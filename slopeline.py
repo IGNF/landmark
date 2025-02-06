@@ -42,47 +42,40 @@ def calculate_slopelines(loader):
     loader.endo_pt = []     # List of EndoPoint objects.
     loader.endorheic_count = 0  # Counter for endorheic points.
     
-    dr_pt_dict = {p.id_pnt: p for p in loader.dr_pt}
-
     
-    # Process drainage points in descending order (assuming loader.dr_pt is sorted in ascending order)
+        # Process drainage points in descending order (assuming loader.dr_pt is sorted in ascending order)
+    # Construire les dictionnaires une seule fois avant la boucle
+    dr_pt_dict = {p.id_pnt: p for p in loader.dr_pt}  
+    dr_net_dict = {net.id_ch: net for net in loader.dr_net}  
+    
     for dp in tqdm(loader.dr_pt[::-1], desc="Building drainage networks", unit="point"):
-        
-        # --- Drainage network update ---
+    
         if dp.ninf > 0:
-            # The point has upstream inflows: treat it as a channel point.
-            # (Assuming that dp.Linflow and dp.Sinflow have been filled previously during loading.)
             if dp.Linflow:
                 l_max = max(dp.Linflow)
                 i_max = dp.Linflow.index(l_max)
                 dp.upl = l_max
-                # Update cumulative deviation from upstream.
                 dp.sumdev = dp.Sinflow[i_max] if dp.Sinflow else 0.0
-                # Retrieve the id of the inflow that has the maximum upstream length.
                 id_up_max = dp.inflow[i_max] if dp.inflow else None
-                if id_up_max is not None:
-                    # Find the upstream drainage point.
-                    up_dp = dr_pt_dict.get(id_up_max)
-
-                    if up_dp is not None:
-                        dp.id_ch = up_dp.id_ch
-                        id_main = dp.id_ch
-                    else:
-                        dp.id_ch = None
-                        id_main = None
+    
+                up_dp = dr_pt_dict.get(id_up_max)
+                if up_dp:
+                    dp.id_ch = up_dp.id_ch
+                    id_main = dp.id_ch
                 else:
+                    dp.id_ch = None
                     id_main = None
-            
-            # Update the drainage network for each inflow.
+    
             for inflow_id in dp.inflow:
-                inflow_dp = next((p for p in loader.dr_pt if p.id_pnt == inflow_id), None)
+                inflow_dp = dr_pt_dict.get(inflow_id)  # 🔥 Accès rapide en O(1)
                 if inflow_dp is None:
                     continue
+    
                 curr_ch = inflow_dp.id_ch
-                # Check if a network with channel id curr_ch already exists.
-                existing_nets = [net for net in loader.dr_net if net.id_ch == curr_ch]
-                if not existing_nets:
-                    # Create a new network for this channel.
+                net = dr_net_dict.get(curr_ch)  # 🔥 Vérification rapide en O(1)
+    
+                if net is None:
+                    # Créer un nouveau réseau si inexistant
                     net = DrainageNetwork(
                         id_ch=curr_ch,
                         id_pnts=[inflow_dp.id_pnt],
@@ -93,23 +86,23 @@ def calculate_slopelines(loader):
                         n_jun=0,
                         id_in=[]
                     )
+                    # Ajouter le réseau au dictionnaire et à la liste
+                    dr_net_dict[curr_ch] = net
                     loader.dr_net.append(net)
-                else:
-                    net = existing_nets[0]
-                # Append current point id to the network.
+    
                 net.id_pnts.append(dp.id_pnt)
-                # For simplicity, assign the network's length as dp.upl.
-                if dp.Linflow:
-                    net.length = dp.upl
+                net.length = dp.upl if dp.Linflow else net.length
                 net.id_ch_out = dp.id_ch
                 net.id_end_pt = dp.id_pnt
-                # If this channel is not the main one, add it as a tributary to the main channel.
+    
+                # Vérifier si le canal courant est un tributaire
                 if id_main is not None and curr_ch != id_main:
-                    main_net = next((net for net in loader.dr_net if net.id_ch == id_main), None)
-                    if main_net is not None and curr_ch not in main_net.id_in:
+                    main_net = dr_net_dict.get(id_main)  # 🔥 Vérification en O(1)
+                    if main_net and curr_ch not in main_net.id_in:
                         main_net.id_in.append(curr_ch)
+    
         else:
-            # The point has no upstream inflows: it is a channel head.
+            # 📌 GESTION DES POINTS SANS AFFLUENTS (CORRIGÉ)
             new_channel_id = len(loader.dr_net) + 1
             dp.id_ch = new_channel_id
             net = DrainageNetwork(
@@ -122,7 +115,10 @@ def calculate_slopelines(loader):
                 n_jun=0,
                 id_in=[]
             )
+            # Mettre à jour le dictionnaire pour éviter qu'il devienne obsolète
+            dr_net_dict[new_channel_id] = net
             loader.dr_net.append(net)
+
         
         # --- Compute drainage direction using D8_LTD ---
         # Call the D8_LTD function on the current drainage point.

@@ -27,11 +27,11 @@ class HydroModel(LoadData, SlopelineMixin):
 if __name__ == "__main__":
 
     # Paths to input files
-    # header_path  = "../../cordevole/cordevole_extrait_coord_header.dat"
-    # dtm_path = "../../cordevole/cordevole_extrait_coord.dat"
+    header_path  = "../../cordevole/cordevole_extrait_coord_header.dat"
+    dtm_path = "../../cordevole/cordevole_extrait_coord.dat"
     
-    header_path  = "../../out_scripts/cordevole_extrait_minimum2_6_header.dat"
-    dtm_path = "../../out_scripts/cordevole_extrait_minimum2_6.dat"
+    # header_path  = "../../out_scripts/cordevole_extrait_minimum2_6_header.dat"
+    # dtm_path = "../../out_scripts/cordevole_extrait_minimum2_6.dat"
 
     rs_path = "rs.dat"           # Optionnel : chemin vers rs.dat
     
@@ -53,10 +53,10 @@ if __name__ == "__main__":
     stats = pstats.Stats("profile_results")
     stats.strip_dirs().sort_stats("cumulative").print_stats(20)  # Afficher les 20 fonctions les plus lentes
     
-    # print("\nDrainage Networks:")
-    # for net in model.dr_net:
-    #     print(f"Channel ID {net.id_ch}: {len(net.id_pnts)} points, length = {net.length}")
+    print("\nDrainage Networks:")
+    for net in model.dr_net:
+        print(f"Channel ID {net.id_ch}: {len(net.id_pnts)} points, length = {net.length}")
     
-    # print("\nEndorheic Points:")
-    # for endo in model.endo_pt:
-    #     print(f"EndoPoint ID {endo.id_eo} at drainage point {endo.id_pnt}, basin type {endo.bas_type}")
+    print("\nEndorheic Points:")
+    for endo in model.endo_pt:
+        print(f"EndoPoint ID {endo.id_eo} at drainage point {endo.id_pnt}, basin type {endo.bas_type}")

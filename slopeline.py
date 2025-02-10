@@ -2,7 +2,7 @@
 
 """
 Module for constructing drainage networks (slopelines) based on the D8-LTD algorithm.
-This module uses the previously loaded DEM data (via the loader) and calls the D8_LTD algorithm.
+This module uses the previously loaded DEM data (via the model) and calls the D8_LTD algorithm.
 """
 
 import time
@@ -15,7 +15,7 @@ from data_structures import DrainageNetwork, EndoPoint
 
 
 
-def calculate_slopelines(loader):
+def calculate_slopelines(model):
     """
     Constructs drainage networks (slopelines) by processing each drainage point.
     For each point (processed in descending order of elevation), the function:
@@ -27,8 +27,8 @@ def calculate_slopelines(loader):
       
     Parameters
     ----------
-    loader : object
-        An instance of your data loader class which must have at least:
+    model : object
+        An instance of your data model class which must have at least:
            - dr_pt: list of DrainagePoint objects (sorted in ascending order of elevation)
            - mat_id: 2D numpy array with DrainagePoint objects at positions (i*2, j*2)
            - N, M: dimensions of the DEM (number of rows, number of columns)
@@ -38,17 +38,17 @@ def calculate_slopelines(loader):
     start_time = time.process_time()
     
     # Initialize drainage network and endorheic lists.
-    loader.dr_net = []      # List of DrainageNetwork objects.
-    loader.endo_pt = []     # List of EndoPoint objects.
-    loader.endorheic_count = 0  # Counter for endorheic points.
+    model.dr_net = []      # List of DrainageNetwork objects.
+    model.endo_pt = []     # List of EndoPoint objects.
+    model.endorheic_count = 0  # Counter for endorheic points.
     
     
-        # Process drainage points in descending order (assuming loader.dr_pt is sorted in ascending order)
+        # Process drainage points in descending order (assuming model.dr_pt is sorted in ascending order)
     # Construire les dictionnaires une seule fois avant la boucle
-    dr_pt_dict = {p.id_pnt: p for p in loader.dr_pt}  
-    dr_net_dict = {net.id_ch: net for net in loader.dr_net}  
+    dr_pt_dict = {p.id_pnt: p for p in model.dr_pt}  
+    dr_net_dict = {net.id_ch: net for net in model.dr_net}  
     
-    for dp in tqdm(loader.dr_pt[::-1], desc="Building drainage networks", unit="point"):
+    for dp in tqdm(model.dr_pt[::-1], desc="Building drainage networks", unit="point"):
     
         if dp.ninf > 0:
             if dp.Linflow:
@@ -67,12 +67,12 @@ def calculate_slopelines(loader):
                     id_main = None
     
             for inflow_id in dp.inflow:
-                inflow_dp = dr_pt_dict.get(inflow_id)  # 🔥 Accès rapide en O(1)
+                inflow_dp = dr_pt_dict.get(inflow_id)
                 if inflow_dp is None:
                     continue
     
                 curr_ch = inflow_dp.id_ch
-                net = dr_net_dict.get(curr_ch)  # 🔥 Vérification rapide en O(1)
+                net = dr_net_dict.get(curr_ch)
     
                 if net is None:
                     # Créer un nouveau réseau si inexistant
@@ -88,7 +88,7 @@ def calculate_slopelines(loader):
                     )
                     # Ajouter le réseau au dictionnaire et à la liste
                     dr_net_dict[curr_ch] = net
-                    loader.dr_net.append(net)
+                    model.dr_net.append(net)
     
                 net.id_pnts.append(dp.id_pnt)
                 net.length = dp.upl if dp.Linflow else net.length
@@ -102,8 +102,8 @@ def calculate_slopelines(loader):
                         main_net.id_in.append(curr_ch)
     
         else:
-            # 📌 GESTION DES POINTS SANS AFFLUENTS (CORRIGÉ)
-            new_channel_id = len(loader.dr_net) + 1
+            # GESTION DES POINTS SANS AFFLUENTS
+            new_channel_id = len(model.dr_net) + 1
             dp.id_ch = new_channel_id
             net = DrainageNetwork(
                 id_ch=new_channel_id,
@@ -115,41 +115,43 @@ def calculate_slopelines(loader):
                 n_jun=0,
                 id_in=[]
             )
-            # Mettre à jour le dictionnaire pour éviter qu'il devienne obsolète
             dr_net_dict[new_channel_id] = net
-            loader.dr_net.append(net)
+            model.dr_net.append(net)
 
         
         # --- Compute drainage direction using D8_LTD ---
         # Call the D8_LTD function on the current drainage point.
-        i_out, j_out, ndfl, sumdev = loader.d8_ltd(dp)
+        i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)
         
         if i_out is not None and j_out is not None and i_out > 0 and j_out > 0:
             # Retrieve the drainage point corresponding to the outflow direction.
-            out_dp = loader.mat_id[i_out * 2, j_out * 2]
+            out_dp = model.mat_id[i_out * 2, j_out * 2]
             if out_dp is not None:
                 dp.fdir = out_dp.id_pnt
                 # Update outflow point: increment inflow count and record the current point.
                 out_dp.ninf += 1
                 out_dp.inflow.append(dp.id_pnt)
                 # Compute the Euclidean distance between dp and out_dp.
-                distance = sqrt(((dp.i - out_dp.i) * loader.delta_x)**2 +
-                                ((dp.j - out_dp.j) * loader.delta_y)**2)
+                distance = sqrt(((dp.i - out_dp.i) * model.delta_x)**2 +
+                                ((dp.j - out_dp.j) * model.delta_y)**2)
                 out_dp.Linflow.append(dp.upl + distance)
                 out_dp.Sinflow.append(sumdev)
         else:
             # If no valid outflow is found, classify dp as a low point / endorheic.
-            loader.endorheic_count += 1
-            dp.id_endo = loader.endorheic_count
+            model.endorheic_count += 1
+            dp.id_endo = model.endorheic_count
             # Create an EndoPoint for dp.
             endo = EndoPoint(
-                id_eo=loader.endorheic_count,
+                id_eo=model.endorheic_count,
                 id_pnt=dp.id_pnt,
                 bas_type=ndfl,
                 nsaddle=0
             )
-            loader.endo_pt.append(endo)
+            model.endo_pt.append(endo)
         
+    model.dr_pt_by_id = {dp.id_pnt: dp for dp in model.dr_pt}
+    model.dr_net_by_id = {net.id_ch: net for net in model.dr_net}
+
     
     finish_time = time.process_time()
     elapsed_time = finish_time - start_time
@@ -255,7 +257,7 @@ def calculate_slopelines(loader):
 
 
 
-# def calculate_slopelines(loader):
+# def calculate_slopelines(model):
 #     """
 #     Constructs drainage networks (slopelines) by processing each drainage point.
 #     For each point (processed in descending order of elevation), the function:
@@ -267,8 +269,8 @@ def calculate_slopelines(loader):
       
 #     Parameters
 #     ----------
-#     loader : object
-#         An instance of your data loader class which must have at least:
+#     model : object
+#         An instance of your data model class which must have at least:
 #            - dr_pt: list of DrainagePoint objects (sorted in ascending order of elevation)
 #            - mat_id: 2D numpy array with DrainagePoint objects at positions (i*2, j*2)
 #            - N, M: dimensions of the DEM (number of rows, number of columns)
@@ -278,14 +280,14 @@ def calculate_slopelines(loader):
 #     start_time = time.process_time()
     
 #     # Initialize drainage network and endorheic lists.
-#     loader.dr_net = []      # List of DrainageNetwork objects.
-#     loader.endo_pt = []     # List of EndoPoint objects.
-#     loader.endorheic_count = 0  # Counter for endorheic points.
+#     model.dr_net = []      # List of DrainageNetwork objects.
+#     model.endo_pt = []     # List of EndoPoint objects.
+#     model.endorheic_count = 0  # Counter for endorheic points.
     
 #     #Initialize arrays
-#     dem  = loader.dem
+#     dem  = model.dem
 #     sumdev_array = np.zeros_like(dem)
-#     flow_dir_array, ndfl_array, dev_array = D8_flow_direction(dem, loader.delta_x, loader.delta_y ) 
+#     flow_dir_array, ndfl_array, dev_array = D8_flow_direction(dem, model.delta_x, model.delta_y ) 
     
     
 #     d8_offsets = [
@@ -304,8 +306,8 @@ def calculate_slopelines(loader):
     
     
     
-#     # Process drainage points in descending order (assuming loader.dr_pt is sorted in ascending order)
-#     for dp in tqdm(reversed(loader.dr_pt), desc="Building drainage networks", unit="point"):
+#     # Process drainage points in descending order (assuming model.dr_pt is sorted in ascending order)
+#     for dp in tqdm(reversed(model.dr_pt), desc="Building drainage networks", unit="point"):
         
 #         # --- Drainage network update ---
 #         if dp.ninf > 0:
@@ -321,7 +323,7 @@ def calculate_slopelines(loader):
 #                 id_up_max = dp.inflow[i_max] if dp.inflow else None
 #                 if id_up_max is not None:
 #                     # Find the upstream drainage point.
-#                     up_dp = next((p for p in loader.dr_pt if p.id_pnt == id_up_max), None)
+#                     up_dp = next((p for p in model.dr_pt if p.id_pnt == id_up_max), None)
 #                     if up_dp is not None:
 #                         dp.id_ch = up_dp.id_ch
 #                         id_main = dp.id_ch
@@ -333,12 +335,12 @@ def calculate_slopelines(loader):
             
 #             # Update the drainage network for each inflow.
 #             for inflow_id in dp.inflow:
-#                 inflow_dp = next((p for p in loader.dr_pt if p.id_pnt == inflow_id), None)
+#                 inflow_dp = next((p for p in model.dr_pt if p.id_pnt == inflow_id), None)
 #                 if inflow_dp is None:
 #                     continue
 #                 curr_ch = inflow_dp.id_ch
 #                 # Check if a network with channel id curr_ch already exists.
-#                 existing_nets = [net for net in loader.dr_net if net.id_ch == curr_ch]
+#                 existing_nets = [net for net in model.dr_net if net.id_ch == curr_ch]
 #                 if not existing_nets:
 #                     # Create a new network for this channel.
 #                     net = DrainageNetwork(
@@ -351,7 +353,7 @@ def calculate_slopelines(loader):
 #                         n_jun=0,
 #                         id_in=[]
 #                     )
-#                     loader.dr_net.append(net)
+#                     model.dr_net.append(net)
 #                 else:
 #                     net = existing_nets[0]
 #                 # Append current point id to the network.
@@ -363,12 +365,12 @@ def calculate_slopelines(loader):
 #                 net.id_end_pt = dp.id_pnt
 #                 # If this channel is not the main one, add it as a tributary to the main channel.
 #                 if id_main is not None and curr_ch != id_main:
-#                     main_net = next((net for net in loader.dr_net if net.id_ch == id_main), None)
+#                     main_net = next((net for net in model.dr_net if net.id_ch == id_main), None)
 #                     if main_net is not None and curr_ch not in main_net.id_in:
 #                         main_net.id_in.append(curr_ch)
 #         else:
 #             # The point has no upstream inflows: it is a channel head.
-#             new_channel_id = len(loader.dr_net) + 1
+#             new_channel_id = len(model.dr_net) + 1
 #             dp.id_ch = new_channel_id
 #             net = DrainageNetwork(
 #                 id_ch=new_channel_id,
@@ -380,7 +382,7 @@ def calculate_slopelines(loader):
 #                 n_jun=0,
 #                 id_in=[]
 #             )
-#             loader.dr_net.append(net)
+#             model.dr_net.append(net)
         
 #         # --- Compute drainage direction using D8_LTD ---
 #         dy, dx = d8_offsets[d8_codes.index(flow_dir_array[dp.i, dp.j])]
@@ -392,29 +394,29 @@ def calculate_slopelines(loader):
         
 #         if i_out is not None and j_out is not None and i_out > 0 and j_out > 0:
 #             # Retrieve the drainage point corresponding to the outflow direction.
-#             out_dp = loader.mat_id[i_out * 2, j_out * 2]
+#             out_dp = model.mat_id[i_out * 2, j_out * 2]
 #             if out_dp is not None:
 #                 dp.fdir = out_dp.id_pnt
 #                 # Update outflow point: increment inflow count and record the current point.
 #                 out_dp.ninf += 1
 #                 out_dp.inflow.append(dp.id_pnt)
 #                 # Compute the Euclidean distance between dp and out_dp.
-#                 distance = sqrt(((dp.i - out_dp.i) * loader.delta_x)**2 +
-#                                 ((dp.j - out_dp.j) * loader.delta_y)**2)
+#                 distance = sqrt(((dp.i - out_dp.i) * model.delta_x)**2 +
+#                                 ((dp.j - out_dp.j) * model.delta_y)**2)
 #                 out_dp.Linflow.append(dp.upl + distance)
 #                 out_dp.Sinflow.append(dp.sumdev)
 #         else:
 #             # If no valid outflow is found, classify dp as a low point / endorheic.
-#             loader.endorheic_count += 1
-#             dp.id_endo = loader.endorheic_count
+#             model.endorheic_count += 1
+#             dp.id_endo = model.endorheic_count
 #             # Create an EndoPoint for dp.
 #             endo = EndoPoint(
-#                 id_eo=loader.endorheic_count,
+#                 id_eo=model.endorheic_count,
 #                 id_pnt=dp.id_pnt,
 #                 bas_type=ndfl,
 #                 nsaddle=0
 #             )
-#             loader.endo_pt.append(endo)
+#             model.endo_pt.append(endo)
         
     
 #     finish_time = time.process_time()

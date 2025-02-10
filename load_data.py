@@ -36,7 +36,7 @@ class LoadData:
         # Matrix for direct access to points (size: (N*2-1, M*2-1))
         # Points will be placed at indices (i*2, j*2) to allow for interpolation/neighborhood processing.
         self.mat_id = None
-        self.dem = None
+        self.dem = None #A supprimer si inutile
 
         # Optionally: list of river sections, if present
         self.rs = []

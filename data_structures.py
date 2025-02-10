@@ -30,7 +30,7 @@ class DrainagePoint:
       upl: float
           Maximum upstream length (used in flow accumulation).
       dpl: float
-          Downslope path length (optional, to be used if needed).
+          Downslope path length.
       sumdev: float
           Cumulative deviation (used in flow direction calculations).
       id_endo: int
@@ -138,5 +138,27 @@ class EndoPoint:
     idms: list = field(default_factory=list)
     
     
+@dataclass
+class RidgePoint:
+    i: int              # Row index in mat_id (not necessarily same as DEM cell indices)
+    j: int              # Column index in mat_id
+    Z: float            # Elevation (taken as the maximum of the two drainage points)
+    id_pnt: int         # Unique identifier for this ridge point
+    md: float = None    # Mutual distance (to be computed)
+    id_sdl: int = None  # (For saddle point; here we just nullify it)
+    id_drpt1: int = None  # id of one neighboring drainage point
+    id_drpt2: int = None  # id of the other neighboring drainage point
+    nen: int = 0        # Neighborhood number (set to 0 here)
+
+
+
+class SaddlePoint:
+    def __init__(self, id_pnt, id_rdpt):
+        self.id_pnt = id_pnt        # Unique saddle point id
+        self.id_rdpt = id_rdpt      # Associated RidgePoint id
+        self.id_rdpt2 = 0           # Secondary ridge point id (default 0)
+        self.id_cis_endo = None     # Endorheic basin id on the cis side
+        self.id_trans_out = None    # Drainage point id on the trans (outflow) side
+
     
-    ################ A compléter avec RidgePoint, RidgelineNetwork et SaddlePoint#########
+    ################ A compléter avec RidgelineNetwork #########

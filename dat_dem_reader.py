@@ -136,8 +136,6 @@ def geotiff_to_dat(geotiff_path: str, output_dat_path: str, output_header_path: 
         x_low_left = transform[2]
         y_low_left = transform[5] - (grid_spacing_y * (num_rows ))
 
-        # # Re-invert DEM for .dat format
-        # dem = np.flipud(dem)
 
         # Write .dat file
         with open(output_dat_path, "w") as f:

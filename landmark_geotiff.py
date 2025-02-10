@@ -13,15 +13,13 @@ Transcript in python of the original landmark.f90
 """
 
 #Internal import
-from load_data import LoadData
+from load_data_geotiff import LoadData
 from D8_LTD import SlopelineMixin
 from slopeline import calculate_slopelines
 from dpl import dpl
 from mutual_dist import mutual_dist
 from endo_del import endo_del
 
-# import cProfile
-# import pstats
 
 class HydroModel(LoadData, SlopelineMixin):
     pass
@@ -29,41 +27,30 @@ class HydroModel(LoadData, SlopelineMixin):
 
 if __name__ == "__main__":
 
-    # Paths to input files
-    # header_path  = "../../cordevole/cordevole_extrait_coord_header.dat"
-    # dtm_path = "../../cordevole/cordevole_extrait_coord.dat"
+    dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
     
-    header_path  = "../../out_scripts/cordevole_extrait_minimum2_6_header.dat"
-    dtm_path = "../../out_scripts/cordevole_extrait_minimum2_6.dat"
+    file_name = dtm_path.split("/")[-1]
+    
+    #Shapefiles path
+    slopelines_shapefile_path = f"../../out_scripts_test_temp/slopelines_{file_name[:-4]}"
 
-    rs_path = "rs.dat"           # Optionnel : chemin vers rs.dat
-    
-    model = HydroModel()    
+        
+    model_geotiff = HydroModel()    
     
     print("Loading data...")
-    model.process(header_path, dtm_path, rs_file=rs_path)
+    model_geotiff.read_geotiff(dtm_path)
     
     print("First 5 drainage points:")
-    for point in model.dr_pt[:5]:
+    for point in model_geotiff.dr_pt[:5]:
         print(point)
     
     print("Calculating slopelines...")
-    calculate_slopelines(model)
+    calculate_slopelines(model_geotiff)
     # cProfile.run("calculate_slopelines(model)", "profile_results")
     
+    model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
     
-    # # # Affichage trié des résultats
-    # # stats = pstats.Stats("profile_results")
-    # # stats.strip_dirs().sort_stats("cumulative").print_stats(20)  # Afficher les 20 fonctions les plus lentes
-    
-    # print("\nDrainage Networks:")
-    # for net in model.dr_net[:10]:
-    #     print(f"Channel ID {net.id_ch}: {len(net.id_pnts)} points, length = {net.length}")
-    
-    # print("\nEndorheic Points:")
-    # for endo in model.endo_pt[:10]:
-    #     print(f"EndoPoint ID {endo.id_eo} at drainage point {endo.id_pnt}, basin type {endo.bas_type}")
-    
+        
     # print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
     # dpl(model)
     

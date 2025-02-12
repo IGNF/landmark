@@ -5,7 +5,7 @@ From pnt_net.f90 Fortran code
 """
 
 from dataclasses import dataclass, field
-
+from typing import List, Optional
 
 # Data Structures
 
@@ -21,7 +21,7 @@ class DrainagePoint:
           Elevation at the point.
       id_pnt: int
           Unique identifier of the drainage point.
-      fdir: int
+      fldir: int
           Identifier of the downstream (outflow) point.
       fldir_ss: int
           flow direction endorheic saddle spill, index of outflow point.
@@ -50,7 +50,7 @@ class DrainagePoint:
     j: int
     Z: float
     id_pnt: int
-    fdir: int = None
+    fldir: int = None
     fldir_ss: int = None
     A_in: int = 0
     upl: float = 0.0
@@ -72,6 +72,8 @@ class DrainageNetwork:
     Attributes:
       id_ch: int
           Identifier of the channel.
+      nel: int
+          Number of points of the channel
       id_pnts: list
           List of identifiers of drainage points belonging to the channel.
       id_start_pt: int
@@ -98,6 +100,7 @@ class DrainageNetwork:
           Horton Stream Order
     """
     id_ch: int
+    nel: int 
     id_pnts: list = field(default_factory=list)
     id_start_pt: int = None
     id_end_pt: int = None
@@ -140,25 +143,68 @@ class EndoPoint:
     
 @dataclass
 class RidgePoint:
-    i: int              # Row index in mat_id (not necessarily same as DEM cell indices)
-    j: int              # Column index in mat_id
-    Z: float            # Elevation (taken as the maximum of the two drainage points)
-    id_pnt: int         # Unique identifier for this ridge point
-    md: float = None    # Mutual distance (to be computed)
-    id_sdl: int = None  # (For saddle point; here we just nullify it)
-    id_drpt1: int = None  # id of one neighboring drainage point
-    id_drpt2: int = None  # id of the other neighboring drainage point
-    nen: int = 0        # Neighborhood number (set to 0 here)
-
-
-
-class SaddlePoint:
-    def __init__(self, id_pnt, id_rdpt):
-        self.id_pnt = id_pnt        # Unique saddle point id
-        self.id_rdpt = id_rdpt      # Associated RidgePoint id
-        self.id_rdpt2 = 0           # Secondary ridge point id (default 0)
-        self.id_cis_endo = None     # Endorheic basin id on the cis side
-        self.id_trans_out = None    # Drainage point id on the trans (outflow) side
-
+    """
+    Ridge point class, equivalent to `rd_pt_type` in Fortran.
+    Represents a point on the ridgeline network with associated attributes.
+    """
+    i: int  # Row index in mat_id (not necessarily the same as DEM grid indices)
+    j: int  # Column index in mat_id
+    Z: float  # Elevation of the ridge point
+    id_pnt: int  # Unique identifier of this ridge point
     
-    ################ A compléter avec RidgelineNetwork #########
+    md: Optional[float] = None  # Mutual distance between two drainage points
+    id_drpt1: Optional[int] = None  # ID of the first neighboring drainage point
+    id_drpt2: Optional[int] = None  # ID of the second neighboring drainage point
+    A_in: Optional[int] = None  # Maximum inflow area between the two drainage points
+    A_in_min: Optional[int] = None  # Minimum inflow area of the two drainage points
+    
+    nen: int = 0  # Number of neighboring points
+    n_jun: int = 0  # Number of junctions (equals `nen` in Fortran)
+    id_neigh: List[int] = field(default_factory=list)  # List of neighboring ridge points
+    id_sdl: Optional[int] = None  # ID of the corresponding saddle point
+    
+    nrdl: int = 0  # Number of ridgeline segments this point belongs to
+    id_rdl: List[int] = field(default_factory=list)  # List of ridgeline IDs associated with this point
+    junc: int = 0  # Junction flag (0 = no junction, 1 = junction)
+    n_ptsa: int = 1  # Number of ridge points defining the spread area (related to DEM resolution)
+
+
+@dataclass
+class SaddlePoint:
+    """
+    Saddle point class, equivalent to `sdl_pt_type` in Fortran.
+    Represents a saddle point connecting different drainage areas.
+    """
+    id_pnt: int  # Unique identifier of the saddle point
+
+    id_rdpt: Optional[int] = None  # ID of the corresponding ridge point (linked to `rd_pt.id_pnt`)
+    id_rdpt2: int = 0  # ID of the secondary ridge point if the saddle is split
+
+    id_cis_endo: Optional[int] = None  # ID of the endorheic basin on one side of the saddle
+    id_trans_out: Optional[int] = None  # ID of the outflow point for the other side of the saddle
+
+    A_endo: Optional[int] = None  # Area of the endorheic basin affected by the saddle
+    
+
+
+@dataclass
+class RidgeNetwork:
+    """
+    Ridge network class, equivalent to `rd_net_type` in Fortran.
+    Represents a ridgeline segment with associated attributes.
+    """
+    id_rdl: int  # Unique identifier of the ridgeline segment
+    
+    length: float = 0.0  # Length of the ridgeline segment
+    nel: int = 0  # Number of points in the ridgeline
+
+    id_pnts: List[int] = field(default_factory=list)  # List of point IDs in the ridgeline
+
+    Zmean: float = 0.0  # Mean elevation of the ridgeline
+    nrdpt_down: int = 0  # Number of ridge points connected, including the current ridge
+    n_down: int = 0  # Number of ridges connected to this ridge segment
+    Zmean_down: float = 0.0  # Mean elevation of the ridges connected to this one
+
+    jun_el: int = 0  # Index of the ridgeline element that serves as a junction
+    
+    

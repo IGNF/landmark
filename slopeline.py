@@ -52,10 +52,10 @@ def calculate_slopelines(model):
         if dp.ninf > 0:
             if dp.Linflow:
                 l_max = max(dp.Linflow)
-                i_max = dp.Linflow.index(l_max)
+                i_max = np.argmax(dp.Linflow)  # Remplace index(l_max) par argmax()
                 dp.upl = l_max
-                dp.sumdev = dp.Sinflow[i_max] if dp.Sinflow else 0.0
-                id_up_max = dp.inflow[i_max] if dp.inflow else None
+                dp.sumdev = dp.Sinflow[i_max] 
+                id_up_max = dp.inflow[i_max] 
     
                 up_dp = dr_pt_dict.get(id_up_max)
                 if up_dp:
@@ -106,6 +106,7 @@ def calculate_slopelines(model):
             dp.id_ch = new_channel_id
             net = DrainageNetwork(
                 id_ch=new_channel_id,
+                nel = 1,
                 id_pnts=[dp.id_pnt],
                 id_start_pt=dp.id_pnt,
                 id_end_pt=dp.id_pnt,
@@ -126,7 +127,8 @@ def calculate_slopelines(model):
             # Retrieve the drainage point corresponding to the outflow direction.
             out_dp = model.mat_id[i_out * 2, j_out * 2]
             if out_dp is not None:
-                dp.fdir = out_dp.id_pnt
+                dp.fldir = out_dp.id_pnt
+                dp.fldir_ss = None
                 # Update outflow point: increment inflow count and record the current point.
                 out_dp.ninf += 1
                 out_dp.inflow.append(dp.id_pnt)
@@ -135,6 +137,17 @@ def calculate_slopelines(model):
                                 ((dp.j - out_dp.j) * model.delta_y)**2)
                 out_dp.Linflow.append(dp.upl + distance)
                 out_dp.Sinflow.append(sumdev)
+                # out_dp.sumdev = sumdev
+                
+                if dp.id_pnt == 3474:
+                    print("=" * 40)
+                    print(f"DEBUG - Sinflow values for id_pnt = {dp.id_pnt}")
+                    print("out_dp.Sinflow content:")
+                    for idx, val in enumerate(out_dp.Sinflow):
+                        print(f"Sinflow[{idx + 1}] = {val:.6f}")  # Pour correspondre à l'indexation Fortran (1-based)
+                    print("=" * 40)
+
+                
         else:
             # If no valid outflow is found, classify dp as a low point / endorheic.
             model.endorheic_count += 1
@@ -150,6 +163,10 @@ def calculate_slopelines(model):
         
     model.dr_pt_by_id = {dp.id_pnt: dp for dp in model.dr_pt}
     model.dr_net_by_id = {net.id_ch: net for net in model.dr_net}
+    
+    
+    n_drnet = len(model.dr_net)
+    print ('n_drnet, size(dr_net) = ', n_drnet)
 
     
     finish_time = time.process_time()

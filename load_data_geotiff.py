@@ -121,7 +121,7 @@ class LoadData:
                 dp = self.dr_pt_by_id.get(pnt_id)
                 if dp:
                     x, y = self.transform * (dp.j, dp.i)  # Convert to projected coordinates
-                    coords.append((x, y))
+                    coords.append((x+self.delta_x/2, y-self.delta_y/2))
             if len(coords) > 1:
                 lines.append(LineString(coords))
                 ids.append(net.id_ch)

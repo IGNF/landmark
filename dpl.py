@@ -149,9 +149,9 @@ def dpl(model):
             dp.dpl = l1 - l2
             # Also update the matrix (mat_id) if possible.
             i_curr, j_curr = dp.i, dp.j
-            if dp.fdir is not None and dp.fdir > 0:
+            if dp.fldir is not None and dp.fldir > 0:
                 # Retrieve the outflow point.
-                out_dp = model.dr_pt_by_id.get(dp.fdir)
+                out_dp = model.dr_pt_by_id.get(dp.fldir)
                 if out_dp is not None:
                     i_out, j_out = out_dp.i, out_dp.j
                     # In Fortran, i_mat = i_curr*2-1 + (i_out - i_curr), etc.
@@ -211,8 +211,8 @@ def up_recurs(curr, model):
             l3 = end_dp.dpl
             dp.dpl = l1 - l2 + l3
             i_curr, j_curr = dp.i, dp.j
-            if dp.fdir is not None and dp.fdir > 0:
-                out_dp = model.dr_pt_by_id.get(dp.fdir)
+            if dp.fldir is not None and dp.fldir > 0:
+                out_dp = model.dr_pt_by_id.get(dp.fldir)
                 if out_dp is not None:
                     i_out, j_out = out_dp.i, out_dp.j
                     i_mat = i_curr * 2 - 1 + (i_out - i_curr)

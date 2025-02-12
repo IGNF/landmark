@@ -7,7 +7,7 @@ import numpy as np
 from math import sin, atan, sqrt, pi
 
 # A small epsilon for floating point comparisons.
-EPSILON = np.finfo(float).eps
+EPSILON = 1e-6
 
 def facet(e0, e1, e2, delta_x, delta_y):
     """
@@ -26,7 +26,7 @@ def facet(e0, e1, e2, delta_x, delta_y):
           s_max_facet: the slope (positive downward) of the facet.
     """
     s1 = (e0 - e1) / delta_x
-    s2 = (e1 - e2) / delta_x
+    s2 = (e1 - e2) / delta_y
     if abs(s1) < EPSILON:
         if s2 >= 0.0:
             r_val = pi / 2.0
@@ -72,16 +72,18 @@ class SlopelineMixin:
             - ndfl: integer flag (1 if valid, 0 if a boundary or invalid cell was encountered),
             - sumdev: the cumulative deviation computed for this point.
         """
+        # Get current point coordinates and initial cumulative deviation.
+        i = dp.i
+        j = dp.j
+        sumdev_in = dp.sumdev  # This is the upstream (or initial) cumulative deviation.
+
+        
         # Initialize outputs.
         ndfl = 1
         sumdev = 0.0
         i_out = 0
         j_out = 0
         
-        # Get current point coordinates and initial cumulative deviation.
-        i = dp.i
-        j = dp.j
-        sumdev_in = dp.sumdev  # This is the upstream (or initial) cumulative deviation.
         
         # Prepare an array (list) to store the elevations in a 3×3 window around (i, j).
         e = [0.0] * 9
@@ -112,8 +114,10 @@ class SlopelineMixin:
         # The center cell's elevation.
         e0 = e[4]
         
+        # print('e = ', e)
+        
         # Prepare lists for the triangle (facet) calculations.
-        num_triangles = 8  # We define 8 triangles (facets) around the center.
+        num_triangles = 9  # We define 8 triangles (facets) around the center + center.
         e1_fmax = [0.0] * num_triangles
         e2_fmax = [0.0] * num_triangles
         r_max = [0.0] * num_triangles
@@ -176,55 +180,65 @@ class SlopelineMixin:
         # Triangle 089: uses e[7] and e[8] (Fortran indices 8 and 9).
         if abs(e[7] * e[8]) > EPSILON:
             r_val, s_max_facet = facet(e0, e[7], e[8], self.delta_x, self.delta_y)
-            e1_fmax[4] = e[7]
-            e2_fmax[4] = e[8]
-            r_max[4] = r_val
-            s_max[4] = s_max_facet
-            i_out1_arr[4] = i
-            j_out1_arr[4] = j + 1
-            i_out2_arr[4] = i - 1
-            j_out2_arr[4] = j + 1
-            sigma_arr[4] = 1.0
-        # Triangle 087: uses e[7] and e[6] (Fortran indices 8 and 7).
-        if abs(e[7] * e[6]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[7], e[6], self.delta_x, self.delta_y)
             e1_fmax[5] = e[7]
-            e2_fmax[5] = e[6]
+            e2_fmax[5] = e[8]
             r_max[5] = r_val
             s_max[5] = s_max_facet
             i_out1_arr[5] = i
             j_out1_arr[5] = j + 1
-            i_out2_arr[5] = i + 1
+            i_out2_arr[5] = i - 1
             j_out2_arr[5] = j + 1
-            sigma_arr[5] = -1.0
-        # Triangle 047: uses e[3] and e[6] (Fortran indices 4 and 7).
-        if abs(e[3] * e[6]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[3], e[6], self.delta_x, self.delta_y)
-            e1_fmax[6] = e[3]
+            sigma_arr[5] = 1.0
+        # Triangle 087: uses e[7] and e[6] (Fortran indices 8 and 7).
+        if abs(e[7] * e[6]) > EPSILON:
+            r_val, s_max_facet = facet(e0, e[7], e[6], self.delta_x, self.delta_y)
+            if dp.id_pnt == 3474 :
+                print('e0 = ', e0)
+                print('e1 = ', e[7])
+                print('e2 = ', e[6])
+                
+            e1_fmax[6] = e[7]
             e2_fmax[6] = e[6]
             r_max[6] = r_val
             s_max[6] = s_max_facet
-            i_out1_arr[6] = i + 1
-            j_out1_arr[6] = j
+            i_out1_arr[6] = i
+            j_out1_arr[6] = j + 1
             i_out2_arr[6] = i + 1
             j_out2_arr[6] = j + 1
-            sigma_arr[6] = 1.0
-        # Triangle 041: uses e[3] and e[0] (Fortran indices 4 and 1).
-        if abs(e[3] * e[0]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[3], e[0], self.delta_x, self.delta_y)
+            sigma_arr[6] = -1.0
+        # Triangle 047: uses e[3] and e[6] (Fortran indices 4 and 7).
+        if abs(e[3] * e[6]) > EPSILON:
+            r_val, s_max_facet = facet(e0, e[3], e[6], self.delta_x, self.delta_y)
             e1_fmax[7] = e[3]
-            e2_fmax[7] = e[0]
+            e2_fmax[7] = e[6]
             r_max[7] = r_val
             s_max[7] = s_max_facet
             i_out1_arr[7] = i + 1
             j_out1_arr[7] = j
             i_out2_arr[7] = i + 1
-            j_out2_arr[7] = j - 1
-            sigma_arr[7] = -1.0
+            j_out2_arr[7] = j + 1
+            sigma_arr[7] = 1.0
+        # Triangle 041: uses e[3] and e[0] (Fortran indices 4 and 1).
+        if abs(e[3] * e[0]) > EPSILON:
+            r_val, s_max_facet = facet(e0, e[3], e[0], self.delta_x, self.delta_y)
+            e1_fmax[8] = e[3]
+            e2_fmax[8] = e[0]
+            r_max[8] = r_val
+            s_max[8] = s_max_facet
+            i_out1_arr[8] = i + 1
+            j_out1_arr[8] = j
+            i_out2_arr[8] = i + 1
+            j_out2_arr[8] = j - 1
+            sigma_arr[8] = -1.0
+            
+        if dp.id_pnt == 3474 :
+            print("r_max :", r_max)
+            print("s_max :", s_max)
         
         # Select the triangle (facet) with the maximum slope.
         s_mx = max(s_max)
-        id_mx = s_max.index(s_mx)
+        # id_mx = s_max.index(s_mx)
+        id_mx = np.argmax(s_max)
         e1_fmx_val = e1_fmax[id_mx]
         e2_fmx_val = e2_fmax[id_mx]
         r_mx = r_max[id_mx]
@@ -234,6 +248,29 @@ class SlopelineMixin:
         j_out2_mx = j_out2_arr[id_mx]
         sigma_mx = sigma_arr[id_mx]
         
+        if dp.id_pnt == 3474:
+            print("=" * 40)
+            print(f"DEBUG - Values for id_dr = {dp.id_pnt}")
+            
+            print("s_max values:")
+            print(s_max)
+            
+            print("r_max values:")
+            print(r_max)
+            
+            print(f"id_mx = {id_mx}")
+            print(f"s_mx = {s_mx}")
+            
+            print(f"e1_fmx = {e1_fmx_val}, e2_fmx = {e2_fmx_val}")
+            print(f"r_mx = {r_mx}")
+            
+            print(f"i_out1_mx = {i_out1_mx}, j_out1_mx = {j_out1_mx}")
+            print(f"i_out2_mx = {i_out2_mx}, j_out2_mx = {j_out2_mx}")
+            
+            print(f"sigma_mx = {sigma_mx}")
+            print("=" * 40)
+            
+        
         # If the maximum slope is positive, compute deviations and decide the final output.
         if s_mx > 0.0:
             dev_1 = self.delta_x * sin(r_mx)
@@ -242,6 +279,10 @@ class SlopelineMixin:
                 dev_2 = -dev_2
             else:
                 dev_1 = -dev_1
+            # if dp.id_pnt == 3474 :
+                # print("sumdev_in 3474 = ", sumdev_in)
+                # print("dev_1 =", dev_1)
+                # print("dev_2 =", dev_2)
             sumdev_1 = sumdev_in + dev_1
             sumdev_2 = sumdev_in + dev_2
             a1 = abs(sumdev_1)
@@ -260,4 +301,11 @@ class SlopelineMixin:
                     i_out = i_out2_mx
                     j_out = j_out2_mx
         
+        if dp.id_pnt == 3474:
+            print("=" * 25)
+            print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt}")
+            print(f"dev_1 = {dev_1:.6f}, dev_2 = {dev_2:.6f}")
+            print(f"sumdev_1 = {sumdev_1:.6f}, sumdev_2 = {sumdev_2:.6f}")
+            print(f"i_out = {i_out}, j_out = {j_out}")
+            print("=" * 25)
         return i_out, j_out, ndfl, sumdev

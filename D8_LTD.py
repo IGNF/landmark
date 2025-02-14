@@ -80,9 +80,9 @@ class SlopelineMixin:
         
         # Initialize outputs.
         ndfl = 1
-        sumdev = 0.0
-        i_out = 0
-        j_out = 0
+        i_out = None
+        j_out = None
+        sumdev = 0
         
         
         # Prepare an array (list) to store the elevations in a 3×3 window around (i, j).
@@ -192,10 +192,10 @@ class SlopelineMixin:
         # Triangle 087: uses e[7] and e[6] (Fortran indices 8 and 7).
         if abs(e[7] * e[6]) > EPSILON:
             r_val, s_max_facet = facet(e0, e[7], e[6], self.delta_x, self.delta_y)
-            if dp.id_pnt == 3474 :
-                print('e0 = ', e0)
-                print('e1 = ', e[7])
-                print('e2 = ', e[6])
+            # if dp.id_pnt == 3474 :
+            #     print('e0 = ', e0)
+            #     print('e1 = ', e[7])
+            #     print('e2 = ', e[6])
                 
             e1_fmax[6] = e[7]
             e2_fmax[6] = e[6]
@@ -231,9 +231,6 @@ class SlopelineMixin:
             j_out2_arr[8] = j - 1
             sigma_arr[8] = -1.0
             
-        if dp.id_pnt == 3474 :
-            print("r_max :", r_max)
-            print("s_max :", s_max)
         
         # Select the triangle (facet) with the maximum slope.
         s_mx = max(s_max)
@@ -248,7 +245,7 @@ class SlopelineMixin:
         j_out2_mx = j_out2_arr[id_mx]
         sigma_mx = sigma_arr[id_mx]
         
-        if dp.id_pnt == 3474:
+        if dp.id_pnt == 23325:
             print("=" * 40)
             print(f"DEBUG - Values for id_dr = {dp.id_pnt}")
             
@@ -279,10 +276,6 @@ class SlopelineMixin:
                 dev_2 = -dev_2
             else:
                 dev_1 = -dev_1
-            # if dp.id_pnt == 3474 :
-                # print("sumdev_in 3474 = ", sumdev_in)
-                # print("dev_1 =", dev_1)
-                # print("dev_2 =", dev_2)
             sumdev_1 = sumdev_in + dev_1
             sumdev_2 = sumdev_in + dev_2
             a1 = abs(sumdev_1)
@@ -301,11 +294,12 @@ class SlopelineMixin:
                     i_out = i_out2_mx
                     j_out = j_out2_mx
         
-        if dp.id_pnt == 3474:
-            print("=" * 25)
-            print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt}")
-            print(f"dev_1 = {dev_1:.6f}, dev_2 = {dev_2:.6f}")
-            print(f"sumdev_1 = {sumdev_1:.6f}, sumdev_2 = {sumdev_2:.6f}")
-            print(f"i_out = {i_out}, j_out = {j_out}")
-            print("=" * 25)
+            if dp.id_pnt == 23325:
+                print("=" * 25)
+                print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt}")
+                print(f"sumdev_in = {sumdev_in:.6f}")
+                print(f"dev_1 = {dev_1:.6f}, dev_2 = {dev_2:.6f}")
+                print(f"sumdev_1 = {sumdev_1:.6f}, sumdev_2 = {sumdev_2:.6f}")
+                print(f"i_out = {i_out}, j_out = {j_out}")
+                print("=" * 25)
         return i_out, j_out, ndfl, sumdev

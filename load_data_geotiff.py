@@ -9,7 +9,7 @@ import rasterio
 from typing import Dict
 from tqdm import tqdm
 import geopandas as gpd
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
 
 #intern imports
 from data_structures import DrainagePoint
@@ -105,28 +105,75 @@ class LoadData:
     
     def export_slopelines_to_shapefile(self, output_shapefile: str):
         """
-        Exports the computed drainage networks (slopelines) to a Shapefile.
-    
+        Exporte le réseau de drainage (slopelines) sous forme de Shapefile.
+
         Parameters
         ----------
         output_shapefile : str
-            Path to save the Shapefile.
+            Chemin pour enregistrer le fichier Shapefile.
         """
         lines = []
-        ids = []
+        attributes = []
     
         for net in self.dr_net:
             coords = []
             for pnt_id in net.id_pnts:
                 dp = self.dr_pt_by_id.get(pnt_id)
                 if dp:
-                    x, y = self.transform * (dp.j, dp.i)  # Convert to projected coordinates
+                    x, y = self.transform * (dp.j, dp.i)
                     coords.append((x+self.delta_x/2, y-self.delta_y/2))
             if len(coords) > 1:
                 lines.append(LineString(coords))
-                ids.append(net.id_ch)
+                attributes.append({
+                    "id_ch": net.id_ch,
+                    "nel": net.nel,
+                    "id_start_pt": net.id_start_pt,
+                    "id_end_pt": net.id_end_pt,
+                    "length": net.length,
+                    "id_ch_out": net.id_ch_out,
+                    "n_jun": net.n_jun,
+                    "n_path": net.n_path,
+                    "id_path": net.id_path,
+                    "id_endo": net.id_endo,
+                    "sso": net.sso,
+                    "hso": net.hso
+                })
     
-        gdf = gpd.GeoDataFrame({"id_ch": ids, "geometry": lines}, crs=self.crs)
+        gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
+        gdf.to_file(output_shapefile)
+
+    def export_drainage_point(self, output_shapefile: str):
+        """
+        Exporte les points de drainage sous forme de Shapefile.
+
+        Parameters
+        ----------
+        output_shapefile : str
+            Chemin pour enregistrer le fichier Shapefile.
+        """
+        points = []
+        attributes = []
+    
+        for dp in self.dr_pt:
+            x, y = self.transform * (dp.j, dp.i)
+            points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
+            attributes.append({
+                "id_pnt": dp.id_pnt,
+                "i": dp.i,
+                "j": dp.j,
+                "Z": dp.Z,
+                "fldir": dp.fldir,
+                "fldir_ss": dp.fldir_ss,
+                "A_in": dp.A_in,
+                "upl": dp.upl,
+                "dpl": dp.dpl,
+                "sumdev": dp.sumdev,
+                "id_endo": dp.id_endo,
+                "ninf": dp.ninf,
+                "id_ch": dp.id_ch
+            })
+    
+        gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
         gdf.to_file(output_shapefile)
 
 

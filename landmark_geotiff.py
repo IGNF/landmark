@@ -33,6 +33,8 @@ if __name__ == "__main__":
     
     #Shapefiles path
     slopelines_shapefile_path = f"../../out_scripts_test_temp/slopelines_{file_name[:-4]}"
+    drainage_points_shapefile_path = f"../../out_scripts_test_temp/drain_points_{file_name[:-4]}"
+
 
         
     model_geotiff = HydroModel()    
@@ -40,19 +42,26 @@ if __name__ == "__main__":
     print("Loading data...")
     model_geotiff.read_geotiff(dtm_path)
     
-    print("First 5 drainage points:")
+    # print("First 5 drainage points:")
     # for point in model_geotiff.dr_pt[:5]:
     #     print(point)
+    
     
     print("Calculating slopelines...")
     calculate_slopelines(model_geotiff)
     # cProfile.run("calculate_slopelines(model)", "profile_results")
     
-    # model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
-    
         
-    # print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
-    # dpl(model)
+    print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
+    dpl(model_geotiff)
+    
+    print("Export drainage points in shapefile")
+    model_geotiff.export_drainage_point(drainage_points_shapefile_path)
+
+    
+    print("Export slopelines to shapefile")
+    model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
+
     
     # for pt in model.dr_pt[100:110]:
     #     print(f"Downslope path length of point {pt.id_pnt} is {pt.dpl} meters long")        

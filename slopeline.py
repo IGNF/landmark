@@ -45,14 +45,15 @@ def calculate_slopelines(model):
     
     # Process drainage points in descending order (assuming model.dr_pt is sorted in ascending order)
     dr_pt_dict = {p.id_pnt: p for p in model.dr_pt}  
-    dr_net_dict = {net.id_ch: net for net in model.dr_net}  
+    dr_net_dict = {}  
     
     for dp in tqdm(model.dr_pt[::-1], desc="Building drainage networks", unit="point"):
     
         if dp.ninf > 0:
             if dp.Linflow:
-                l_max = max(dp.Linflow)
+                # l_max = max(dp.Linflow)
                 i_max = np.argmax(dp.Linflow)  # Remplace index(l_max) par argmax()
+                l_max = dp.Linflow[i_max]
                 dp.upl = l_max
                 dp.sumdev = dp.Sinflow[i_max] 
                 id_up_max = dp.inflow[i_max] 
@@ -123,7 +124,7 @@ def calculate_slopelines(model):
         # Call the D8_LTD function on the current drainage point.
         i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)
         
-        if i_out is not None and j_out is not None and i_out > 0 and j_out > 0:
+        if i_out is not None and j_out is not None:
             # Retrieve the drainage point corresponding to the outflow direction.
             out_dp = model.mat_id[i_out * 2, j_out * 2]
             if out_dp is not None:
@@ -139,14 +140,6 @@ def calculate_slopelines(model):
                 out_dp.Sinflow.append(sumdev)
                 # out_dp.sumdev = sumdev
                 
-                if dp.id_pnt == 3474:
-                    print("=" * 40)
-                    print(f"DEBUG - Sinflow values for id_pnt = {dp.id_pnt}")
-                    print("out_dp.Sinflow content:")
-                    for idx, val in enumerate(out_dp.Sinflow):
-                        print(f"Sinflow[{idx + 1}] = {val:.6f}")  # Pour correspondre à l'indexation Fortran (1-based)
-                    print("=" * 40)
-
                 
         else:
             # If no valid outflow is found, classify dp as a low point / endorheic.

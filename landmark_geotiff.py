@@ -32,8 +32,8 @@ if __name__ == "__main__":
     file_name = dtm_path.split("/")[-1]
     
     #Shapefiles path
-    slopelines_shapefile_path = f"../../out_scripts_test_temp/slopelines_{file_name[:-4]}"
-    drainage_points_shapefile_path = f"../../out_scripts_test_temp/drain_points_{file_name[:-4]}"
+    slopelines_shapefile_path = f"../../out_scripts_test_temp/slopelines_{file_name[:-4]}_test"
+    drainage_points_shapefile_path = f"../../out_scripts_test_temp/drain_points_{file_name[:-4]}_test"
 
 
         
@@ -44,12 +44,11 @@ if __name__ == "__main__":
     
     # print("First 5 drainage points:")
     # for point in model_geotiff.dr_pt[:5]:
-    #     print(point)
+    #     print("\n",point)
     
     
     print("Calculating slopelines...")
     calculate_slopelines(model_geotiff)
-    # cProfile.run("calculate_slopelines(model)", "profile_results")
     
         
     print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")

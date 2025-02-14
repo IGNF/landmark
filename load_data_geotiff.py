@@ -117,7 +117,7 @@ class LoadData:
     
         for net in self.dr_net:
             coords = []
-            for pnt_id in net.id_pnts:
+            for pnt_id in net.id_pnts.value:
                 dp = self.dr_pt_by_id.get(pnt_id)
                 if dp:
                     x, y = self.transform * (dp.j, dp.i)
@@ -125,16 +125,17 @@ class LoadData:
             if len(coords) > 1:
                 lines.append(LineString(coords))
                 attributes.append({
-                    "id_ch": net.id_ch,
+                    "id_ch": net.id_ch.value,
                     "nel": net.nel,
-                    "id_start_pt": net.id_start_pt,
-                    "id_end_pt": net.id_end_pt,
+                    "id_start_pt": net.id_start_pt.value,
+                    "id_end_pt": net.id_end_pt.value,
                     "length": net.length,
-                    "id_ch_out": net.id_ch_out,
+                    "id_ch_out": net.id_ch_out.value,
                     "n_jun": net.n_jun,
+                    "id_in:": net.id_in.value,
                     "n_path": net.n_path,
-                    "id_path": net.id_path,
-                    "id_endo": net.id_endo,
+                    "id_path": net.id_path.value,
+                    "id_endo": net.id_endo.value,
                     "sso": net.sso,
                     "hso": net.hso
                 })
@@ -162,15 +163,18 @@ class LoadData:
                 "i": dp.i,
                 "j": dp.j,
                 "Z": dp.Z,
-                "fldir": dp.fldir,
-                "fldir_ss": dp.fldir_ss,
+                "fldir": dp.fldir.value,
+                "fldir_ss": dp.fldir_ss.value,
                 "A_in": dp.A_in,
                 "upl": dp.upl,
                 "dpl": dp.dpl,
                 "sumdev": dp.sumdev,
                 "id_endo": dp.id_endo,
                 "ninf": dp.ninf,
-                "id_ch": dp.id_ch
+                "inflow": dp.inflow.value,
+                "Linflow:": dp.Linflow.value,
+                "Sinflow:": dp.Sinflow.value,
+                "id_ch": dp.id_ch.value
             })
     
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)

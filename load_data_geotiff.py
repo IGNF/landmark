@@ -72,15 +72,20 @@ class LoadData:
                     for id_j in range(self.M):
                         elevation = self.dem[id_i, id_j]
                         # Create a DrainagePoint (id_pnt starts at 1)
-                        dp = DrainagePoint(i=id_i, j=id_j, Z=float(elevation), id_pnt=len(self.dr_pt) + 1)
+                        dp = DrainagePoint(
+                            i=id_i,
+                            j=id_j,
+                            Z=float(elevation),
+                            id_pnt=len(self.dr_pt) + 1
+                            )
                         self.dr_pt.append(dp)
                         # Place the point in the matrix.
                         self.mat_id[id_i * 2, id_j * 2] = dp
 
 
-                # Sorts the list of drainage points by elevation (ascending order).
-                # This sort is essential for further processing (e.g., flow calculations).
-                self.dr_pt.sort(key=lambda dp: dp.Z)
+                # Build the list 'qoi' by sorting DrainagePoints in ascending Z
+                # qoi will store the 'id_pnt' for each DrainagePoint
+                self.qoi = [dp.id_pnt.value for dp in sorted(self.dr_pt, key=lambda dp: dp.Z)]
 
                 
         except Exception as e:
@@ -115,10 +120,10 @@ class LoadData:
         lines = []
         attributes = []
     
-        for net in self.dr_net:
+        for net in self.l_dr_net:
             coords = []
             for pnt_id in net.id_pnts.value:
-                dp = self.dr_pt_by_id.get(pnt_id)
+                dp = self.dr_pt[pnt_id-1]
                 if dp:
                     x, y = self.transform * (dp.j, dp.i)
                     coords.append((x+self.delta_x/2, y-self.delta_y/2))
@@ -159,7 +164,7 @@ class LoadData:
             x, y = self.transform * (dp.j, dp.i)
             points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
             attributes.append({
-                "id_pnt": dp.id_pnt,
+                "id_pnt": dp.id_pnt.value,
                 "i": dp.i,
                 "j": dp.j,
                 "Z": dp.Z,

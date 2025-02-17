@@ -192,7 +192,7 @@ class SlopelineMixin:
         # Triangle 087: uses e[7] and e[6] (Fortran indices 8 and 7).
         if abs(e[7] * e[6]) > EPSILON:
             r_val, s_max_facet = facet(e0, e[7], e[6], self.delta_x, self.delta_y)
-            # if dp.id_pnt == 3474 :
+            # if dp.id_pnt.value == 3474 :
             #     print('e0 = ', e0)
             #     print('e1 = ', e[7])
             #     print('e2 = ', e[6])
@@ -245,9 +245,9 @@ class SlopelineMixin:
         j_out2_mx = j_out2_arr[id_mx]
         sigma_mx = sigma_arr[id_mx]
         
-        if dp.id_pnt == 23325:
+        if dp.id_pnt.value == 23325:
             print("=" * 40)
-            print(f"DEBUG - Values for id_dr = {dp.id_pnt}")
+            print(f"DEBUG - Values for id_dr = {dp.id_pnt.value}")
             
             print("s_max values:")
             print(s_max)
@@ -294,9 +294,9 @@ class SlopelineMixin:
                     i_out = i_out2_mx
                     j_out = j_out2_mx
         
-            if dp.id_pnt == 23325:
+            if dp.id_pnt.value == 23325:
                 print("=" * 25)
-                print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt}")
+                print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt.value}")
                 print(f"sumdev_in = {sumdev_in:.6f}")
                 print(f"dev_1 = {dev_1:.6f}, dev_2 = {dev_2:.6f}")
                 print(f"sumdev_1 = {sumdev_1:.6f}, sumdev_2 = {sumdev_2:.6f}")

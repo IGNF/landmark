@@ -19,6 +19,10 @@ class ListPointer:
         if value is None:
             value = []
         self.value = value
+        
+    def append(self, item):
+        """Appends an item to the list."""
+        self.value.append(item)
 
 
 
@@ -62,7 +66,7 @@ class DrainagePoint:
         self.i = i
         self.j = j
         self.Z = Z
-        self.id_pnt = id_pnt
+        self.id_pnt = IDPointer(id_pnt)
         self.fldir = IDPointer(None)      # Simulates a pointer
         self.fldir_ss = IDPointer(None)   # Simulates a pointer
         self.A_in = 0

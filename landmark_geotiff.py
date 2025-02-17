@@ -15,8 +15,8 @@ Transcript in python of the original landmark.f90
 #Internal import
 from load_data_geotiff import LoadData
 from D8_LTD import SlopelineMixin
-from slopeline import calculate_slopelines
-from dpl import dpl
+from slopeline_recode import calculate_slopelines
+from dpl_recode import dpl
 from mutual_dist import mutual_dist
 from endo_del import endo_del
 
@@ -42,9 +42,9 @@ if __name__ == "__main__":
     print("Loading data...")
     model_geotiff.read_geotiff(dtm_path)
     
-    # print("First 5 drainage points:")
-    # for point in model_geotiff.dr_pt[:5]:
-    #     print("\n",point)
+    print("First 5 drainage points:")
+    for point in model_geotiff.dr_pt[:5]:
+        print("\n",point)
     
     
     print("Calculating slopelines...")

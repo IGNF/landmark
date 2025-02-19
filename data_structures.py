@@ -73,7 +73,7 @@ class DrainagePoint:
         self.upl = 0.0
         self.dpl = 0.0
         self.sumdev = 0.0
-        self.id_endo = None
+        self.id_endo = IDPointer(None)
         self.ninf = 0
         self.inflow = ListPointer()  # Simulates a pointer to a list
         self.Linflow = ListPointer()
@@ -152,7 +152,7 @@ class DrainageNetwork:
         self.n_jun = 0
         self.id_in = ListPointer()  # Simulates a pointer to a list
         self.n_path = 0
-        self.id_path = ListPointer()  # Simulates a pointer to a list of downslope paths
+        self.id_path = []
         self.id_endo = IDPointer(None)  # Simulates a pointer
         self.sso = None
         self.hso = None

@@ -137,9 +137,9 @@ class LoadData:
                     "length": net.length,
                     "id_ch_out": net.id_ch_out.value,
                     "n_jun": net.n_jun,
-                    "id_in:": net.id_in.value,
+                    "id_in:": [i.value for i in net.id_in.value],
                     "n_path": net.n_path,
-                    "id_path": net.id_path.value,
+                    "id_path": [i.value for i in net.id_path],
                     "id_endo": net.id_endo.value,
                     "sso": net.sso,
                     "hso": net.hso
@@ -174,7 +174,7 @@ class LoadData:
                 "upl": dp.upl,
                 "dpl": dp.dpl,
                 "sumdev": dp.sumdev,
-                "id_endo": dp.id_endo,
+                "id_endo": dp.id_endo.value,
                 "ninf": dp.ninf,
                 "inflow": dp.inflow.value,
                 "Linflow:": dp.Linflow.value,
@@ -184,6 +184,47 @@ class LoadData:
     
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
         gdf.to_file(output_shapefile)
+        
+        
+        
+    def export_ridge_point(self, output_shapefile: str):
+        """
+        Exporte les points de crête sous forme de Shapefile.
+
+        Parameters
+        ----------
+        output_shapefile : str
+            Chemin pour enregistrer le fichier Shapefile.
+        """
+        points = []
+        attributes = []
+    
+        for rp in self.rd_pt:
+            x, y = self.transform * (rp.j/2, rp.i/2)
+            points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
+            attributes.append({
+                "id_pnt": rp.id_pnt,
+                "i": rp.i,
+                "j": rp.j,
+                "Z": rp.Z,
+                "md": rp.md,
+                "id_drpt1": rp.id_drpt1.value,
+                "id_drpt2": rp.id_drpt2.value,
+                "A_in": rp.A_in,
+                "A_in_min": rp.A_in_min,
+                "nen:": rp.nen,
+                "n_jun": rp.n_jun,
+                "id_neigh": rp.id_neigh.value,
+                "id_sdl": rp.id_sdl.value,
+                "nrdl": rp.nrdl,
+                "id_rdl": rp.id_rdl.value,
+                "junc": rp.junc,
+                "n_ptsa": rp.n_ptsa
+            })
+    
+        gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
+        gdf.to_file(output_shapefile)
+
 
 
 if __name__ == "__main__":

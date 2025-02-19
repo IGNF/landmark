@@ -245,7 +245,7 @@ class SlopelineMixin:
         j_out2_mx = j_out2_arr[id_mx]
         sigma_mx = sigma_arr[id_mx]
         
-        if dp.id_pnt.value == 23325:
+        if dp.id_pnt.value == 2802:
             print("=" * 40)
             print(f"DEBUG - Values for id_dr = {dp.id_pnt.value}")
             
@@ -294,7 +294,7 @@ class SlopelineMixin:
                     i_out = i_out2_mx
                     j_out = j_out2_mx
         
-            if dp.id_pnt.value == 23325:
+            if dp.id_pnt.value == 2802:
                 print("=" * 25)
                 print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt.value}")
                 print(f"sumdev_in = {sumdev_in:.6f}")

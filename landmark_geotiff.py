@@ -17,8 +17,8 @@ from load_data_geotiff import LoadData
 from D8_LTD import SlopelineMixin
 from slopeline_recode import calculate_slopelines
 from dpl_recode import dpl
-from mutual_dist import mutual_dist
-from endo_del import endo_del
+from mutual_dist_recode import mutual_dist
+# from endo_del import endo_del
 
 
 class HydroModel(LoadData, SlopelineMixin):
@@ -34,6 +34,8 @@ if __name__ == "__main__":
     #Shapefiles path
     slopelines_shapefile_path = f"../../out_scripts_test_temp/slopelines_{file_name[:-4]}_test"
     drainage_points_shapefile_path = f"../../out_scripts_test_temp/drain_points_{file_name[:-4]}_test"
+    ridge_points_shapefile_path = f"../../out_scripts_test_temp/ridge_points_{file_name[:-4]}_test"
+
 
 
         
@@ -42,9 +44,9 @@ if __name__ == "__main__":
     print("Loading data...")
     model_geotiff.read_geotiff(dtm_path)
     
-    print("First 5 drainage points:")
-    for point in model_geotiff.dr_pt[:5]:
-        print("\n",point)
+    # print("First 5 drainage points:")
+    # for point in model_geotiff.dr_pt[:5]:
+    #     print("\n",point)
     
     
     print("Calculating slopelines...")
@@ -54,20 +56,24 @@ if __name__ == "__main__":
     print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
     dpl(model_geotiff)
     
-    print("Export drainage points in shapefile")
-    model_geotiff.export_drainage_point(drainage_points_shapefile_path)
+    # print("Export drainage points in shapefile")
+    # model_geotiff.export_drainage_point(drainage_points_shapefile_path)
 
     
-    print("Export slopelines to shapefile")
-    model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
+    # print("Export slopelines to shapefile")
+    # model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
 
     
     # for pt in model.dr_pt[100:110]:
     #     print(f"Downslope path length of point {pt.id_pnt} is {pt.dpl} meters long")        
     
     
-    # print ("calculates the mutual distance between the two neighbor drainage points")
-    # mutual_dist(model)
+    print ("calculates the mutual distance between the two neighbor drainage points")
+    # mutual_dist(model_geotiff)
+    
+    print("Export ridges points in shapefile")
+    # model_geotiff.export_ridge_point(ridge_points_shapefile_path)
+    
     
     # for pt in model.rd_pt[100:110]:
     #     print(pt)

@@ -59,11 +59,11 @@ def calculate_slopelines(model):
 
             
             for length_inflow, id_inflow in zip(dp.Linflow.value,dp.inflow.value):  # Extract values from ListPointer
-                curr_ch = model.dr_pt[id_inflow-1].id_ch.value
-                model.l_dr_net[curr_ch-1].id_pnts.append(dp.id_pnt.value)
-                model.l_dr_net[curr_ch-1].length = length_inflow
-                model.l_dr_net[curr_ch-1].id_ch_out = dp.id_ch
-                model.l_dr_net[curr_ch-1].id_end_pt = dp.id_pnt
+                curr_ch = model.dr_pt[id_inflow-1].id_ch
+                model.l_dr_net[curr_ch.value-1].id_pnts.append(dp.id_pnt.value)
+                model.l_dr_net[curr_ch.value-1].length = length_inflow
+                model.l_dr_net[curr_ch.value-1].id_ch_out = dp.id_ch
+                model.l_dr_net[curr_ch.value-1].id_end_pt = dp.id_pnt
                 
 
             
@@ -89,7 +89,7 @@ def calculate_slopelines(model):
             net.n_jun=0
             net.id_in=ListPointer([])
             net.n_path=0
-            net.id_path=ListPointer([])
+            net.id_path=[]
             net.id_endo=IDPointer(None)
             net.sso=None
             net.hso=None

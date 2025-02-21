@@ -77,7 +77,7 @@ def dpl(model):
         # For the current channel, set the downslope path identifier:
         main_net.n_path = 1
         main_net.id_path.append(main_net.id_ch.value)
-        
+
         # Now call the recursive routine to update tributaries.
         up_recurs_recode(main.value, model)
         
@@ -109,19 +109,18 @@ def up_recurs_recode(curr, model, visited=None):
     model : object
         The hydrological model object containing dr_pt, dr_net, etc.
     """
-    # if visited is None:
-    #     visited = set()
+    if visited is None:
+        visited = set()
 
-    # # Si on est déjà passé par ce canal, on ne le traite plus
-    # if curr in visited:
-    #     return
-    # visited.add(curr)
+    # Si on est déjà passé par ce canal, on ne le traite plus
+    if curr in visited:
+        return
+    visited.add(curr)
 
     
     for i in range(model.l_dr_net[curr-1].n_jun):
         in_curr = model.l_dr_net[curr-1].id_in.value[i-1]
         for cnt_pt in range(model.l_dr_net[in_curr.value-1].nel-1): #last pnt belongs to main channel
-        #Marque tous les points sur les lignes de flux pour ne pas apparaitre comme points de crête pour la suite.
             dp = model.dr_pt[model.l_dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1]
             # l1 is the length of the tributary channel.
             l1 = model.l_dr_net[in_curr.value-1].length
@@ -147,7 +146,7 @@ def up_recurs_recode(curr, model, visited=None):
         n_path = model.l_dr_net[in_curr.value-1].n_path
         # model.l_dr_net[in_curr.value-1].id_path = []
         model.l_dr_net[in_curr.value-1].id_path.append(model.l_dr_net[in_curr.value-1].id_ch.value)
-        for cnt_in in range(2,n_path+1):
+        for cnt_in in range(2,n_path):
             model.l_dr_net[in_curr.value-1].id_path.append(model.l_dr_net[curr-1].id_path[cnt_in-2])
         # Propagate the endorheic id from the parent.
         model.l_dr_net[in_curr.value-1].id_endo = model.l_dr_net[curr-1].id_endo
@@ -155,9 +154,6 @@ def up_recurs_recode(curr, model, visited=None):
         up_recurs_recode(in_curr.value, model, visited)
         
         
-        
 
         
-            
-
             

@@ -56,11 +56,11 @@ if __name__ == "__main__":
     print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
     dpl(model_geotiff)
     
-    # print("Export drainage points in shapefile")
+    print("Export drainage points in shapefile")
     # model_geotiff.export_drainage_point(drainage_points_shapefile_path)
 
     
-    # print("Export slopelines to shapefile")
+    print("Export slopelines to shapefile")
     # model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
 
     
@@ -69,10 +69,10 @@ if __name__ == "__main__":
     
     
     print ("calculates the mutual distance between the two neighbor drainage points")
-    # mutual_dist(model_geotiff)
+    mutual_dist(model_geotiff)
     
     print("Export ridges points in shapefile")
-    # model_geotiff.export_ridge_point(ridge_points_shapefile_path)
+    model_geotiff.export_ridge_point(ridge_points_shapefile_path)
     
     
     # for pt in model.rd_pt[100:110]:

@@ -69,7 +69,7 @@ def calculate_slopelines(model):
 
             
                 # Handle tributary channels
-                if curr_ch.value != id_main:
+                if curr_ch != id_main:
                     #Add triburaties index to main channel
                     if curr_ch not in model.l_dr_net[id_main-1].id_in.value:
                         model.l_dr_net[id_main-1].n_jun += 1

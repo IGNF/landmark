@@ -230,7 +230,7 @@ def md(dp1, dp2, model):
     n_com=0  #Number of channels belonging to both path
     
     # Loop from min_n_pth down to 1.
-    for cnt_path in range(min_n_pth-1, 0, -1): #!!!!!!!!!!!!!!!!! J'ai un doute sur le min_n_pth-1
+    for cnt_path in range(min_n_pth, 0, -1): #!!!!!!!!!!!!!!!!! J'ai un doute sur le min_n_pth-1
         curr_cnt1 = cnt_path + n_path1 - min_n_pth  
         curr_cnt2 = cnt_path + n_path2 - min_n_pth
         # print("\nn_path1 : ", n_path1)
@@ -255,8 +255,8 @@ def md(dp1, dp2, model):
         else:
             if (n_path1 - n_com > 0) and (n_path2 - n_com > 0):
                 # Get the channel at position (n_path - n_com)
-                jun1_channel_id = net1.id_path[n_path1 - n_com - 1].value
-                jun2_channel_id = net2.id_path[n_path2 - n_com - 1].value
+                jun1_channel_id = net1.id_path[n_path1 - n_com - 1]
+                jun2_channel_id = net2.id_path[n_path2 - n_com - 1]
                 #id of the first point of the path #1 belonging to the same path after the rejunction
                 jun1 = model.l_dr_net[jun1_channel_id-1].id_end_pt.value
                 #d of the first point of the path #2 belonging to the same path after the rejunction
@@ -266,13 +266,17 @@ def md(dp1, dp2, model):
                 if (n_path1 == min_n_pth) and (n_path1 != n_path2):
                     jun1 = dp1.id_pnt.value
                 else:
+                    jun1_channel_id = net1.id_path[n_path1 - n_com - 1]
                     jun1 = model.l_dr_net[jun1_channel_id-1].id_end_pt.value
                 if (n_path2 == min_n_pth) and (n_path1 != n_path2):
                     jun2 = dp2.id_pnt.value
                 else:
+                    # print("dp1.id_pnt.value :",dp1.id_pnt.value )
+                    # print("dp2.id_pnt.value :",dp2.id_pnt.value )
+                    jun2_channel_id = net2.id_path[n_path2 - n_com - 1]
                     jun2 = model.l_dr_net[jun2_channel_id-1].id_end_pt.value
             if (jun1 is None) or (jun2 is None):
-                mutdist = 1e11
+                mutdist = 1e10
             else:
                 end_pt1 = model.dr_pt[jun1-1]
                 end_pt2 = model.dr_pt[jun2-1]

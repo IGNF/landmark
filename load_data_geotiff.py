@@ -225,7 +225,7 @@ class LoadData:
                 "nen": int(rp.nen) if rp.nen is not None else 0,  
                 "n_jun": int(rp.n_jun) if rp.n_jun is not None else 0,
                 "id_neigh": str(rp.id_neigh.value) if rp.id_neigh and rp.id_neigh.value is not None else 0,
-                "id_sdl": int(rp.id_sdl.value) if rp.id_sdl and rp.id_sdl.value is not None else 0,
+                "id_sdl": int(rp.id_sdl) if rp.id_sdl is not None else 0,
                 "nrdl": int(rp.nrdl) if rp.nrdl is not None else 0,
                 "id_rdl": str(rp.id_rdl.value) if rp.id_rdl and rp.id_rdl.value is not None else 0,
                 "junc": int(rp.junc) if rp.junc is not None else 0,
@@ -235,6 +235,38 @@ class LoadData:
         # Créer un GeoDataFrame et écrire en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
         gdf.to_file(output_shapefile)
+   
+    
+    def export_saddle_points(self, output_shapefile: str):
+        """
+        Exporte les points de selle (`saddle points`) sous forme de Shapefile.
+    
+        Parameters
+        ----------
+        output_shapefile : str
+            Chemin pour enregistrer le fichier Shapefile.
+        """
+        points = []
+        attributes = []
+        
+        for sp in self.sdl_pt:  # Parcours tous les Saddle Points
+            x, y = self.transform * (sp.j / 2, sp.i / 2)
+            points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
+    
+            # Nettoyage et conversion des valeurs
+            attributes.append({
+                "id_pnt": int(sp.id_pnt) if sp.id_pnt is not None else 0,
+                "id_rdpt": int(sp.id_rdpt) if sp.id_rdpt is not None else 0,
+                "id_rdpt2": int(sp.id_rdpt2) if sp.id_rdpt2 is not None else 0,
+                "Z": float(sp.Z),
+                "id_cis_endo": int(sp.id_cis_endo.value) if sp.id_cis_endo and sp.id_cis_endo.value is not None else 0,
+                "id_trans_out": int(sp.id_trans_out.value) if sp.id_trans_out and sp.id_trans_out.value is not None else 0,
+                "A_endo": float(sp.A_endo) if sp.A_endo is not None else 0.0
+            })
+    
+        # Création du GeoDataFrame et exportation en fichier Shapefile
+        gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
+        gdf.to_file(output_shapefile) 
     
 
 if __name__ == "__main__":

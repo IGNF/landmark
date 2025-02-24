@@ -216,7 +216,7 @@ class RidgePoint:
         self.nen = 0  # Number of neighboring points
         self.n_jun = 0  # Number of junctions (equals `nen` in Fortran)
         self.id_neigh = ListPointer()  # List of neighboring ridge points
-        self.id_sdl = IDPointer(None)  # ID of the corresponding saddle point
+        self.id_sdl = None  # ID of the corresponding saddle point
         
         self.nrdl = 0  # Number of ridgeline segments this point belongs to
         self.id_rdl = ListPointer()  # List of ridgeline IDs associated with this point
@@ -237,8 +237,8 @@ class SaddlePoint:
     def __init__(self, id_pnt):
         self.id_pnt = id_pnt  # Unique identifier of the saddle point
     
-        self.id_rdpt = IDPointer(None)  # ID of the corresponding ridge point (linked to `rd_pt.id_pnt`)
-        self.id_rdpt2 = IDPointer(None) # ID of the secondary ridge point if the saddle is split
+        self.id_rdpt = 0  # ID of the corresponding ridge point (linked to `rd_pt.id_pnt`)
+        self.id_rdpt2 = 0 # ID of the secondary ridge point if the saddle is split
     
         self.id_cis_endo = IDPointer(None)  # ID of the endorheic basin on one side of the saddle
         self.id_trans_out = IDPointer(None)  # ID of the outflow point for the other side of the saddle

@@ -69,8 +69,8 @@ def saddle_spill(model):
             id_endo_curr = trace_out(id_cis_pt, id_trans_pt, model)
             endo_out(id_endo_curr, max_Zs, model)
     
-    for pt in model.sdl_pt:
-        print(f"id_pnt : {pt.id_pnt}, id_cis_endo : {pt.id_cis_endo.value}, id_trans_endo : {pt.id_trans_out.value}")
+    # for pt in model.sdl_pt:
+    #     print(f"id_pnt : {pt.id_pnt}, id_cis_endo : {pt.id_cis_endo.value}, id_trans_endo : {pt.id_trans_out.value}")
 
             
 
@@ -195,6 +195,7 @@ def endo_out(curr, max_Zs, model):
     Determines the outlet for the endorheic basin identified by 'curr' (1-based).
     It merges candidate saddles in ascending order, checking each one to see if it spills out
     below a maximum threshold. If a saddle indeed connects this endorheic basin to an outlet,
+    we handle the merging of new saddles from the newly connected basin
 
     Parameters
     ----------

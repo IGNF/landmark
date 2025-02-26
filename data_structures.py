@@ -215,11 +215,11 @@ class RidgePoint:
         
         self.nen = 0  # Number of neighboring points
         self.n_jun = 0  # Number of junctions (equals `nen` in Fortran)
-        self.id_neigh = ListPointer()  # List of neighboring ridge points
+        self.id_neigh = []  # List of neighboring ridge points
         self.id_sdl = None  # ID of the corresponding saddle point
         
         self.nrdl = 0  # Number of ridgeline segments this point belongs to
-        self.id_rdl = ListPointer()  # List of ridgeline IDs associated with this point
+        self.id_rdl = []  # List of ridgeline IDs associated with this point
         self.junc = 0  # Junction flag (0 = no junction, 1 = junction)
         self.n_ptsa = 1  # Number of ridge points defining the spread area (related to DEM resolution)
 

@@ -20,6 +20,7 @@ from dpl_recode import dpl
 from mutual_dist_recode import mutual_dist
 from endo_del_recode import endo_del
 from saddle_spill_recode import saddle_spill
+from ridge_point import find_ridge_neighbors
 
 
 class HydroModel(LoadData, SlopelineMixin):
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     slopelines_shapefile_path = f"../../out_scripts_test_temp/slopelines_{file_name[:-4]}_test"
     drainage_points_shapefile_path = f"../../out_scripts_test_temp/drain_points_{file_name[:-4]}_test"
     ridge_points_shapefile_path = f"../../out_scripts_test_temp/ridge_points_{file_name[:-4]}_test"
-    saddle_points_shapefile_path = f"../../out_scripts_test_temp/saddle_points_{file_name[:-4]}_test"
+    saddle_points_shapefile_path = f"../../out_scripts_test_temp/saddle_points_filtre_{file_name[:-4]}_test"
 
 
         
@@ -63,6 +64,9 @@ if __name__ == "__main__":
     saddle_spill(model_geotiff)
     
     
+    print("Define the relationship between ridge points")
+    find_ridge_neighbors(model_geotiff)
+    
     print("Export drainage points in shapefile")
     # model_geotiff.export_drainage_point(drainage_points_shapefile_path)
 
@@ -70,11 +74,12 @@ if __name__ == "__main__":
     # model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
     
     print("Export ridges points in shapefile")
-    # model_geotiff.export_ridge_point(ridge_points_shapefile_path)
+    model_geotiff.export_ridge_point(ridge_points_shapefile_path)
 
-
+    
     print("Export saddle points in shapefile")
     # model_geotiff.export_saddle_points(saddle_points_shapefile_path)
+
         
     
         

@@ -73,7 +73,7 @@ class DrainagePoint:
         self.upl = 0.0
         self.dpl = 0.0
         self.sumdev = 0.0
-        self.id_endo = IDPointer(None)
+        self.id_endo = IDPointer(0)
         self.ninf = 0
         self.inflow = ListPointer()  # Simulates a pointer to a list
         self.Linflow = ListPointer()
@@ -141,7 +141,7 @@ class DrainageNetwork:
       hso: int
           Horton Stream Order
     """
-    def __init__(self, id_ch, nel):
+    def __init__(self, id_ch = None, nel = 0):
         self.id_ch = IDPointer(id_ch)  # Simulates a pointer
         self.nel = nel
         self.id_pnts = ListPointer()  # Simulates a pointer to a list of points

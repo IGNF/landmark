@@ -37,11 +37,17 @@ if __name__ == "__main__":
     slopelines_shapefile_path = f"../../out_scripts_test_temp/slopelines_{file_name[:-4]}_test"
     drainage_points_shapefile_path = f"../../out_scripts_test_temp/drain_points_{file_name[:-4]}_test"
     ridge_points_shapefile_path = f"../../out_scripts_test_temp/ridge_points_{file_name[:-4]}_test"
+    ridge_points_shapefile_path_avant_relation = f"../../out_scripts_test_temp/ridge_points__avant_relation{file_name[:-4]}_test"
     saddle_points_shapefile_path = f"../../out_scripts_test_temp/saddle_points_filtre_{file_name[:-4]}_test"
+    
+    #Landmarks option
+    main_channel_choice =2 #area:0, length:1, hso:2
 
 
         
-    model_geotiff = HydroModel()    
+    model_geotiff = HydroModel()
+    model_geotiff.main_channel_choice = main_channel_choice
+    
     
     print("Loading data...")
     model_geotiff.read_geotiff(dtm_path)
@@ -63,6 +69,10 @@ if __name__ == "__main__":
     print("Connect basin by sadlle spill")
     saddle_spill(model_geotiff)
     
+    print("Export ridges points in shapefile")
+    # model_geotiff.export_ridge_point(ridge_points_shapefile_path_avant_relation)
+
+    
     
     print("Define the relationship between ridge points")
     find_ridge_neighbors(model_geotiff)
@@ -74,7 +84,7 @@ if __name__ == "__main__":
     # model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
     
     print("Export ridges points in shapefile")
-    model_geotiff.export_ridge_point(ridge_points_shapefile_path)
+    # model_geotiff.export_ridge_point(ridge_points_shapefile_path)
 
     
     print("Export saddle points in shapefile")

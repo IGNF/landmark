@@ -42,11 +42,11 @@ def dpl(model):
         # (En Fortran : main => dr_pt(endo_pt(cnt_endo)%id_pnt)%id_ch)
         main = model.dr_pt[endo.id_pnt.value-1].id_ch
         # Assign the channel’s endorheic id:
-        model.l_dr_net[main.value-1].id_endo = endo.id_eo
+        model.dr_net[main.value-1].id_endo = endo.id_eo
 
         # For each drainage point in the main channel:
             
-        main_net = model.l_dr_net[main.value-1]
+        main_net = model.dr_net[main.value-1]
         l1 = main_net.length
         for dp_id in main_net.id_pnts.value:
             dp = model.dr_pt[dp_id-1]
@@ -118,16 +118,16 @@ def up_recurs_recode(curr, model, visited=None):
     # visited.add(curr)
 
     
-    for i in range(model.l_dr_net[curr-1].n_jun):
-        in_curr = model.l_dr_net[curr-1].id_in.value[i-1]
-        for cnt_pt in range(model.l_dr_net[in_curr.value-1].nel-1): #last pnt belongs to main channel
+    for i in range(model.dr_net[curr-1].n_jun):
+        in_curr = model.dr_net[curr-1].id_in.value[i-1]
+        for cnt_pt in range(model.dr_net[in_curr.value-1].nel-1): #last pnt belongs to main channel
         #Marque tous les points sur les lignes de flux pour ne pas apparaitre comme points de crête pour la suite.
-            dp = model.dr_pt[model.l_dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1]
+            dp = model.dr_pt[model.dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1]
             # l1 is the length of the tributary channel.
-            l1 = model.l_dr_net[in_curr.value-1].length
+            l1 = model.dr_net[in_curr.value-1].length
             l2 = dp.upl
-            l3 = model.dr_pt[model.l_dr_net[in_curr.value-1].id_end_pt.value-1].dpl
-            model.dr_pt[model.l_dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1].dpl = l1-l2+l3
+            l3 = model.dr_pt[model.dr_net[in_curr.value-1].id_end_pt.value-1].dpl
+            model.dr_pt[model.dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1].dpl = l1-l2+l3
             i_curr = dp.i
             j_curr = dp.j
             # print(i_curr)
@@ -139,18 +139,18 @@ def up_recurs_recode(curr, model, visited=None):
                 # print("\ni_mat", i_mat)
                 # print("j_mat", j_mat)
 
-                model.mat_id[i_mat, j_mat] = model.l_dr_net[in_curr.value-1].id_ch
+                model.mat_id[i_mat, j_mat] = model.dr_net[in_curr.value-1].id_ch
         
         # Update the tributary channel’s path:
-        model.l_dr_net[in_curr.value-1].n_path = model.l_dr_net[curr-1].n_path+1
+        model.dr_net[in_curr.value-1].n_path = model.dr_net[curr-1].n_path+1
         # Build new id_path: first element is its own id_ch, then append parent's path.
-        n_path = model.l_dr_net[in_curr.value-1].n_path
-        # model.l_dr_net[in_curr.value-1].id_path = []
-        model.l_dr_net[in_curr.value-1].id_path.append(model.l_dr_net[in_curr.value-1].id_ch.value)
+        n_path = model.dr_net[in_curr.value-1].n_path
+        # model.dr_net[in_curr.value-1].id_path = []
+        model.dr_net[in_curr.value-1].id_path.append(model.dr_net[in_curr.value-1].id_ch.value)
         for cnt_in in range(2,n_path+1):
-            model.l_dr_net[in_curr.value-1].id_path.append(model.l_dr_net[curr-1].id_path[cnt_in-2])
+            model.dr_net[in_curr.value-1].id_path.append(model.dr_net[curr-1].id_path[cnt_in-2])
         # Propagate the endorheic id from the parent.
-        model.l_dr_net[in_curr.value-1].id_endo = model.l_dr_net[curr-1].id_endo
+        model.dr_net[in_curr.value-1].id_endo = model.dr_net[curr-1].id_endo
         
         up_recurs_recode(in_curr.value, model, visited)
         

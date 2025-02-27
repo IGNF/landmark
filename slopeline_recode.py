@@ -38,7 +38,7 @@ def calculate_slopelines(model):
     start_time = time.process_time()
     
     # Initialize drainage network and endorheic lists.
-    model.l_dr_net = []      # List of DrainageNetwork objects.
+    model.dr_net = []      # List of DrainageNetwork objects.
     model.l_endo_pt = []     # List of EndoPoint objects.
     model.endorheic_count = 0  # Counter for endorheic points.
     
@@ -60,25 +60,25 @@ def calculate_slopelines(model):
             
             for length_inflow, id_inflow in zip(dp.Linflow.value,dp.inflow.value):  # Extract values from ListPointer
                 curr_ch = model.dr_pt[id_inflow-1].id_ch
-                model.l_dr_net[curr_ch.value-1].id_pnts.append(dp.id_pnt.value)
-                model.l_dr_net[curr_ch.value-1].nel+=1
-                model.l_dr_net[curr_ch.value-1].length = length_inflow
-                model.l_dr_net[curr_ch.value-1].id_ch_out = dp.id_ch
-                model.l_dr_net[curr_ch.value-1].id_end_pt = dp.id_pnt
+                model.dr_net[curr_ch.value-1].id_pnts.append(dp.id_pnt.value)
+                model.dr_net[curr_ch.value-1].nel+=1
+                model.dr_net[curr_ch.value-1].length = length_inflow
+                model.dr_net[curr_ch.value-1].id_ch_out = dp.id_ch
+                model.dr_net[curr_ch.value-1].id_end_pt = dp.id_pnt
                 
 
             
                 # Handle tributary channels
                 if curr_ch.value != id_main:
                     #Add triburaties index to main channel
-                    if curr_ch not in model.l_dr_net[id_main-1].id_in.value:
-                        model.l_dr_net[id_main-1].n_jun += 1
-                        model.l_dr_net[id_main-1].id_in.append(curr_ch)
+                    if curr_ch not in model.dr_net[id_main-1].id_in.value:
+                        model.dr_net[id_main-1].n_jun += 1
+                        model.dr_net[id_main-1].id_in.append(curr_ch)
                         
     
         else:
             # Handling drainage points with no inflows (channel head)
-            new_channel_id = len(model.l_dr_net) + 1
+            new_channel_id = len(model.dr_net) + 1
             dp.id_ch = IDPointer(new_channel_id)
             net = DrainageNetwork(
                 id_ch=new_channel_id,
@@ -96,7 +96,7 @@ def calculate_slopelines(model):
             net.sso=None
             net.hso=None
             
-            model.l_dr_net.append(net)
+            model.dr_net.append(net)
         
         # --- Compute drainage direction using D8_LTD ---
         i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)

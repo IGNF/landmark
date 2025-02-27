@@ -120,7 +120,7 @@ class LoadData:
         lines = []
         attributes = []
         
-        for net in self.l_dr_net:
+        for net in self.dr_net:
             coords = []
             for pnt_id in net.id_pnts.value:
                 dp = self.dr_pt[pnt_id - 1]

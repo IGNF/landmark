@@ -25,8 +25,8 @@ def endo_del(model):
         if rp.md == 1e10:
             # Retrieve id_eo1 and id_eo2:
             # For id_eo1: access the DrainagePoint corresponding to rd.id_drpt1, then get its channel, then endo id.
-            id_eo1 = model.l_dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
-            id_eo2 = model.l_dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
+            id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
+            id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
             sdl_mem = 1
             cnt_sdl = find_saddle(rp.id_pnt, id_eo1, id_eo2, sdl_mem, model, cnt_sdl)
             sdl_mem = 0

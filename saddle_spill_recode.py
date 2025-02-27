@@ -46,8 +46,8 @@ def saddle_spill(model):
         id_sdl = qoi[cnt_sdl]
         sp = model.sdl_pt[id_sdl-1]
         rp = model.rd_pt[sp.id_rdpt-1]
-        id_eo1 = model.l_dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
-        id_eo2 = model.l_dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
+        id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
+        id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
         if model.l_endo_pt[id_eo1-1].bas_type + model.l_endo_pt[id_eo2-1].bas_type == 1:
             #This saddle point connect and endorheic basin to an outlet
             max_Zs = rp.Z
@@ -105,20 +105,20 @@ def trace_out(id_endopt, id_beypt, model):
 
     # Trouver `curr_ch` et `npt_curr`
     curr_ch = model.dr_pt[id_endopt-1].id_ch.value
-    npt_curr = model.l_dr_net[curr_ch-1].id_pnts.value.index(id_endopt) #Index de id_endopt dans la liste id_pnts du canal courant
+    npt_curr = model.dr_net[curr_ch-1].id_pnts.value.index(id_endopt) #Index de id_endopt dans la liste id_pnts du canal courant
     
-    # Ajouter les points restants de `l_dr_net(curr_ch)` dans `taop`
-    taop.extend(model.l_dr_net[curr_ch-1].id_pnts.value[npt_curr:])
+    # Ajouter les points restants de `dr_net(curr_ch)` dans `taop`
+    taop.extend(model.dr_net[curr_ch-1].id_pnts.value[npt_curr:])
     
-    id_endo = model.l_dr_net[curr_ch-1].id_endo.value
+    id_endo = model.dr_net[curr_ch-1].id_endo.value
     # Ajouter les chemins supplémentaires
-    nelpath = model.l_dr_net[curr_ch-1].n_path
+    nelpath = model.dr_net[curr_ch-1].n_path
     #from the first junction to the endoreich basin lowest point 
     for _ in range(1, nelpath):
-        id_lstpt = model.l_dr_net[curr_ch-1].id_end_pt.value
+        id_lstpt = model.dr_net[curr_ch-1].id_end_pt.value
         curr_ch = model.dr_pt[id_lstpt-1].id_ch.value
-        npt_curr = model.l_dr_net[curr_ch-1].id_pnts.value.index(id_lstpt)
-        taop.extend(model.l_dr_net[curr_ch-1].id_pnts.value[npt_curr + 1:])  # Éviter le doublon du dernier point
+        npt_curr = model.dr_net[curr_ch-1].id_pnts.value.index(id_lstpt)
+        taop.extend(model.dr_net[curr_ch-1].id_pnts.value[npt_curr + 1:])  # Éviter le doublon du dernier point
         
     
     # Ajouter le chemin inversé à `out_net`
@@ -163,20 +163,20 @@ def trace_out(id_endopt, id_beypt, model):
 
     # Trouver `curr_ch` et `npt_curr`
     curr_ch = model.dr_pt[id_beypt-1].id_ch.value
-    npt_curr = model.l_dr_net[curr_ch-1].id_pnts.value.index(id_beypt) #Index de id_beypt dans la liste id_pnts du canal courant
+    npt_curr = model.dr_net[curr_ch-1].id_pnts.value.index(id_beypt) #Index de id_beypt dans la liste id_pnts du canal courant
     
-    # Ajouter les points restants de `l_dr_net(curr_ch)` dans `taop`
-    taop.extend(model.l_dr_net[curr_ch-1].id_pnts.value[npt_curr:])
+    # Ajouter les points restants de `dr_net(curr_ch)` dans `taop`
+    taop.extend(model.dr_net[curr_ch-1].id_pnts.value[npt_curr:])
     
     
     # Ajouter les chemins supplémentaires
-    nelpath = model.l_dr_net[curr_ch-1].n_path
+    nelpath = model.dr_net[curr_ch-1].n_path
     #from the first junction to the endoreich basin lowest point 
     for _ in range(1, nelpath):
-        id_lstpt = model.l_dr_net[curr_ch-1].id_end_pt.value
+        id_lstpt = model.dr_net[curr_ch-1].id_end_pt.value
         curr_ch = model.dr_pt[id_lstpt-1].id_ch.value
-        npt_curr = model.l_dr_net[curr_ch-1].id_pnts.value.index(id_lstpt)
-        taop.extend(model.l_dr_net[curr_ch-1].id_pnts.value[npt_curr+1:])
+        npt_curr = model.dr_net[curr_ch-1].id_pnts.value.index(id_lstpt)
+        taop.extend(model.dr_net[curr_ch-1].id_pnts.value[npt_curr+1:])
         
         
     # Ajouter le chemin inversé à `out_net`
@@ -290,7 +290,7 @@ def endo_out(curr, max_Zs, model):
                 #This saddle point connect and endorheic basin to an outlet
                 if model.l_endo_pt[id_eo1-1].bas_type == 1:
                     model.l_endo_pt[id_eo1-1].bas_type = 0
-                    if model.l_dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value == id_eo1:
+                    if model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value == id_eo1:
                         id_cis_pt = rp.id_drpt1.value #id cis point of the current endo basin
                         id_trans_pt = rp.id_drpt2.value #id trans point of the current endo basin
                     else:
@@ -298,7 +298,7 @@ def endo_out(curr, max_Zs, model):
                         id_trans_pt = rp.id_drpt1.value
                 else: #that means (endo_pt(id_eo2)%bas_type == 1)
                     model.l_endo_pt[id_eo2-1].bas_type = 0
-                    if model.l_dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value == id_eo2:
+                    if model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value == id_eo2:
                         id_cis_pt = rp.id_drpt1.value
                         id_trans_pt = rp.id_drpt2.value
                     else:

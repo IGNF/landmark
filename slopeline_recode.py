@@ -92,7 +92,7 @@ def calculate_slopelines(model):
             net.id_in=ListPointer([])
             net.n_path=0
             net.id_path=[]
-            net.id_endo=IDPointer(None)
+            net.id_endo=IDPointer(0)
             net.sso=None
             net.hso=None
             

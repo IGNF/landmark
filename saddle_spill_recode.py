@@ -39,6 +39,11 @@ def saddle_spill(model):
     # Build the list 'qoi' by sorting Saddle_point in ascending Z
     # qoi will store the 'id_pnt' for each SaddlePoint
     qoi = [sp.id_pnt for sp in sorted(model.sdl_pt, key=lambda sp: sp.Z)]
+    print("\n --------------------avant saddle_spill-------------------")
+    print("Valeur de ninf pour le point 24019 : ", model.dr_pt[24018].ninf)
+    print("Valeur de id_endo pour le point 24019 : ", model.dr_pt[24018].id_endo.value)
+    print("Valeur de fldir pour le point 24019 : ", model.dr_pt[24018].fldir.value)
+    print("Valeur de fldir_ss pour le point 24019 : ", model.dr_pt[24018].fldir_ss.value)
 
 
     # Process each saddle point in sorted order.
@@ -71,6 +76,12 @@ def saddle_spill(model):
     
     # for pt in model.sdl_pt:
     #     print(f"id_pnt : {pt.id_pnt}, id_cis_endo : {pt.id_cis_endo.value}, id_trans_endo : {pt.id_trans_out.value}")
+    print("\n --------------------après saddle_spill-------------------")
+    print("Valeur de ninf pour le point 24019 : ", model.dr_pt[24018].ninf)
+    print("Valeur de id_endo pour le point 24019 : ", model.dr_pt[24018].id_endo.value)
+    print("Valeur de fldir pour le point 24019 : ", model.dr_pt[24018].fldir.value)
+    print("Valeur de fldir_ss pour le point 24019 : ", model.dr_pt[24018].fldir_ss.value)
+
 
             
 
@@ -128,11 +139,15 @@ def trace_out(id_endopt, id_beypt, model):
     }
     model.out_net.append(new_outflow)
     model.n_outnet += 1
-   
+    if 24019 in taop:
+        print("On trouve le point 24019 dans taop :", taop)
+
     
     # Mise à jour de `fldir_ss`
     for cnt_taop in range(len(taop), 1, -1): 
         dp = model.dr_pt[taop[cnt_taop-1]-1]
+        if dp.id_pnt.value == 24019:
+            print("\n-------Point 24019 dans mise à jour fldir_ss dans saddle_spill")
         if dp.fldir_ss.value is None:
             # Mise à jour de fldir_ss avec la valeur du point précédent dans `taop
             dp.fldir_ss.value = taop[cnt_taop-2]

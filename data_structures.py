@@ -137,7 +137,7 @@ class DrainageNetwork:
       id_endo: int
           id of endorheic basin that the current channel belongs.
       sso: int
-          Strhaler Stream Order for hso calculation, at the end sso=hso.
+          Sttrhaler Stream Order for hso calculation, at the end sso=hso.
       hso: int
           Horton Stream Order
     """
@@ -153,7 +153,7 @@ class DrainageNetwork:
         self.id_in = ListPointer()  # Simulates a pointer to a list
         self.n_path = 0
         self.id_path = []
-        self.id_endo = IDPointer(None)  # Simulates a pointer
+        self.id_endo = IDPointer(0)  # Simulates a pointer
         self.sso = None
         self.hso = None
         

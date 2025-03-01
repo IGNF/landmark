@@ -144,7 +144,7 @@ class LoadData:
                     "id_in": [int(i.value) if i.value is not None else 0 for i in net.id_in.value] if net.id_in is not None else [],
                     "n_path": int(net.n_path),
                     "id_path": str([int(i) if i is not None else 0 for i in net.id_path] if net.id_path is not None else [])[:254],
-                    "id_endo": int(net.id_endo.value) if net.id_endo.value is not None else -1,
+                    "id_endo": int(net.id_endo.value) if net.id_endo.value is not None else 0,
                     "sso": int(net.sso) if net.sso is not None else 0,
                     "hso": int(net.hso) if net.hso is not None else 0
                 })

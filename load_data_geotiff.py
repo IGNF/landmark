@@ -268,7 +268,42 @@ class LoadData:
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
         gdf.to_file(output_shapefile) 
+
+
+    def export_endo_points(self, output_shapefile: str):
+        """
+        Exporte les points endohériques sous forme de Shapefile.
     
+        Parameters
+        ----------
+        output_shapefile : str
+            Chemin pour enregistrer le fichier Shapefile.
+        """
+        points = []
+        attributes = []
+        
+        for ep in self.l_endo_pt:  # Parcours tous les Endo Points
+            dp = self.dr_pt[ep.id_pnt.value-1]
+    
+            x, y = self.transform * (dp.j, dp.i)
+            points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
+            
+    
+            # Nettoyage et conversion des valeurs
+            attributes.append({
+                "id_eo": int(ep.id_eo.value) if ep.id_eo.value is not None else 0,
+                "id_pnt": int(ep.id_pnt.value) if ep.id_pnt.value is not None else 0,
+                "bas_type": int(ep.bas_type) if ep.bas_type is not None else 0,
+                "nsaddle": int(ep.nsaddle) if ep.nsaddle is not None else 0,
+                "beyo_sad": str(ep.beyo_sad.value) if ep.beyo_sad.value is not None else "NULL",
+                "idms": str(ep.idms.value) if ep.idms.value is not None else "NULL",
+            })
+    
+        # Création du GeoDataFrame et exportation en fichier Shapefile
+        gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
+        gdf.to_file(output_shapefile) 
+
+
 
 if __name__ == "__main__":
     dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"

@@ -53,6 +53,10 @@ def saddle_spill(model):
         rp = model.rd_pt[sp.id_rdpt-1]
         id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
         id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
+        if id_sdl == 6:
+            print("id_eo1 : ", id_eo1, "type bassin ; ", model.l_endo_pt[id_eo1-1].bas_type)
+            print("id_eo2 : ", id_eo2, "type bassin ; ", model.l_endo_pt[id_eo2-1].bas_type)
+
         if model.l_endo_pt[id_eo1-1].bas_type + model.l_endo_pt[id_eo2-1].bas_type == 1:
             #This saddle point connect and endorheic basin to an outlet
             max_Zs = rp.Z
@@ -70,6 +74,17 @@ def saddle_spill(model):
             if model.dr_pt[id_cis_pt-1].fldir_ss.value == None:
                 model.dr_pt[id_cis_pt-1].fldir_ss = model.dr_pt[id_trans_pt-1].id_pnt
                 model.dr_pt[model.dr_pt[id_cis_pt-1].fldir_ss.value-1].ninf += 1
+                
+                if id_cis_pt == 15987 and id_trans_pt == 15986:
+                    print("----------id_cis_pt = 15987 et id_trans_pt = 15986 depuis la fonction saddle_spill------------")
+                
+            # if id_cis_pt == 15987:
+            #     print("quand le point 15987 est passé en argument id_cis_pt, on traitait le point ridge :", rp.id_pnt)
+            #     print("Le point endoerique d'identifiant (identifiant drainage) : ", model.l_endo_pt[id_eo1-1].id_pnt.value, "avait pour type de bassin", model.l_endo_pt[id_eo1-1].bas_type)
+            #     print("Le point endoerique d'identifiant (identifiant drainage) : ", model.l_endo_pt[id_eo2-1].id_pnt.value, "avait pour type de bassin", model.l_endo_pt[id_eo2-1].bas_type)
+            #     print("Le ridge point d'identifiant : ",rp.id_pnt, "avait pour valeur de id_drpt 1  : ", rp.id_drpt1.value)
+            #     print("Le ridge point d'identifiant : ",rp.id_pnt, "avait pour valeur de id_drpt 2  : ", rp.id_drpt2.value)
+
             
             id_endo_curr = trace_out(id_cis_pt, id_trans_pt, model)
             endo_out(id_endo_curr, max_Zs, model)
@@ -139,15 +154,16 @@ def trace_out(id_endopt, id_beypt, model):
     }
     model.out_net.append(new_outflow)
     model.n_outnet += 1
-    if 24019 in taop:
-        print("On trouve le point 24019 dans taop :", taop)
+    # if 24019 in taop:
+    #     print("On trouve le point 24019 dans taop :", taop)
+    #     print("Les paramètres passé à la fonction sont : id_endopt, id_beypt : ", id_endopt, id_beypt)
 
     
     # Mise à jour de `fldir_ss`
     for cnt_taop in range(len(taop), 1, -1): 
         dp = model.dr_pt[taop[cnt_taop-1]-1]
-        if dp.id_pnt.value == 24019:
-            print("\n-------Point 24019 dans mise à jour fldir_ss dans saddle_spill")
+        # if dp.id_pnt.value == 24019:
+        #     print("\n-------Point 24019 dans mise à jour fldir_ss dans saddle_spill")
         if dp.fldir_ss.value is None:
             # Mise à jour de fldir_ss avec la valeur du point précédent dans `taop
             dp.fldir_ss.value = taop[cnt_taop-2]
@@ -325,7 +341,12 @@ def endo_out(curr, max_Zs, model):
                 if model.dr_pt[id_cis_pt-1].fldir_ss.value == None:
                     model.dr_pt[id_cis_pt-1].fldir_ss = model.dr_pt[id_trans_pt-1].id_pnt
                     model.dr_pt[model.dr_pt[id_cis_pt-1].fldir_ss.value-1].ninf += 1
-                    
+                
+                if id_cis_pt == 15987 and id_trans_pt == 15986:
+                    print("----------id_cis_pt = 15987 et id_trans_pt = 15986 depuis la fonction endo_out------------")
+                    print("----------La fonction endo_out avait alors pour argument en entrée curr ", curr)
+
+                
                 id_endo_curr = trace_out(id_cis_pt, id_trans_pt, model) #trace the path from curent endorheic to outlet
                 curr = id_endo_curr
                 nsdl = model.l_endo_pt[curr-1].nsaddle

@@ -12,6 +12,7 @@ import numpy as np
 from mutual_dist_recode import md
 from data_structures import RidgePoint, DrainagePoint, IDPointer
 from thal_net_hso_length import thal_net_hso_length
+from dpl_ss import dpl_ss
 
 
 def ridge_point(model):
@@ -319,6 +320,8 @@ def find_ridge_neighbors(model):
                     
     if model.main_channel_choice == 2:
         thal_net_hso_length(model, river_mask)
+    
+    dpl_ss(model)
     
                 
 

@@ -4,12 +4,52 @@ D8_LTD algoritm from the original D8_LTD.f90 Fortran code
 """
 
 import numpy as np
-from math import sin, atan, sqrt, pi
+from math import sin, atan, sqrt, pi, atan2
 
 # A small epsilon for floating point comparisons.
-EPSILON = 1e-6
+EPSILON = np.finfo(np.float32).eps  # Si le Fortran utilise des REAL simple précision (kind=RSP typiquement en float32)
 
-def facet(e0, e1, e2, delta_x, delta_y):
+# def facet(e0, e1, e2, delta_x, delta_y):
+#     """
+#     Calculates the aspect (r) and the maximum slope (s_max_facet)
+#     within a given triangle (facet), following the Fortran FACET subroutine.
+    
+#     Parameters:
+#       e0, e1, e2 : float
+#           Elevations at the three vertices.
+#       delta_x, delta_y : float
+#           Grid spacings.
+    
+#     Returns:
+#       (r, s_max_facet) : tuple of floats
+#           r: computed aspect (in radians),
+#           s_max_facet: the slope (positive downward) of the facet.
+#     """
+#     s1 = (e0 - e1) / delta_x
+#     s2 = (e1 - e2) / delta_x
+#     if abs(s1) < EPSILON:
+#         if s2 >= 0.0:
+#             r_val = pi / 2.0
+#         else:
+#             r_val = -pi / 2.0
+#     else:
+#         r_val = atan2(s2, s1)
+#     sp = sqrt(s1**2 + s2**2)
+#     sd = (e0 - e2) / sqrt(delta_x**2 + delta_y**2)
+#     if (r_val >= 0.0 and r_val <= pi/4.0 and s1 >= 0.0):
+#         s_max_facet = sp
+#     else:
+#         if s1 > sd:
+#             s_max_facet = s1
+#             r_val = 0.0
+#         else:
+#             s_max_facet = sd
+#             r_val = pi/4.0
+#     return r_val, s_max_facet
+
+
+
+def facet(e0, e1, e2, delta_x, delta_y, id_dr=None):
     """
     Calculates the aspect (r) and the maximum slope (s_max_facet)
     within a given triangle (facet), following the Fortran FACET subroutine.
@@ -26,14 +66,14 @@ def facet(e0, e1, e2, delta_x, delta_y):
           s_max_facet: the slope (positive downward) of the facet.
     """
     s1 = (e0 - e1) / delta_x
-    s2 = (e1 - e2) / delta_y
+    s2 = (e1 - e2) / delta_x
     if abs(s1) < EPSILON:
         if s2 >= 0.0:
             r_val = pi / 2.0
         else:
             r_val = -pi / 2.0
     else:
-        r_val = atan(s2 / s1)
+        r_val = atan2(s2, s1)
     sp = sqrt(s1**2 + s2**2)
     sd = (e0 - e2) / sqrt(delta_x**2 + delta_y**2)
     if (r_val >= 0.0 and r_val <= pi/4.0 and s1 >= 0.0):
@@ -45,7 +85,20 @@ def facet(e0, e1, e2, delta_x, delta_y):
         else:
             s_max_facet = sd
             r_val = pi/4.0
+            
+            
+    
+    if id_dr == 10711:
+        print("--------------------------------------")
+        print(f"Debug facet - id_dr = {id_dr}")
+        print(f"e0 = {e0}, e1 = {e1}, e2 = {e2}")
+        print(f"s1 = {s1}, s2 = {s2}")
+        print(f"r_val = {r_val}, s_max_facet = {s_max_facet}")
+        print("--------------------------------------")
+    
+    
     return r_val, s_max_facet
+
 
 class SlopelineMixin:
     def d8_ltd(self, dp):
@@ -131,7 +184,7 @@ class SlopelineMixin:
         # For each triangle, we use specific pairs of neighbor elevations.
         # Triangle 021: uses e[1] and e[0] (Fortran indices 2 and 1).
         if abs(e[1] * e[0]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[1], e[0], self.delta_x, self.delta_y)
+            r_val, s_max_facet = facet(e0, e[1], e[0], self.delta_x, self.delta_y, dp.id_pnt.value)
             e1_fmax[0] = e[1]
             e2_fmax[0] = e[0]
             r_max[0] = r_val
@@ -143,7 +196,7 @@ class SlopelineMixin:
             sigma_arr[0] = 1.0
         # Triangle 023: uses e[1] and e[2] (Fortran indices 2 and 3).
         if abs(e[1] * e[2]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[1], e[2], self.delta_x, self.delta_y)
+            r_val, s_max_facet = facet(e0, e[1], e[2], self.delta_x, self.delta_y, dp.id_pnt.value)
             e1_fmax[1] = e[1]
             e2_fmax[1] = e[2]
             r_max[1] = r_val
@@ -155,7 +208,7 @@ class SlopelineMixin:
             sigma_arr[1] = -1.0
         # Triangle 063: uses e[5] and e[2] (Fortran indices 6 and 3).
         if abs(e[5] * e[2]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[5], e[2], self.delta_x, self.delta_y)
+            r_val, s_max_facet = facet(e0, e[5], e[2], self.delta_x, self.delta_y, dp.id_pnt.value)
             e1_fmax[2] = e[5]
             e2_fmax[2] = e[2]
             r_max[2] = r_val
@@ -167,7 +220,7 @@ class SlopelineMixin:
             sigma_arr[2] = 1.0
         # Triangle 069: uses e[5] and e[8] (Fortran indices 6 and 9).
         if abs(e[5] * e[8]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[5], e[8], self.delta_x, self.delta_y)
+            r_val, s_max_facet = facet(e0, e[5], e[8], self.delta_x, self.delta_y, dp.id_pnt.value)
             e1_fmax[3] = e[5]
             e2_fmax[3] = e[8]
             r_max[3] = r_val
@@ -179,7 +232,7 @@ class SlopelineMixin:
             sigma_arr[3] = -1.0
         # Triangle 089: uses e[7] and e[8] (Fortran indices 8 and 9).
         if abs(e[7] * e[8]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[7], e[8], self.delta_x, self.delta_y)
+            r_val, s_max_facet = facet(e0, e[7], e[8], self.delta_x, self.delta_y, dp.id_pnt.value)
             e1_fmax[5] = e[7]
             e2_fmax[5] = e[8]
             r_max[5] = r_val
@@ -191,7 +244,7 @@ class SlopelineMixin:
             sigma_arr[5] = 1.0
         # Triangle 087: uses e[7] and e[6] (Fortran indices 8 and 7).
         if abs(e[7] * e[6]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[7], e[6], self.delta_x, self.delta_y)
+            r_val, s_max_facet = facet(e0, e[7], e[6], self.delta_x, self.delta_y, dp.id_pnt.value)
             # if dp.id_pnt.value == 3474 :
             #     print('e0 = ', e0)
             #     print('e1 = ', e[7])
@@ -208,7 +261,7 @@ class SlopelineMixin:
             sigma_arr[6] = -1.0
         # Triangle 047: uses e[3] and e[6] (Fortran indices 4 and 7).
         if abs(e[3] * e[6]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[3], e[6], self.delta_x, self.delta_y)
+            r_val, s_max_facet = facet(e0, e[3], e[6], self.delta_x, self.delta_y, dp.id_pnt.value)
             e1_fmax[7] = e[3]
             e2_fmax[7] = e[6]
             r_max[7] = r_val
@@ -220,7 +273,7 @@ class SlopelineMixin:
             sigma_arr[7] = 1.0
         # Triangle 041: uses e[3] and e[0] (Fortran indices 4 and 1).
         if abs(e[3] * e[0]) > EPSILON:
-            r_val, s_max_facet = facet(e0, e[3], e[0], self.delta_x, self.delta_y)
+            r_val, s_max_facet = facet(e0, e[3], e[0], self.delta_x, self.delta_y, dp.id_pnt.value)
             e1_fmax[8] = e[3]
             e2_fmax[8] = e[0]
             r_max[8] = r_val
@@ -245,27 +298,27 @@ class SlopelineMixin:
         j_out2_mx = j_out2_arr[id_mx]
         sigma_mx = sigma_arr[id_mx]
         
-        # if dp.id_pnt.value == 2802:
-        #     print("=" * 40)
-        #     print(f"DEBUG - Values for id_dr = {dp.id_pnt.value}")
+        if dp.id_pnt.value == 10711:
+            print("=" * 40)
+            print(f"DEBUG - Values for id_dr = {dp.id_pnt.value}")
             
-        #     print("s_max values:")
-        #     print(s_max)
+            print("s_max values:")
+            print(s_max)
             
-        #     print("r_max values:")
-        #     print(r_max)
+            print("r_max values:")
+            print(r_max)
             
-        #     print(f"id_mx = {id_mx}")
-        #     print(f"s_mx = {s_mx}")
+            print(f"id_mx = {id_mx}")
+            print(f"s_mx = {s_mx}")
             
-        #     print(f"e1_fmx = {e1_fmx_val}, e2_fmx = {e2_fmx_val}")
-        #     print(f"r_mx = {r_mx}")
+            print(f"e1_fmx = {e1_fmx_val}, e2_fmx = {e2_fmx_val}")
+            print(f"r_mx = {r_mx}")
             
-        #     print(f"i_out1_mx = {i_out1_mx}, j_out1_mx = {j_out1_mx}")
-        #     print(f"i_out2_mx = {i_out2_mx}, j_out2_mx = {j_out2_mx}")
+            print(f"i_out1_mx = {i_out1_mx}, j_out1_mx = {j_out1_mx}")
+            print(f"i_out2_mx = {i_out2_mx}, j_out2_mx = {j_out2_mx}")
             
-        #     print(f"sigma_mx = {sigma_mx}")
-        #     print("=" * 40)
+            print(f"sigma_mx = {sigma_mx}")
+            print("=" * 40)
             
         
         # If the maximum slope is positive, compute deviations and decide the final output.
@@ -294,12 +347,13 @@ class SlopelineMixin:
                     i_out = i_out2_mx
                     j_out = j_out2_mx
         
-            # if dp.id_pnt.value == 2802:
-                # print("=" * 25)
-                # print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt.value}")
-                # print(f"sumdev_in = {sumdev_in:.6f}")
-                # print(f"dev_1 = {dev_1:.6f}, dev_2 = {dev_2:.6f}")
-                # print(f"sumdev_1 = {sumdev_1:.6f}, sumdev_2 = {sumdev_2:.6f}")
-                # print(f"i_out = {i_out}, j_out = {j_out}")
-                # print("=" * 25)
+            if dp.id_pnt.value == 10711:
+                print("=" * 25)
+                print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt.value}")
+                print(f"sumdev_in = {sumdev_in:.6f}")
+                print(f"dev_1 = {dev_1:.6f}, dev_2 = {dev_2:.6f}")
+                print(f"sumdev_1 = {sumdev_1:.6f}, sumdev_2 = {sumdev_2:.6f}")
+                print(f"sumdev = {sumdev:.6f}")
+                print(f"i_out = {i_out}, j_out = {j_out}")
+                print("=" * 25)
         return i_out, j_out, ndfl, sumdev

@@ -35,13 +35,13 @@ if __name__ == "__main__":
     
     #Shapefiles path
     slopelines_shapefile_path = f"../../out_scripts_test_temp/slopelines_{file_name[:-4]}_test"
-    slopelines_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_HSO2_{file_name[:-4]}_test"
+    slopelines_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test3"
 
     drainage_points_shapefile_path = f"../../out_scripts_test_temp/drain_points_{file_name[:-4]}_test"
-    drainage_points_HSO_shapefile_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test"
+    drainage_points_HSO_shapefile_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test2"
 
     
-    ridge_points_shapefile_path = f"../../out_scripts_test_temp/ridge_points_{file_name[:-4]}_test"
+    ridge_points_shapefile_path = f"../../out_scripts_test_temp/ridge_points_HSO{file_name[:-4]}_test2"
     ridge_points_shapefile_path_avant_relation = f"../../out_scripts_test_temp/ridge_points__avant_relation{file_name[:-4]}_test"
     
     saddle_points_shapefile_path = f"../../out_scripts_test_temp/saddle_points_filtre_{file_name[:-4]}_test"
@@ -76,12 +76,12 @@ if __name__ == "__main__":
     endo_del(model_geotiff)
     
     print("\nExport endo points in shapefile")
-    model_geotiff.export_endo_points(endo_points_shapefile_path_avant_saddle_spill)
+    # model_geotiff.export_endo_points(endo_points_shapefile_path_avant_saddle_spill)
 
     
     
     print("Connect basin by sadlle spill")
-    # saddle_spill(model_geotiff)
+    saddle_spill(model_geotiff)
     
     # print("Export drainage points in shapefile")
     # # model_geotiff.export_drainage_point(drainage_points_shapefile_path)
@@ -98,17 +98,17 @@ if __name__ == "__main__":
     # # model_geotiff.export_slopelines_to_shapefile(slopelines_shapefile_path)
 
     
-    # print("Define the relationship between ridge points")
-    # # find_ridge_neighbors(model_geotiff)
+    print("Define the relationship between ridge points")
+    find_ridge_neighbors(model_geotiff)
     
     # print("Export drainage points HSO in shapefile")
-    # # model_geotiff.export_drainage_point(drainage_points_HSO_shapefile_path)
+    # model_geotiff.export_drainage_point(drainage_points_HSO_shapefile_path)
 
     # print("Export slopelines HSO to shapefile")
-    # # model_geotiff.export_slopelines_to_shapefile(slopelines_HSO_shapefile_path)
+    # model_geotiff.export_slopelines_to_shapefile(slopelines_HSO_shapefile_path)
     
-    # print("Export ridges points in shapefile")
-    # # model_geotiff.export_ridge_point(ridge_points_shapefile_path)
+    # print("Export ridges points HSO in shapefile")
+    # model_geotiff.export_ridge_point(ridge_points_shapefile_path)
 
     
 

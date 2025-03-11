@@ -224,6 +224,7 @@ def thal_net_hso_length(model, river_mask):
                 dp.id_endo.value = -1
     
     model.dr_net = dr_net[:inet]
+    model.dr_pt_in = dr_pt_in
 
                                 
 def dwnslp_hso(model, id_dr, dr_net, dr_pt_in, max_Z):
@@ -245,8 +246,8 @@ def dwnslp_hso(model, id_dr, dr_net, dr_pt_in, max_Z):
                 curr_fldir = dp.fldir
         
             if curr_fldir.value != None:
-                if curr_fldir == 24020 :
-                    print("\n-------curr_fldir = 24020-----------")
+                # if curr_fldir == 24020 :
+                #     print("\n-------curr_fldir = 24020-----------")
 
                 dp_fldir = model.dr_pt[curr_fldir.value-1]
                 #drainage network 

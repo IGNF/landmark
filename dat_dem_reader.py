@@ -140,7 +140,7 @@ def geotiff_to_dat(geotiff_path: str, output_dat_path: str, output_header_path: 
         # Write .dat file
         with open(output_dat_path, "w") as f:
             for row in dem:
-                f.write(" ".join(map(lambda v: f"{v:.2f}" if not np.isnan(v) else f"{int(nodata)}", row)) + "\n")
+                f.write(" ".join(map(lambda v: f"{v:.3f}" if not np.isnan(v) else f"{int(nodata)}", row)) + "\n")
 
         # Write header.dat file
         with open(output_header_path, "w") as f:

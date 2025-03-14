@@ -39,11 +39,11 @@ def saddle_spill(model):
     # Build the list 'qoi' by sorting Saddle_point in ascending Z
     # qoi will store the 'id_pnt' for each SaddlePoint
     qoi = [sp.id_pnt for sp in sorted(model.sdl_pt, key=lambda sp: sp.Z)]
-    print("\n --------------------avant saddle_spill-------------------")
-    print("Valeur de ninf pour le point 1314 : ", model.dr_pt[1313].ninf)
-    print("Valeur de id_endo pour le point 1314 : ", model.dr_pt[1313].id_endo.value)
-    print("Valeur de fldir pour le point 1314 : ", model.dr_pt[1313].fldir.value)
-    print("Valeur de fldir_ss pour le point 1314 : ", model.dr_pt[1313].fldir_ss.value)
+    # print("\n --------------------avant saddle_spill-------------------")
+    # print("Valeur de ninf pour le point 1314 : ", model.dr_pt[1313].ninf)
+    # print("Valeur de id_endo pour le point 1314 : ", model.dr_pt[1313].id_endo.value)
+    # print("Valeur de fldir pour le point 1314 : ", model.dr_pt[1313].fldir.value)
+    # print("Valeur de fldir_ss pour le point 1314 : ", model.dr_pt[1313].fldir_ss.value)
 
 
     # Process each saddle point in sorted order.
@@ -53,10 +53,10 @@ def saddle_spill(model):
         rp = model.rd_pt[sp.id_rdpt-1]
         id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
         id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
-        if id_sdl == 9:
-            print("\nTraitement du saddle point 9 :")
-            print("id_eo1 : ", id_eo1, "type bassin ; ", model.l_endo_pt[id_eo1-1].bas_type)
-            print("id_eo2 : ", id_eo2, "type bassin ; ", model.l_endo_pt[id_eo2-1].bas_type)
+        # if id_sdl == 9:
+        #     print("\nTraitement du saddle point 9 :")
+        #     print("id_eo1 : ", id_eo1, "type bassin ; ", model.l_endo_pt[id_eo1-1].bas_type)
+        #     print("id_eo2 : ", id_eo2, "type bassin ; ", model.l_endo_pt[id_eo2-1].bas_type)
 
         if model.l_endo_pt[id_eo1-1].bas_type + model.l_endo_pt[id_eo2-1].bas_type == 1:
             #This saddle point connect and endorheic basin to an outlet
@@ -92,11 +92,11 @@ def saddle_spill(model):
     
     # for pt in model.sdl_pt:
     #     print(f"id_pnt : {pt.id_pnt}, id_cis_endo : {pt.id_cis_endo.value}, id_trans_endo : {pt.id_trans_out.value}")
-    print("\n --------------------après saddle_spill-------------------")
-    print("Valeur de ninf pour le point 1314 : ", model.dr_pt[1313].ninf)
-    print("Valeur de id_endo pour le point 1314 : ", model.dr_pt[1313].id_endo.value)
-    print("Valeur de fldir pour le point 1314 : ", model.dr_pt[1313].fldir.value)
-    print("Valeur de fldir_ss pour le point 1314 : ", model.dr_pt[1313].fldir_ss.value)
+    # print("\n --------------------après saddle_spill-------------------")
+    # print("Valeur de ninf pour le point 1314 : ", model.dr_pt[1313].ninf)
+    # print("Valeur de id_endo pour le point 1314 : ", model.dr_pt[1313].id_endo.value)
+    # print("Valeur de fldir pour le point 1314 : ", model.dr_pt[1313].fldir.value)
+    # print("Valeur de fldir_ss pour le point 1314 : ", model.dr_pt[1313].fldir_ss.value)
 
 
             

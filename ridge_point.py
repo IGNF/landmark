@@ -13,6 +13,7 @@ from mutual_dist_recode import md
 from data_structures import RidgePoint, DrainagePoint, IDPointer
 from thal_net_hso_length import thal_net_hso_length
 from dpl_ss import dpl_ss
+from a_endo import a_endo
 
 
 def ridge_point(model):
@@ -96,11 +97,9 @@ def find_ridge_neighbors(model):
         #bottom left
         if 0 <= i+1 <= i_max and 0 <= j-1 <= j_max:
             if ridge_mask[i+1, j-1] and associated_mask[i+1,j] and associated_mask[i,j-1]:
-                if ridge_mask[i+1, j] or ridge_mask[i, j-1]:
+                if not(ridge_mask[i+1, j] or ridge_mask[i, j-1]):
                     # means that in one of the two corners of the square there is another ridge point for which a diagonal would be cut through the right angle
                     # No need to trace diagonal segment
-                    continue
-                else:
                     if drainage_mask[i+1, j]:
                         irr1 = i-1
                         icc1 = j-2
@@ -111,21 +110,19 @@ def find_ridge_neighbors(model):
                         icc1 = j+1
                         irr2 = i
                         icc2 = j-1
-                if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
-                    if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
-                        if not ridge_mask[irr1, icc1]:
-                            if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
-                                and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
-                                rp.id_neigh.append(model.mat_id[i+1,j-1].id_pnt)
-                                rp.nen += 1
+                    if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
+                        if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
+                            if not ridge_mask[irr1, icc1]:
+                                if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
+                                    and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
+                                    rp.id_neigh.append(model.mat_id[i+1,j-1].id_pnt)
+                                    rp.nen += 1
         
         #bottom right
         if 0 <= i+1 <= i_max and 0 <= j+1 <= j_max:
             if ridge_mask[i+1, j+1] and associated_mask[i+1,j] and associated_mask[i,j+1]:
-                if ridge_mask[i+1, j] or ridge_mask[i, j+1]:
+                if not(ridge_mask[i+1, j] or ridge_mask[i, j+1]):
                     # No need to trace diagonal segment
-                    continue
-                else:
                     if drainage_mask[i+1, j]:
                         irr1 = i-1
                         icc1 = j+2
@@ -136,21 +133,19 @@ def find_ridge_neighbors(model):
                         icc1 = j-1
                         irr2 = i
                         icc2 = j+1
-                if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
-                    if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
-                        if not ridge_mask[irr1, icc1]:
-                            if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
-                                and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
-                                rp.id_neigh.append(model.mat_id[i+1,j+1].id_pnt)
-                                rp.nen += 1
+                    if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
+                        if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
+                            if not ridge_mask[irr1, icc1]:
+                                if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
+                                    and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
+                                    rp.id_neigh.append(model.mat_id[i+1,j+1].id_pnt)
+                                    rp.nen += 1
                                 
         #top right
         if 0 <= i-1 <= i_max and 0 <= j+1 <= j_max:
             if ridge_mask[i-1, j+1] and associated_mask[i-1,j] and associated_mask[i,j+1]:
-                if ridge_mask[i-1, j] or ridge_mask[i, j+1]:
+                if not(ridge_mask[i-1, j] or ridge_mask[i, j+1]):
                     # No need to trace diagonal segment
-                    continue
-                else:
                     if drainage_mask[i-1, j]:
                         irr1 = i+1
                         icc1 = j+2
@@ -161,22 +156,20 @@ def find_ridge_neighbors(model):
                         icc1 = j-1
                         irr2 = i
                         icc2 = j+1
-                if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
-                    if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
-                        if not ridge_mask[irr1, icc1]:
-                            if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
-                                and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
-                                rp.id_neigh.append(model.mat_id[i-1,j+1].id_pnt)
-                                rp.nen += 1
+                    if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
+                        if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
+                            if not ridge_mask[irr1, icc1]:
+                                if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
+                                    and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
+                                    rp.id_neigh.append(model.mat_id[i-1,j+1].id_pnt)
+                                    rp.nen += 1
 
 
         #top left
         if 0 <= i-1 <= i_max and 0 <= j-1 <= j_max:
             if ridge_mask[i-1, j-1] and associated_mask[i-1,j] and associated_mask[i,j-1]:
-                if ridge_mask[i-1, j] or ridge_mask[i, j-1]:
+                if not(ridge_mask[i-1, j] or ridge_mask[i, j-1]):
                     # No need to trace diagonal segment
-                    continue
-                else:
                     if drainage_mask[i-1, j]:
                         irr1 = i+1
                         icc1 = j-2
@@ -187,13 +180,13 @@ def find_ridge_neighbors(model):
                         icc1 = j+1
                         irr2 = i
                         icc2 = j-1
-                if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
-                    if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
-                        if not ridge_mask[irr1, icc1]:
-                            if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
-                                and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
-                                rp.id_neigh.append(model.mat_id[i-1,j-1].id_pnt)
-                                rp.nen += 1
+                    if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
+                        if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
+                            if not ridge_mask[irr1, icc1]:
+                                if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
+                                    and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
+                                    rp.id_neigh.append(model.mat_id[i-1,j-1].id_pnt)
+                                    rp.nen += 1
 
                 
             
@@ -268,10 +261,9 @@ def find_ridge_neighbors(model):
                                     rr4=rr_sdl-(rr_sdl-rr+rr_sdl-rr2)
                                     cr4=cr_sdl-(cr_sdl-cr+cr_sdl-cr2)
                                     if (d == 2**0.5):
-                                        if (model.sdl_pt[cnt_sdl].id_cis_endo.value == model.mat_id(rr4, cr4).id_pnt.value #channel spilling from saddle 
+                                        if not(model.sdl_pt[cnt_sdl].id_cis_endo.value == model.mat_id(rr4, cr4).id_pnt.value #channel spilling from saddle 
                                             or model.sdl_pt[cnt_sdl].id_trans_out.value == model.mat_id(rr4, cr4).id_pnt.value):
-                                            continue
-                                        else: #no channel between points (rr,cr) and (rr2,cr2) 
+                                            #no channel between points (rr,cr) and (rr2,cr2) 
                                             tmp_elab[cnt_el2] = None
                                             tmp_elab2 = model.rd_pt[id_ne-1].id_neigh
                                             model.rd_pt[id_ne-1].nen += 1
@@ -322,6 +314,18 @@ def find_ridge_neighbors(model):
         thal_net_hso_length(model, river_mask)
     
     dpl_ss(model)
+    a_endo(model)
+    
+    #Mise à jour des valeurs de mutual distance
+    print("Update ridge points mutual distance")
+    for rp in tqdm(model.rd_pt, desc="Calculating md for ridge points"):
+        if model.dr_pt[rp.id_drpt1.value-1].dpl > 0 and model.dr_pt[rp.id_drpt2.value-1].dpl > 0:
+            rp.md = md(model.dr_pt[rp.id_drpt1.value-1], model.dr_pt[rp.id_drpt2.value-1], model)
+        
+        rp.A_in = max(model.dr_pt[rp.id_drpt1.value-1].A_in, model.dr_pt[rp.id_drpt2.value-1].A_in)
+        rp.A_in_min = min(model.dr_pt[rp.id_drpt1.value-1].A_in, model.dr_pt[rp.id_drpt2.value-1].A_in)
+
+        
     
                 
 

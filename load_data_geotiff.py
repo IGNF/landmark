@@ -119,6 +119,7 @@ class LoadData:
         """
         lines = []
         attributes = []
+        a_unit = self.delta_x * self.delta_y
         
         for net in self.dr_net:
             coords = []
@@ -140,6 +141,8 @@ class LoadData:
                     "id_end_pt": int(net.id_end_pt.value) if net.id_end_pt.value is not None else 0,
                     "length": float(net.length),
                     "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
+                    "id_ch_main": int(net.id_path[-1]),
+                    "A_out": int(self.dr_pt[net.id_pnts.value[-2]-1].A_in*a_unit),
                     "n_jun": int(net.n_jun),
                     "id_in": [int(i.value) if i.value is not None else 0 for i in net.id_in.value] if net.id_in is not None else [],
                     "n_path": int(net.n_path),
@@ -152,6 +155,54 @@ class LoadData:
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
         gdf.to_file(output_shapefile)
+        
+    
+    def export_slopelines_single_element_to_shapefile(self, output_shapefile: str):
+        """
+        Exporte le réseau de drainage (slopelines), tronçon par tronçon, sous forme de Shapefile.
+    
+        Parameters
+        ----------
+        output_shapefile : str
+            Chemin pour enregistrer le fichier Shapefile.
+        """
+        lines = []
+        attributes = []
+        a_unit = self.delta_x * self.delta_y
+    
+        for net in self.dr_net:
+            points_ids = net.id_pnts.value
+            for idx in range(len(points_ids) - 1):
+                dp1 = self.dr_pt[points_ids[idx] - 1]
+                dp2 = self.dr_pt[points_ids[idx + 1] - 1]
+    
+                if dp1 and dp2:
+                    x1, y1 = self.transform * (dp1.j, dp1.i)
+                    x2, y2 = self.transform * (dp2.j, dp2.i)
+                    line = LineString([
+                        (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
+                        (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
+                    ])
+    
+                    lines.append(line)
+    
+                    # Nettoyage et conversion des valeurs
+                    attributes.append({
+                        "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
+                        "start_pnt": int(dp1.id_pnt.value) if dp1.id_pnt.value is not None else 0,
+                        "end_pnt": int(dp2.id_pnt.value) if dp2.id_pnt.value is not None else 0,
+                        "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
+                        "id_ch_main": int(net.id_path[-1]),
+                        "A_out": int(dp1.A_in * a_unit),
+                        "length": float(line.length),
+                        "sso": int(net.sso) if net.sso is not None else 0,
+                        "hso": int(net.hso) if net.hso is not None else 0
+                    })
+    
+        # Création du GeoDataFrame et exportation en fichier Shapefile
+        gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
+        gdf.to_file(output_shapefile)
+
         
         
     def export_drainage_point(self, output_shapefile: str):

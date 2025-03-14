@@ -40,11 +40,11 @@ def thal_net_hso_length(model, river_mask):
     
     inet = 0
     
-    print("\n----avant la boucle thal_net_hso_length------ ")
-    print("Valeur de ninf pour le point 24020 : ", model.dr_pt[24019].ninf)
-    print("Valeur de id_endo pour le point 24020 : ", model.dr_pt[24019].id_endo.value)
-    print("Valeur de fldir pour le point 24020 : ", model.dr_pt[24019].fldir.value)
-    print("Valeur de fldir_ss pour le point 24020 : ", model.dr_pt[24019].fldir_ss.value)
+    # print("\n----avant la boucle thal_net_hso_length------ ")
+    # print("Valeur de ninf pour le point 24020 : ", model.dr_pt[24019].ninf)
+    # print("Valeur de id_endo pour le point 24020 : ", model.dr_pt[24019].id_endo.value)
+    # print("Valeur de fldir pour le point 24020 : ", model.dr_pt[24019].fldir.value)
+    # print("Valeur de fldir_ss pour le point 24020 : ", model.dr_pt[24019].fldir_ss.value)
 
     
     for id_dr in tqdm(qoi[::-1], desc="Building drainage networks HSO length", unit="point"):
@@ -52,12 +52,12 @@ def thal_net_hso_length(model, river_mask):
         # id_dr = dp.id_pnt #Pointer in this version
         i_curr = dp.i
         j_curr = dp.j
-        if dp.id_pnt.value == 24020:
-            print("\n-----dans la boucle thal_net_hso_length------ ")
-            print("Valeur de ninf pour le point 24020 : ", dp.ninf)
-            print("Valeur de id_endo pour le point 24020 : ", dp.id_endo.value)
-            print("Valeur de fldir pour le point 24020 : ", dp.fldir.value)
-            print("Valeur de fldir_ss pour le point 24020 : ", dp.fldir_ss.value)
+        # if dp.id_pnt.value == 24020:
+        #     print("\n-----dans la boucle thal_net_hso_length------ ")
+        #     print("Valeur de ninf pour le point 24020 : ", dp.ninf)
+        #     print("Valeur de id_endo pour le point 24020 : ", dp.id_endo.value)
+        #     print("Valeur de fldir pour le point 24020 : ", dp.fldir.value)
+        #     print("Valeur de fldir_ss pour le point 24020 : ", dp.fldir_ss.value)
 
 
         if dp.ninf == 0 and dp.id_endo.value >= 0:
@@ -70,10 +70,10 @@ def thal_net_hso_length(model, river_mask):
                     curr_fldir = dp.fldir
                 max_Z = dp.Z
                 if curr_fldir.value != None:
-                    if curr_fldir.value == 24020 :
-                        print("\n-------curr_fldir = 24020-----------")
-                        print("Traitement du point : ", dp.id_pnt.value)
-                        print("ninf de 24020 à l'entrée", model.dr_pt[curr_fldir.value-1].ninf)
+                    # if curr_fldir.value == 24020 :
+                    #     print("\n-------curr_fldir = 24020-----------")
+                    #     print("Traitement du point : ", dp.id_pnt.value)
+                    #     print("ninf de 24020 à l'entrée", model.dr_pt[curr_fldir.value-1].ninf)
                     dp_fldir = model.dr_pt[curr_fldir.value-1]
                     #drainage network 
                     if dp.A_in > 0 :
@@ -217,14 +217,19 @@ def thal_net_hso_length(model, river_mask):
                                 dr_pt_in[curr_fldir.value-1].inflow.append(dr_net_inet.id_ch.value)
                                 if dp_fldir.Z >= max_Z:
                                     dr_net, dr_pt_in = dwnslp_hso(model, curr_fldir.value, dr_net, dr_pt_in, max_Z)
-                if curr_fldir.value == 24020 :
-                    print("ninf de 24020 à la sortie", model.dr_pt[curr_fldir.value-1].ninf)
+                # if curr_fldir.value == 24020 :
+                #     print("ninf de 24020 à la sortie", model.dr_pt[curr_fldir.value-1].ninf)
 
                 
                 dp.id_endo.value = -1
     
     model.dr_net = dr_net[:inet]
     model.dr_pt_in = dr_pt_in
+    
+    #update ch_out
+    for curr_net in model.dr_net:
+        curr_net.id_ch_out = model.dr_pt[curr_net.id_end_pt.value-1].id_ch
+
 
                                 
 def dwnslp_hso(model, id_dr, dr_net, dr_pt_in, max_Z):

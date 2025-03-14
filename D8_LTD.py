@@ -9,46 +9,6 @@ from math import sin, atan, sqrt, pi, atan2
 # A small epsilon for floating point comparisons.
 EPSILON = np.finfo(np.float32).eps  # Si le Fortran utilise des REAL simple précision (kind=RSP typiquement en float32)
 
-# def facet(e0, e1, e2, delta_x, delta_y):
-#     """
-#     Calculates the aspect (r) and the maximum slope (s_max_facet)
-#     within a given triangle (facet), following the Fortran FACET subroutine.
-    
-#     Parameters:
-#       e0, e1, e2 : float
-#           Elevations at the three vertices.
-#       delta_x, delta_y : float
-#           Grid spacings.
-    
-#     Returns:
-#       (r, s_max_facet) : tuple of floats
-#           r: computed aspect (in radians),
-#           s_max_facet: the slope (positive downward) of the facet.
-#     """
-#     s1 = (e0 - e1) / delta_x
-#     s2 = (e1 - e2) / delta_x
-#     if abs(s1) < EPSILON:
-#         if s2 >= 0.0:
-#             r_val = pi / 2.0
-#         else:
-#             r_val = -pi / 2.0
-#     else:
-#         r_val = atan2(s2, s1)
-#     sp = sqrt(s1**2 + s2**2)
-#     sd = (e0 - e2) / sqrt(delta_x**2 + delta_y**2)
-#     if (r_val >= 0.0 and r_val <= pi/4.0 and s1 >= 0.0):
-#         s_max_facet = sp
-#     else:
-#         if s1 > sd:
-#             s_max_facet = s1
-#             r_val = 0.0
-#         else:
-#             s_max_facet = sd
-#             r_val = pi/4.0
-#     return r_val, s_max_facet
-
-
-
 def facet(e0, e1, e2, delta_x, delta_y, id_dr=None):
     """
     Calculates the aspect (r) and the maximum slope (s_max_facet)
@@ -85,19 +45,59 @@ def facet(e0, e1, e2, delta_x, delta_y, id_dr=None):
         else:
             s_max_facet = sd
             r_val = pi/4.0
-            
-            
-    
-    if id_dr == 10711:
-        print("--------------------------------------")
-        print(f"Debug facet - id_dr = {id_dr}")
-        print(f"e0 = {e0}, e1 = {e1}, e2 = {e2}")
-        print(f"s1 = {s1}, s2 = {s2}")
-        print(f"r_val = {r_val}, s_max_facet = {s_max_facet}")
-        print("--------------------------------------")
-    
-    
     return r_val, s_max_facet
+
+
+
+# def facet(e0, e1, e2, delta_x, delta_y, id_dr=None):
+#     """
+#     Calculates the aspect (r) and the maximum slope (s_max_facet)
+#     within a given triangle (facet), following the Fortran FACET subroutine.
+    
+#     Parameters:
+#       e0, e1, e2 : float
+#           Elevations at the three vertices.
+#       delta_x, delta_y : float
+#           Grid spacings.
+    
+#     Returns:
+#       (r, s_max_facet) : tuple of floats
+#           r: computed aspect (in radians),
+#           s_max_facet: the slope (positive downward) of the facet.
+#     """
+#     s1 = (e0 - e1) / delta_x
+#     s2 = (e1 - e2) / delta_x
+#     if abs(s1) < EPSILON:
+#         if s2 >= 0.0:
+#             r_val = pi / 2.0
+#         else:
+#             r_val = -pi / 2.0
+#     else:
+#         r_val = atan2(s2, s1)
+#     sp = sqrt(s1**2 + s2**2)
+#     sd = (e0 - e2) / sqrt(delta_x**2 + delta_y**2)
+#     if (r_val >= 0.0 and r_val <= pi/4.0 and s1 >= 0.0):
+#         s_max_facet = sp
+#     else:
+#         if s1 > sd:
+#             s_max_facet = s1
+#             r_val = 0.0
+#         else:
+#             s_max_facet = sd
+#             r_val = pi/4.0
+            
+            
+    
+#     if id_dr == 10711:
+#         print("--------------------------------------")
+#         print(f"Debug facet - id_dr = {id_dr}")
+#         print(f"e0 = {e0}, e1 = {e1}, e2 = {e2}")
+#         print(f"s1 = {s1}, s2 = {s2}")
+#         print(f"r_val = {r_val}, s_max_facet = {s_max_facet}")
+#         print("--------------------------------------")
+    
+    
+#     return r_val, s_max_facet
 
 
 class SlopelineMixin:
@@ -298,27 +298,27 @@ class SlopelineMixin:
         j_out2_mx = j_out2_arr[id_mx]
         sigma_mx = sigma_arr[id_mx]
         
-        if dp.id_pnt.value == 10711:
-            print("=" * 40)
-            print(f"DEBUG - Values for id_dr = {dp.id_pnt.value}")
+        # if dp.id_pnt.value == 10711:
+        #     print("=" * 40)
+        #     print(f"DEBUG - Values for id_dr = {dp.id_pnt.value}")
             
-            print("s_max values:")
-            print(s_max)
+        #     print("s_max values:")
+        #     print(s_max)
             
-            print("r_max values:")
-            print(r_max)
+        #     print("r_max values:")
+        #     print(r_max)
             
-            print(f"id_mx = {id_mx}")
-            print(f"s_mx = {s_mx}")
+        #     print(f"id_mx = {id_mx}")
+        #     print(f"s_mx = {s_mx}")
             
-            print(f"e1_fmx = {e1_fmx_val}, e2_fmx = {e2_fmx_val}")
-            print(f"r_mx = {r_mx}")
+        #     print(f"e1_fmx = {e1_fmx_val}, e2_fmx = {e2_fmx_val}")
+        #     print(f"r_mx = {r_mx}")
             
-            print(f"i_out1_mx = {i_out1_mx}, j_out1_mx = {j_out1_mx}")
-            print(f"i_out2_mx = {i_out2_mx}, j_out2_mx = {j_out2_mx}")
+        #     print(f"i_out1_mx = {i_out1_mx}, j_out1_mx = {j_out1_mx}")
+        #     print(f"i_out2_mx = {i_out2_mx}, j_out2_mx = {j_out2_mx}")
             
-            print(f"sigma_mx = {sigma_mx}")
-            print("=" * 40)
+        #     print(f"sigma_mx = {sigma_mx}")
+        #     print("=" * 40)
             
         
         # If the maximum slope is positive, compute deviations and decide the final output.
@@ -347,13 +347,13 @@ class SlopelineMixin:
                     i_out = i_out2_mx
                     j_out = j_out2_mx
         
-            if dp.id_pnt.value == 10711:
-                print("=" * 25)
-                print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt.value}")
-                print(f"sumdev_in = {sumdev_in:.6f}")
-                print(f"dev_1 = {dev_1:.6f}, dev_2 = {dev_2:.6f}")
-                print(f"sumdev_1 = {sumdev_1:.6f}, sumdev_2 = {sumdev_2:.6f}")
-                print(f"sumdev = {sumdev:.6f}")
-                print(f"i_out = {i_out}, j_out = {j_out}")
-                print("=" * 25)
+            # if dp.id_pnt.value == 10711:
+            #     print("=" * 25)
+            #     print(f"DEBUG - Computed values for id_pnt = {dp.id_pnt.value}")
+            #     print(f"sumdev_in = {sumdev_in:.6f}")
+            #     print(f"dev_1 = {dev_1:.6f}, dev_2 = {dev_2:.6f}")
+            #     print(f"sumdev_1 = {sumdev_1:.6f}, sumdev_2 = {sumdev_2:.6f}")
+            #     print(f"sumdev = {sumdev:.6f}")
+            #     print(f"i_out = {i_out}, j_out = {j_out}")
+            #     print("=" * 25)
         return i_out, j_out, ndfl, sumdev

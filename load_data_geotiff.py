@@ -278,9 +278,9 @@ class LoadData:
                 "id_neigh": str(rp.id_neigh) if rp.id_neigh is not None else 0,
                 "id_sdl": int(rp.id_sdl) if rp.id_sdl is not None else 0,
                 "nrdl": int(rp.nrdl) if rp.nrdl is not None else 0,
-                "id_rdl": str(rp.id_rdl.value) if rp.id_rdl and rp.id_rdl.value is not None else 0,
+                "id_rdl": str(rp.id_rdl) if rp.id_rdl is not None else 0,
                 "junc": int(rp.junc) if rp.junc is not None else 0,
-                "n_ptsa": int(rp.n_ptsa) if rp.n_ptsa is not None else 0
+                "n_ptsa": float(rp.n_ptsa*0.5*self.delta_x*self.delta_y ) if rp.n_ptsa is not None else 0
             })
     
         # Créer un GeoDataFrame et écrire en fichier Shapefile
@@ -353,6 +353,92 @@ class LoadData:
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
         gdf.to_file(output_shapefile) 
+        
+        
+    def export_ridgelines_to_shapefile(self, output_shapefile: str):
+        """
+        Exporte les réseaux de crêtes (ridgelines) sous forme de Shapefile.
+    
+        Parameters
+        ----------
+        output_shapefile : str
+            Chemin pour enregistrer le fichier Shapefile.
+        """
+        lines = []
+        attributes = []
+    
+        for net in self.rd_net:
+            coords = []
+            for pnt_id in net.id_pnts:
+                rp = self.rd_pt[pnt_id - 1]  # RidgePoint
+                if rp:
+                    x, y = self.transform * (rp.j / 2, rp.i / 2)
+                    coords.append((x + self.delta_x / 2, y - self.delta_y / 2))
+    
+            if len(coords) > 1:
+                lines.append(LineString(coords))
+    
+                attributes.append({
+                    "id_rdl": int(net.id_rdl),
+                    "nel": int(net.nel),
+                    "id_pnts": str(net.id_pnts)[:254],
+                    "length": float(net.length),
+                    "Zmean": float(net.Zmean),
+                    "nrdpt_down": int(net.nrdpt_down),
+                    "n_down": int(net.n_down),
+                    "Zmean_down": float(net.Zmean_down),
+                    "Z_diff": float(net.Zmean-net.Zmean_down) if net.Zmean_down > 0 else 0,
+                    "A_in": float((self.rd_pt[net.id_pnts[0]-1].A_in+1)*self.delta_x*self.delta_y),
+                    "A_in_min": float((self.rd_pt[net.id_pnts[0]-1].A_in_min+1)*self.delta_x*self.delta_y),
+                    "jun_el": int(net.jun_el)
+                })
+    
+        # Création du GeoDataFrame et exportation en fichier Shapefile
+        gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
+        gdf.to_file(output_shapefile)
+
+
+    def export_ridgelines_single_element_to_shapefile(self, output_shapefile: str):
+        """
+        Exporte les réseaux de crêtes (ridgelines), tronçon par tronçon, sous forme de Shapefile.
+    
+        Parameters
+        ----------
+        output_shapefile : str
+            Chemin pour enregistrer le fichier Shapefile.
+        """
+        lines = []
+        attributes = []
+    
+        for net in self.rd_net:
+            points_ids = net.id_pnts
+            for idx in range(len(points_ids) - 1):
+                rp1 = self.rd_pt[points_ids[idx] - 1]
+                rp2 = self.rd_pt[points_ids[idx + 1] - 1]
+    
+                if rp1 and rp2:
+                    x1, y1 = self.transform * (rp1.j / 2, rp1.i / 2)
+                    x2, y2 = self.transform * (rp2.j / 2, rp2.i / 2)
+                    line = LineString([
+                        (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
+                        (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
+                    ])
+    
+                    lines.append(line)
+                    A_last = (1 / (rp2.n_jun)) * self.delta_x * self.delta_y
+    
+                    attributes.append({
+                        "id_rdl": int(net.id_rdl),
+                        "start_pnt": int(rp1.id_pnt),
+                        "end_pnt": int(rp2.id_pnt),
+                        "length": float(line.length),
+                        "jun_el": int(net.jun_el),
+                        "A_spread": float(rp1.n_ptsa*0.5*self.delta_x*self.delta_y ) + A_last 
+                    })
+    
+        # Création du GeoDataFrame et exportation en fichier Shapefile
+        gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
+        gdf.to_file(output_shapefile)
 
 
 

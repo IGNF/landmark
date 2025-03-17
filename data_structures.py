@@ -219,7 +219,7 @@ class RidgePoint:
         self.id_sdl = None  # ID of the corresponding saddle point
         
         self.nrdl = 0  # Number of ridgeline segments this point belongs to
-        self.id_rdl = []  # List of ridgeline IDs associated with this point
+        self.id_rdl = [None, None, None, None]  # List of ridgeline IDs associated with this point
         self.junc = 0  # Junction flag (0 = no junction, 1 = junction)
         self.n_ptsa = 1  # Number of ridge points defining the spread area (related to DEM resolution)
 
@@ -273,10 +273,10 @@ class RidgeNetwork:
     Represents a ridgeline segment with associated attributes.
     """
     def __init__(self, id_rdl):
-        self.id_rdl = IDPointer(id_rdl)  # Unique identifier of the ridgeline segment
+        self.id_rdl = id_rdl  # Unique identifier of the ridgeline segment
         self.length = 0.0  # Length of the ridgeline segment
         self.nel = 0  # Number of points in the ridgeline
-        self.id_pnts = ListPointer()  # List of point IDs in the ridgeline
+        self.id_pnts = []  # List of point IDs in the ridgeline
         self.Zmean = 0.0  # Mean elevation of the ridgeline
         self.nrdpt_down = 0  # Number of ridge points connected, including the current ridge
         self.n_down = 0  # Number of ridges connected to this ridge segment

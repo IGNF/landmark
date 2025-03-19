@@ -206,7 +206,7 @@ def find_ridge_neighbors(model):
                             cnt_nen2 = 0
                             tmp_neigh2 = []
                             # reference to the current saddle in the neighbor saddle deleted
-                            for i in range(len(model.rd_pt[id_ne-1].nen)):
+                            for i in range(model.rd_pt[id_ne-1].nen):
                                 if model.rd_pt[id_ne-1].id_neigh[i] != irs:
                                     cnt_nen2 += 1
                                     tmp_neigh2.append(model.rd_pt[id_ne-1].id_neigh[i])
@@ -261,8 +261,8 @@ def find_ridge_neighbors(model):
                                     rr4=rr_sdl-(rr_sdl-rr+rr_sdl-rr2)
                                     cr4=cr_sdl-(cr_sdl-cr+cr_sdl-cr2)
                                     if (d == 2**0.5):
-                                        if not(model.sdl_pt[cnt_sdl].id_cis_endo.value == model.mat_id(rr4, cr4).id_pnt.value #channel spilling from saddle 
-                                            or model.sdl_pt[cnt_sdl].id_trans_out.value == model.mat_id(rr4, cr4).id_pnt.value):
+                                        if not(model.sdl_pt[cnt_sdl].id_cis_endo.value == model.mat_id[rr4, cr4].id_pnt.value #channel spilling from saddle 
+                                            or model.sdl_pt[cnt_sdl].id_trans_out.value == model.mat_id[rr4, cr4].id_pnt.value):
                                             #no channel between points (rr,cr) and (rr2,cr2) 
                                             tmp_elab[cnt_el2] = None
                                             tmp_elab2 = model.rd_pt[id_ne-1].id_neigh

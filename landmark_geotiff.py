@@ -119,7 +119,7 @@ if __name__ == "__main__":
     model_geotiff.export_ridgelines_to_shapefile(ridgelines_HSO_shapefile_path)
     
     print("Export ridgelines single element HSO to shapefile")
-    # model_geotiff.export_ridgelines_single_element_to_shapefile(ridgelines_se_HSO_shapefile_path)
+    model_geotiff.export_ridgelines_single_element_to_shapefile(ridgelines_se_HSO_shapefile_path)
 
     
 

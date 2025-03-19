@@ -121,7 +121,7 @@ class LoadData:
         attributes = []
         a_unit = self.delta_x * self.delta_y
         
-        for net in self.dr_net:
+        for net in tqdm(self.dr_net):
             coords = []
             for pnt_id in net.id_pnts.value:
                 dp = self.dr_pt[pnt_id - 1]
@@ -170,7 +170,7 @@ class LoadData:
         attributes = []
         a_unit = self.delta_x * self.delta_y
     
-        for net in self.dr_net:
+        for net in tqdm(self.dr_net):
             points_ids = net.id_pnts.value
             for idx in range(len(points_ids) - 1):
                 dp1 = self.dr_pt[points_ids[idx] - 1]
@@ -217,7 +217,7 @@ class LoadData:
         points = []
         attributes = []
         
-        for dp in self.dr_pt:
+        for dp in tqdm(self.dr_pt):
             x, y = self.transform * (dp.j, dp.i)
             points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
             
@@ -258,7 +258,7 @@ class LoadData:
         points = []
         attributes = []
         
-        for rp in self.rd_pt:
+        for rp in tqdm(self.rd_pt):
             x, y = self.transform * (rp.j / 2, rp.i / 2)
             points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
     
@@ -300,7 +300,7 @@ class LoadData:
         points = []
         attributes = []
         
-        for sp in self.sdl_pt:  # Parcours tous les Saddle Points
+        for sp in tqdm(self.sdl_pt):  # Parcours tous les Saddle Points
             if sp.id_cis_endo.value != None :
                 x, y = self.transform * (sp.j / 2, sp.i / 2)
                 points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
@@ -333,7 +333,7 @@ class LoadData:
         points = []
         attributes = []
         
-        for ep in self.l_endo_pt:  # Parcours tous les Endo Points
+        for ep in tqdm(self.l_endo_pt):  # Parcours tous les Endo Points
             dp = self.dr_pt[ep.id_pnt.value-1]
     
             x, y = self.transform * (dp.j, dp.i)
@@ -367,7 +367,7 @@ class LoadData:
         lines = []
         attributes = []
     
-        for net in self.rd_net:
+        for net in tqdm(self.rd_net):
             coords = []
             for pnt_id in net.id_pnts:
                 rp = self.rd_pt[pnt_id - 1]  # RidgePoint
@@ -410,7 +410,7 @@ class LoadData:
         lines = []
         attributes = []
     
-        for net in self.rd_net:
+        for net in tqdm(self.rd_net):
             points_ids = net.id_pnts
             for idx in range(len(points_ids) - 1):
                 rp1 = self.rd_pt[points_ids[idx] - 1]

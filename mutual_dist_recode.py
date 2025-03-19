@@ -230,7 +230,7 @@ def md(dp1, dp2, model):
     n_com=0  #Number of channels belonging to both path
     
     # Loop from min_n_pth down to 1.
-    for cnt_path in range(min_n_pth, 0, -1): #!!!!!!!!!!!!!!!!! J'ai un doute sur le min_n_pth-1
+    for cnt_path in range(min_n_pth, 0, -1): 
         curr_cnt1 = cnt_path + n_path1 - min_n_pth  
         curr_cnt2 = cnt_path + n_path2 - min_n_pth
         # print("\nn_path1 : ", n_path1)

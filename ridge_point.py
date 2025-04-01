@@ -9,15 +9,12 @@ Modify fldir and id_ch
 from tqdm import tqdm
 import numpy as np
 
-from mutual_dist_recode import md
+from mutual_dist import md
 from data_structures import RidgePoint, DrainagePoint, IDPointer
 from thal_net_hso_length import thal_net_hso_length
 from dpl_ss import dpl_ss
 from a_endo import a_endo
 
-
-def ridge_point(model):
-    pass       
 
 
 def find_ridge_neighbors(model):

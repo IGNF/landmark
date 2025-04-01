@@ -177,27 +177,29 @@ class LoadData:
                 dp2 = self.dr_pt[points_ids[idx + 1] - 1]
     
                 if dp1 and dp2:
-                    x1, y1 = self.transform * (dp1.j, dp1.i)
-                    x2, y2 = self.transform * (dp2.j, dp2.i)
-                    line = LineString([
-                        (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
-                        (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
-                    ])
-    
-                    lines.append(line)
-    
-                    # Nettoyage et conversion des valeurs
-                    attributes.append({
-                        "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
-                        "start_pnt": int(dp1.id_pnt.value) if dp1.id_pnt.value is not None else 0,
-                        "end_pnt": int(dp2.id_pnt.value) if dp2.id_pnt.value is not None else 0,
-                        "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
-                        "id_ch_main": int(net.id_path[-1]),
-                        "A_out": int(dp1.A_in * a_unit),
-                        "length": float(line.length),
-                        "sso": int(net.sso) if net.sso is not None else 0,
-                        "hso": int(net.hso) if net.hso is not None else 0
-                    })
+                    a_out = dp1.A_in * a_unit
+                    if a_out >= self.a_out_threshold:
+                        x1, y1 = self.transform * (dp1.j, dp1.i)
+                        x2, y2 = self.transform * (dp2.j, dp2.i)
+                        line = LineString([
+                            (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
+                            (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
+                        ])
+        
+                        lines.append(line)
+        
+                        # Nettoyage et conversion des valeurs
+                        attributes.append({
+                            "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
+                            "start_pnt": int(dp1.id_pnt.value) if dp1.id_pnt.value is not None else 0,
+                            "end_pnt": int(dp2.id_pnt.value) if dp2.id_pnt.value is not None else 0,
+                            "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
+                            "id_ch_main": int(net.id_path[-1]),
+                            "A_out": int(dp1.A_in * a_unit),
+                            "length": float(line.length),
+                            "sso": int(net.sso) if net.sso is not None else 0,
+                            "hso": int(net.hso) if net.hso is not None else 0
+                        })
     
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
@@ -417,24 +419,27 @@ class LoadData:
                 rp2 = self.rd_pt[points_ids[idx + 1] - 1]
     
                 if rp1 and rp2:
-                    x1, y1 = self.transform * (rp1.j / 2, rp1.i / 2)
-                    x2, y2 = self.transform * (rp2.j / 2, rp2.i / 2)
-                    line = LineString([
-                        (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
-                        (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
-                    ])
-    
-                    lines.append(line)
                     A_last = (1 / (rp2.n_jun)) * self.delta_x * self.delta_y
-    
-                    attributes.append({
-                        "id_rdl": int(net.id_rdl),
-                        "start_pnt": int(rp1.id_pnt),
-                        "end_pnt": int(rp2.id_pnt),
-                        "length": float(line.length),
-                        "jun_el": int(net.jun_el),
-                        "A_spread": float(rp1.n_ptsa*0.5*self.delta_x*self.delta_y ) + A_last 
-                    })
+                    a_spread = (rp1.n_ptsa*0.5*self.delta_x*self.delta_y ) + A_last 
+                    
+                    if a_spread >= self.a_spread_threshold:
+                        x1, y1 = self.transform * (rp1.j / 2, rp1.i / 2)
+                        x2, y2 = self.transform * (rp2.j / 2, rp2.i / 2)
+                        line = LineString([
+                            (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
+                            (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
+                        ])
+        
+                        lines.append(line)
+        
+                        attributes.append({
+                            "id_rdl": int(net.id_rdl),
+                            "start_pnt": int(rp1.id_pnt),
+                            "end_pnt": int(rp2.id_pnt),
+                            "length": float(line.length),
+                            "jun_el": int(net.jun_el),
+                            "A_spread": float(a_spread ) 
+                        })
     
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)

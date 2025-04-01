@@ -2,8 +2,9 @@
 
 # saddle_spill.py
 """
-Module to define the outflow path of each endorheic basin across
-a saddle, following the Fortran subroutine 'saddle_spill'. 
+This module define the outflow path of each endorheic basin across
+the saddle that connect it with the lower outflow basin.
+The procedure is carried out in saddle point elevation ascending order 
 """
 
 import time
@@ -12,7 +13,7 @@ from tqdm import tqdm
 
 
 # -----------------------------------------------------------------------------
-def saddle_spill(loader):
+def saddle_spill(model):
     """
     Delineate endorheic basins by processing saddle points.
     The procedure is carried out in ascending order of saddle point elevation.
@@ -30,88 +31,78 @@ def saddle_spill(loader):
              - out_net: list for outflow network entries.
              - (other necessary attributes, e.g., progress counters).
     """
-    start_time = time.process_time()
     
     # Allocate temporary arrays for sorting: build lists for elevation (Zarr) and point IDs (qoi)
-    # Here we build a list of tuples (elevation, saddle_point_id) for each saddle.
-    Zarr = []
-    qoi = []
-    for sdl in loader.sdl_pt:
-        # Get elevation from the corresponding ridge point:
-        # We assume that sdl.id_rdpt is the id of a RidgePoint in loader.rd_pt.
-        ridge = loader.rd_pt[sdl.id_rdpt - 1]  # Convert 1-based id to 0-based index.
-        Zarr.append(ridge.Z)
-        qoi.append(sdl.id_pnt)
-    
-    # Sort the saddle points in ascending order based on elevation.
-    # Create a list of saddle point ids sorted by elevation.
-    sorted_indices = np.argsort(Zarr)
-    sorted_qoi = [qoi[i] for i in sorted_indices]
-    
-    # Initialize outflow network counter.
-    loader.n_outnet = 0
-    
+    model.out_net = []
+    model.n_outnet = 0
+
+    # Build the list 'qoi' by sorting Saddle_point in ascending Z
+    # qoi will store the 'id_pnt' for each SaddlePoint
+    qoi = [sp.id_pnt for sp in sorted(model.sdl_pt, key=lambda sp: sp.Z)]
+    # print("\n --------------------avant saddle_spill-------------------")
+    # print("Valeur de ninf pour le point 1314 : ", model.dr_pt[1313].ninf)
+    # print("Valeur de id_endo pour le point 1314 : ", model.dr_pt[1313].id_endo.value)
+    # print("Valeur de fldir pour le point 1314 : ", model.dr_pt[1313].fldir.value)
+    # print("Valeur de fldir_ss pour le point 1314 : ", model.dr_pt[1313].fldir_ss.value)
+
+
     # Process each saddle point in sorted order.
-    for sdl_id in tqdm(sorted_qoi, desc="Processing saddle points", unit="saddle"):
-        # Retrieve the SaddlePoint object (convert sdl_id from 1-based to index)
-        sdl = loader.sdl_pt[sdl_id - 1]
-        # Get the associated RidgePoint from rd_pt using sdl.id_rdpt.
-        rd = loader.rd_pt[sdl.id_rdpt - 1]
-        # Retrieve the two drainage point ids on either side of the ridge.
-        dp1 = loader.dr_pt_by_id.get(rd.id_drpt1)
-        dp2 = loader.dr_pt_by_id.get(rd.id_drpt2)
-        if dp1 is None or dp2 is None:
-            continue
-        # Retrieve the endorheic basin ids from the drainage networks.
-        id_eo1 = loader.dr_net_by_id.get(dp1.id_ch).id_endo if dp1.id_ch in loader.dr_net_by_id else None
-        id_eo2 = loader.dr_net_by_id.get(dp2.id_ch).id_endo if dp2.id_ch in loader.dr_net_by_id else None
-        # If the sum of the bas_type values equals 1, then one basin is endorheic and one is not.
-        if id_eo1 is not None and id_eo2 is not None:
-            bas_sum = loader.endo_pt[id_eo1 - 1].bas_type + loader.endo_pt[id_eo2 - 1].bas_type
-            if bas_sum == 1:
-                # This saddle connects an endorheic basin to an outlet.
-                if loader.endo_pt[id_eo1 - 1].bas_type == 1:
-                    id_cis_pt = rd.id_drpt1  # cis drainage point of current endo basin
-                    id_trans_pt = rd.id_drpt2
-                    loader.endo_pt[id_eo1 - 1].bas_type = 0
-                else:
-                    id_cis_pt = rd.id_drpt2
-                    id_trans_pt = rd.id_drpt1
-                    loader.endo_pt[id_eo2 - 1].bas_type = 0
-                # Only saddle points that spill out have nonzero cis and trans identifiers.
-                sdl.id_cis_endo = loader.dr_pt_by_id.get(id_cis_pt).id_pnt
-                sdl.id_trans_out = loader.dr_pt_by_id.get(id_trans_pt).id_pnt
-                # If the drainage point on the cis side does not have a secondary flow direction, assign it.
-                dp_cis = loader.dr_pt_by_id.get(id_cis_pt)
-                if dp_cis is not None and not hasattr(dp_cis, 'fldir_ss'):
-                    dp_cis.fldir_ss = loader.dr_pt_by_id.get(id_trans_pt).id_pnt
-                    # Increase inflow count on the secondary flow point.
-                    fldir_ss_dp = loader.dr_pt_by_id.get(dp_cis.fldir_ss)
-                    if fldir_ss_dp:
-                        fldir_ss_dp.ninf += 1
-                # Initialize a recursion counter if needed.
-                loader.n_recurs = 0
-                # Trace the outflow path from the cis point to an outlet.
-                id_endo_curr = trace_out(id_cis_pt, id_trans_pt, loader)
-                # Call endo_out to process the endorheic outlet.
-                endo_out(id_endo_curr, loader)
+    for cnt_sdl in tqdm(range(len(model.sdl_pt))):
+        id_sdl = qoi[cnt_sdl]
+        sp = model.sdl_pt[id_sdl-1]
+        rp = model.rd_pt[sp.id_rdpt-1]
+        id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
+        id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
+        # if id_sdl == 9:
+        #     print("\nTraitement du saddle point 9 :")
+        #     print("id_eo1 : ", id_eo1, "type bassin ; ", model.l_endo_pt[id_eo1-1].bas_type)
+        #     print("id_eo2 : ", id_eo2, "type bassin ; ", model.l_endo_pt[id_eo2-1].bas_type)
+
+        if model.l_endo_pt[id_eo1-1].bas_type + model.l_endo_pt[id_eo2-1].bas_type == 1:
+            #This saddle point connect and endorheic basin to an outlet
+            max_Zs = rp.Z
+            if model.l_endo_pt[id_eo1-1].bas_type == 1:
+                id_cis_pt = rp.id_drpt1.value #id cis point of the current endo basin
+                id_trans_pt = rp.id_drpt2.value #id trans point of the current endo basin
+                model.l_endo_pt[id_eo1-1].bas_type = 0
+            else: #that means (endo_pt(id_eo2)%bas_type == 1)
+                id_cis_pt = rp.id_drpt2.value #id cis point of the current endo basin
+                id_trans_pt = rp.id_drpt1.value #id trans point of the current endo basin
+                model.l_endo_pt[id_eo2-1].bas_type = 0
+            # Only saddle points that spill out have id_cis_endo and in_trans_endo gt 0
+            sp.id_cis_endo = model.dr_pt[id_cis_pt-1].id_pnt
+            sp.id_trans_out = model.dr_pt[id_trans_pt-1].id_pnt
+            if model.dr_pt[id_cis_pt-1].fldir_ss.value == None:
+                model.dr_pt[id_cis_pt-1].fldir_ss = model.dr_pt[id_trans_pt-1].id_pnt
+                model.dr_pt[model.dr_pt[id_cis_pt-1].fldir_ss.value-1].ninf += 1
+                
+                if id_cis_pt == 3429 and id_trans_pt == 3694:
+                    print("----------id_cis_pt = 3429 et id_trans_pt = 3694 depuis la fonction saddle_spill------------")
+                
+            # if id_cis_pt == 1051:
+            #     print("quand le point 1051 est passé en argument id_cis_pt, on traitait le point ridge :", rp.id_pnt)
+            #     print("Le point endoerique d'identifiant (identifiant drainage) : ", model.l_endo_pt[id_eo1-1].id_pnt.value, "avait pour type de bassin", model.l_endo_pt[id_eo1-1].bas_type)
+            #     print("Le point endoerique d'identifiant (identifiant drainage) : ", model.l_endo_pt[id_eo2-1].id_pnt.value, "avait pour type de bassin", model.l_endo_pt[id_eo2-1].bas_type)
+            #     print("Le ridge point d'identifiant : ",rp.id_pnt, "avait pour valeur de id_drpt 1  : ", rp.id_drpt1.value)
+            #     print("Le ridge point d'identifiant : ",rp.id_pnt, "avait pour valeur de id_drpt 2  : ", rp.id_drpt2.value)
+
+            
+            id_endo_curr = trace_out(id_cis_pt, id_trans_pt, model)
+            endo_out(id_endo_curr, max_Zs, model)
     
-    del Zarr, qoi
-    
-    # Reallocate out_net if needed (here we simply trim the list)
-    if loader.n_outnet < len(loader.out_net):
-        loader.out_net = loader.out_net[:loader.n_outnet]
-        print(f"New out_net size: {len(loader.out_net)}")
-    
-    finish_time = time.process_time()
-    elapsed_time = finish_time - start_time
-    hours = int(elapsed_time / 3600)
-    minutes = int((elapsed_time % 3600) / 60)
-    seconds = elapsed_time % 60
-    print(f"Elapsed time (saddle_spill): {hours}h {minutes}m {seconds:.2f}s")
+    # for pt in model.sdl_pt:
+    #     print(f"id_pnt : {pt.id_pnt}, id_cis_endo : {pt.id_cis_endo.value}, id_trans_endo : {pt.id_trans_out.value}")
+    # print("\n --------------------après saddle_spill-------------------")
+    # print("Valeur de ninf pour le point 1314 : ", model.dr_pt[1313].ninf)
+    # print("Valeur de id_endo pour le point 1314 : ", model.dr_pt[1313].id_endo.value)
+    # print("Valeur de fldir pour le point 1314 : ", model.dr_pt[1313].fldir.value)
+    # print("Valeur de fldir_ss pour le point 1314 : ", model.dr_pt[1313].fldir_ss.value)
+
+
+            
 
 # -----------------------------------------------------------------------------
-def trace_out(id_endopt, id_beypt, loader):
+def trace_out(id_endopt, id_beypt, model):
     """
     Trace the path from the low point of the current endorheic basin (id_endopt)
     to the low point of the outflow basin (id_beypt), and then continue tracing
@@ -136,162 +127,107 @@ def trace_out(id_endopt, id_beypt, loader):
     id_endo : int
         The drainage point id that corresponds to the final outlet.
     """
-    # 1) Build the path from id_endopt (the endorheic low point) upstream to the channel's end,
-    #    then reverse it (so it goes from low point -> outflow saddle).
-    taop = [None] * 1000000  # Large list for temporary storage (like the Fortran allocate(taop(1000000))).
-    size_taop = 0
     
-    dp_end = loader.dr_pt_by_id.get(id_endopt)
-    if dp_end is None:
-        return None
-    curr_ch = dp_end.id_ch
-    if curr_ch is None:
-        return None
-    
-    # Find npt_curr: the index of id_endopt in the channel's point list.
-    net = loader.dr_net_by_id.get(curr_ch)
-    if net is None:
-        return None
-    
-    npt_curr = None
-    for idx, dp_id in enumerate(net.id_pnts):
-        if dp_id == id_endopt:
-            npt_curr = idx
-            break
-    if npt_curr is None:
-        return None
-    
-    # Append from npt_curr to end of channel
-    for cnt_pt in range(npt_curr, len(net.id_pnts)):
-        size_taop += 1
-        taop[size_taop - 1] = net.id_pnts[cnt_pt]
-    
-    # The channel has a field n_path that might indicate the number of “hops” to the final outlet.
-    # We collect subsequent channels if the basin is composed of multiple channel segments.
-    nelpath = net.n_path
-    id_endo = net.id_endo  # The endorheic ID of this channel
-    for ip in range(1, nelpath):
-        # The last point in the channel is its end point:
-        id_lstpt = net.id_end_pt
-        dp_lstpt = loader.dr_pt_by_id.get(id_lstpt)
-        if dp_lstpt is None or dp_lstpt.id_ch is None:
-            break
-        curr_ch = dp_lstpt.id_ch
-        net = loader.dr_net_by_id.get(curr_ch)
-        if net is None:
-            break
-        # find npt_curr again
-        npt_curr = None
-        for idx, dp_id in enumerate(net.id_pnts):
-            if dp_id == id_lstpt:
-                npt_curr = idx
-                break
-        if npt_curr is None:
-            break
-        for cnt_pt in range(npt_curr + 1, len(net.id_pnts)):
-            size_taop += 1
-            taop[size_taop - 1] = net.id_pnts[cnt_pt]
-    
-    # Reverse the path so it goes from the endorheic low point up to the outflow saddle.
-    path_1 = list(reversed(taop[:size_taop]))
-    
-    # Create an out_net entry for this path.
-    loader.n_outnet += 1
-    if not hasattr(loader, 'out_net'):
-        loader.out_net = []
-    out_net_entry_1 = {
-        'id_pnts': path_1,
-        'nel': len(path_1)
-    }
-    loader.out_net.append(out_net_entry_1)
-    
-    # Update secondary flow direction along this path (fldir_ss).
-    for idx in range(1, len(path_1)):
-        current_id = path_1[idx]
-        previous_id = path_1[idx - 1]
-        dp_current = loader.dr_pt_by_id.get(current_id)
-        dp_prev = loader.dr_pt_by_id.get(previous_id)
-        if dp_current and not hasattr(dp_current, 'fldir_ss') and idx > 0:
-            dp_current.fldir_ss = previous_id
-            if dp_prev:
-                dp_prev.ninf += 1
-            dp_current.ninf -= 1
-    
-    # 2) Build the path from id_beypt to the final outlet, forward
-    taop2 = [None] * 1000000
-    size_taop2 = 0
-    
-    dp_bey = loader.dr_pt_by_id.get(id_beypt)
-    if dp_bey is None:
-        return id_endo  # fallback
-    curr_ch = dp_bey.id_ch
-    if curr_ch is None:
-        return id_endo
-    
-    net = loader.dr_net_by_id.get(curr_ch)
-    if net is None:
-        return id_endo
-    
-    # find the index of id_beypt in the channel
-    npt_curr = None
-    for idx, dp_id in enumerate(net.id_pnts):
-        if dp_id == id_beypt:
-            npt_curr = idx
-            break
-    if npt_curr is None:
-        return id_endo
-    
-    # from npt_curr to the end of the channel
-    for cnt_pt in range(npt_curr, len(net.id_pnts)):
-        size_taop2 += 1
-        taop2[size_taop2 - 1] = net.id_pnts[cnt_pt]
-    
-    nelpath = net.n_path
-    for ip in range(1, nelpath):
-        id_lstpt = net.id_end_pt
-        dp_lstpt = loader.dr_pt_by_id.get(id_lstpt)
-        if dp_lstpt is None or dp_lstpt.id_ch is None:
-            break
-        curr_ch = dp_lstpt.id_ch
-        net = loader.dr_net_by_id.get(curr_ch)
-        if net is None:
-            break
-        # find npt_curr for id_lstpt
-        npt_curr = None
-        for idx, dp_id in enumerate(net.id_pnts):
-            if dp_id == id_lstpt:
-                npt_curr = idx
-                break
-        if npt_curr is None:
-            break
-        for cnt_pt in range(npt_curr, len(net.id_pnts)):
-            size_taop2 += 1
-            taop2[size_taop2 - 1] = net.id_pnts[cnt_pt]
-    
-    path_2 = taop2[:size_taop2]  # no reversal here, we want forward direction
-    loader.n_outnet += 1
-    out_net_entry_2 = {
-        'id_pnts': path_2,
-        'nel': len(path_2)
-    }
-    loader.out_net.append(out_net_entry_2)
-    
-    # The final outlet is the last point in path_2
-    final_outlet_id = path_2[-1] if path_2 else None
-    
-    # Clean up
-    del taop, taop2
-    
-    return final_outlet_id
+    taop = []
 
-# -----------------------------------------------------------------------------
-def endo_out(curr, loader):
+    # Trouver `curr_ch` et `npt_curr`
+    curr_ch = model.dr_pt[id_endopt-1].id_ch.value
+    npt_curr = model.dr_net[curr_ch-1].id_pnts.value.index(id_endopt) #Index de id_endopt dans la liste id_pnts du canal courant
+    
+    # Ajouter les points restants de `dr_net(curr_ch)` dans `taop`
+    taop.extend(model.dr_net[curr_ch-1].id_pnts.value[npt_curr:])
+    
+    id_endo = model.dr_net[curr_ch-1].id_endo.value
+    # Ajouter les chemins supplémentaires
+    nelpath = model.dr_net[curr_ch-1].n_path
+    #from the first junction to the endoreich basin lowest point 
+    for _ in range(1, nelpath):
+        id_lstpt = model.dr_net[curr_ch-1].id_end_pt.value
+        curr_ch = model.dr_pt[id_lstpt-1].id_ch.value
+        npt_curr = model.dr_net[curr_ch-1].id_pnts.value.index(id_lstpt)
+        taop.extend(model.dr_net[curr_ch-1].id_pnts.value[npt_curr + 1:])  # Éviter le doublon du dernier point
+        
+    
+    # Ajouter le chemin inversé à `out_net`
+    new_outflow = {
+        "id_pnts": list(reversed(taop)),
+        "nel": len(taop)
+    }
+    model.out_net.append(new_outflow)
+    model.n_outnet += 1
+    if 1314 in taop:
+        print("On trouve le point 1314 dans taop :", taop)
+        print("Les paramètres passé à la fonction sont : id_endopt, id_beypt : ", id_endopt, id_beypt)
+
+    
+    # Mise à jour de `fldir_ss`
+    for cnt_taop in range(len(taop), 1, -1): 
+        dp = model.dr_pt[taop[cnt_taop-1]-1]
+        # if dp.id_pnt.value == 24019:
+        #     print("\n-------Point 24019 dans mise à jour fldir_ss dans saddle_spill")
+        if dp.fldir_ss.value is None:
+            # Mise à jour de fldir_ss avec la valeur du point précédent dans `taop
+            dp.fldir_ss.value = taop[cnt_taop-2]
+            # Incrémentation du nombre d'affluents (`ninf`) du point précédent
+            model.dr_pt[dp.fldir_ss.value-1].ninf += 1
+            # Décrémentation du `ninf` du point actuel
+            dp.ninf -= 1
+
+
+
+    # #Code Fortran : 
+    # # Boucle en ordre inverse (Fortran `do cnt_taop=size_taop,1,-1`)
+    # for cnt_taop in range(len(taop), 0, -1):
+    #     # Condition: Vérifier si `fldir_ss` est NULL et que `cnt_taop > 1`
+    #     if model.dr_pt[taop[cnt_taop - 1]-1].fldir_ss is None and cnt_taop > 1:
+    #         # Mise à jour de fldir_ss avec la valeur du point précédent dans `taop`
+    #         model.dr_pt[taop[cnt_taop - 1]-1].fldir_ss = taop[cnt_taop - 2]
+    
+    #         # Incrémentation du nombre d'affluents (`ninf`) du point précédent
+    #         model.dr_pt[model.dr_pt[taop[cnt_taop - 1]-1].fldir_ss-1].ninf += 1
+    
+    #         # Décrémentation du `ninf` du point actuel
+    #         model.dr_pt[taop[cnt_taop - 1]-1].ninf -= 1
+
+
+    # Path from the current endorheic saddle point to the free basin outlet point:
+    taop = []
+
+    # Trouver `curr_ch` et `npt_curr`
+    curr_ch = model.dr_pt[id_beypt-1].id_ch.value
+    npt_curr = model.dr_net[curr_ch-1].id_pnts.value.index(id_beypt) #Index de id_beypt dans la liste id_pnts du canal courant
+    
+    # Ajouter les points restants de `dr_net(curr_ch)` dans `taop`
+    taop.extend(model.dr_net[curr_ch-1].id_pnts.value[npt_curr:])
+    
+    
+    # Ajouter les chemins supplémentaires
+    nelpath = model.dr_net[curr_ch-1].n_path
+    #from the first junction to the endoreich basin lowest point 
+    for _ in range(1, nelpath):
+        id_lstpt = model.dr_net[curr_ch-1].id_end_pt.value
+        curr_ch = model.dr_pt[id_lstpt-1].id_ch.value
+        npt_curr = model.dr_net[curr_ch-1].id_pnts.value.index(id_lstpt)
+        taop.extend(model.dr_net[curr_ch-1].id_pnts.value[npt_curr+1:])
+        
+        
+    # Ajouter le chemin inversé à `out_net`
+    new_outflow = {
+        "id_pnts": taop,
+        "nel": len(taop)
+    }
+    model.out_net.append(new_outflow)
+    model.n_outnet += 1
+
+    return id_endo
+
+
+def endo_out(curr, max_Zs, model):
     """
     Determines the outlet for the endorheic basin identified by 'curr' (1-based).
     It merges candidate saddles in ascending order, checking each one to see if it spills out
     below a maximum threshold. If a saddle indeed connects this endorheic basin to an outlet,
-    we handle the merging of new saddles from the newly connected basin, replicating the
-    Fortran logic more faithfully.
+    we handle the merging of new saddles from the newly connected basin
 
     Parameters
     ----------
@@ -311,147 +247,208 @@ def endo_out(curr, loader):
         in ascending order. Also checks if saddles connect to an outlet and
         merges newly created saddles from a newly spilled basin.
     """
-    # 0) Quick check on 'curr'
-    if curr < 1 or curr > len(loader.endo_pt):
-        return
-    endo_obj = loader.endo_pt[curr - 1]
-    nsdl = endo_obj.nsaddle
-    if nsdl <= 0:
-        # No saddles -> nothing to do
-        return
-
-    # 1) Prepare arrays to store and merge the saddles. 
-    # The code is loosely based on your Fortran approach. 
+    nsdl = model.l_endo_pt[curr-1].nsaddle
     n_qoi = nsdl
-    # The Fortran code uses qoi_sdl, qoi_endo, qoi_stmp, qoi_etmp
-    qoi_sdl = [None] * n_qoi
-    qoi_endo = [None] * n_qoi
-    qoi_stmp = [None] * n_qoi
-    qoi_etmp = [None] * n_qoi
-
-    # The Fortran sets the first position:
-    #   qoi_sdl(1) = 1
-    #   qoi_stmp(1) = 1
-    #   qoi_endo(1) = curr
-    #   qoi_etmp(1) = curr
-    #   n_el = 1
-    qoi_sdl[0] = 1
-    qoi_stmp[0] = 1
-    qoi_endo[0] = curr
-    qoi_etmp[0] = curr
+    
+    qoi_sdl = []
+    qoi_stmp = [0]
+    qoi_endo = []
+    qoi_etmp = [curr]
     n_el = 1
-
-    # For the saddle indices from 2..nsdl
-    for cnt_sdl in range(2, nsdl + 1):
+    
+    #current endorheic basin saddles are considered 
+    for cnt_sdl in range (1, nsdl): #the first one is already put in the tmp 
         shift = 0
         cnt_curr = 0
-        # get the ridge index for this saddle
-        # in Fortran: rd_pt(endo_pt(curr)%idms(cnt_sdl))%Z
-        # in Python, we convert to 0-based:
-        ridge_idx = endo_obj.idms[cnt_sdl - 1] - 1
-        if ridge_idx < 0 or ridge_idx >= len(loader.rd_pt):
-            continue
-        zs_cur = loader.rd_pt[ridge_idx].Z
-        if zs_cur <= loader.max_Zs:
-            # Merge logic in ascending order
-            for cnt_qoi in range(1, n_el + 1):
-                # retrieve the stored saddle in position cnt_qoi
-                stored_saddle_id = qoi_stmp[cnt_qoi - 1]
-                # find the corresponding ridge index
-                stored_ridge_idx = endo_obj.idms[stored_saddle_id - 1] - 1
-                stored_z = loader.rd_pt[stored_ridge_idx].Z if stored_ridge_idx >= 0 else float('inf')
-                if zs_cur < stored_z and shift == 0:
+        zs_cur = model.rd_pt[model.l_endo_pt[curr-1].idms.value[cnt_sdl]-1].Z
+        if zs_cur <= max_Zs:
+            for cnt_qoi in range(n_el):
+
+                if zs_cur < model.rd_pt[model.l_endo_pt[qoi_etmp[cnt_qoi]-1].idms.value[qoi_stmp[cnt_qoi]]-1].Z and shift ==0 :
+                    # the current saddle has a lower quota than the one recorded in the current position
+                    # so I insert that and then add the quota already recorded which moves
                     cnt_curr += 1
-                    qoi_sdl[cnt_curr - 1] = cnt_sdl
-                    qoi_endo[cnt_curr - 1] = curr
+                    qoi_sdl.append(cnt_sdl)
+                    qoi_endo.append(curr)
                     shift = 1
                     cnt_curr += 1
-                    qoi_sdl[cnt_curr - 1] = qoi_stmp[cnt_qoi - 1]
-                    qoi_endo[cnt_curr - 1] = qoi_etmp[cnt_qoi - 1]
-                else:
+                    qoi_sdl.append(qoi_stmp[cnt_qoi])
+                    qoi_endo.append(qoi_etmp[cnt_qoi])
+                else :
+                    #the current saddle has a higher height, the saddle that was already in the current position remains
                     cnt_curr += 1
-                    qoi_sdl[cnt_curr - 1] = qoi_stmp[cnt_qoi - 1]
-                    qoi_endo[cnt_curr - 1] = qoi_etmp[cnt_qoi - 1]
+                    qoi_sdl.append(qoi_stmp[cnt_qoi])
+                    qoi_endo.append(qoi_etmp[cnt_qoi])
+            # If shift is null it means that I have not inserted the saddle I have to insert anywhere because evidently
+            # the height is greater than the heights of the saddles already present. I therefore put it last
             if shift == 0:
                 shift = 1
                 cnt_curr += 1
-                qoi_sdl[cnt_curr - 1] = cnt_sdl
-                qoi_endo[cnt_curr - 1] = curr
-            if cnt_curr > n_el:
-                n_el = cnt_curr
-            # copy back 
-            for i2 in range(n_el):
-                qoi_stmp[i2] = qoi_sdl[i2]
-                qoi_etmp[i2] = qoi_endo[i2]
-
-    n_qoi = n_el
-    # The Fortran code then enters a loop: do while (n_qoi > 0)
-    # in which it picks the first saddle in the list, checks if it truly "spills out",
-    # and if so, merges additional saddles from the newly spilled basin. Let's replicate that.
-
-    while n_qoi > 0:
-        # The first saddle in the list is the lowest
-        first_sdl_idx = qoi_sdl[0]  # e.g. 1-based index into endo_obj arrays
-        # The current endo is qoi_endo(1)
-        endo_current_id = qoi_endo[0]
-        if endo_current_id < 1 or endo_current_id > len(loader.endo_pt):
-            break
-        endo_current_obj = loader.endo_pt[endo_current_id - 1]
-        # Retrieve the corresponding ridge index for that saddle:
-        # endo_obj.idms(first_sdl_idx)
-        if first_sdl_idx < 1 or first_sdl_idx > len(endo_current_obj.idms):
-            # out of range
-            # remove the first from the list
-            n_qoi -= 1
-            for i2 in range(n_qoi):
-                qoi_sdl[i2] = qoi_sdl[i2 + 1]
-                qoi_endo[i2] = qoi_endo[i2 + 1]
-            continue
-        # The Fortran code uses something like:
-        #   zs_cur = rd_pt(endo_pt(curr)%idms(id_sdl))%Z
-        sdl_ridge_idx = endo_current_obj.idms[first_sdl_idx - 1] - 1
-        if sdl_ridge_idx < 0 or sdl_ridge_idx >= len(loader.rd_pt):
-            # remove first from the list
-            n_qoi -= 1
-            for i2 in range(n_qoi):
-                qoi_sdl[i2] = qoi_sdl[i2 + 1]
-                qoi_endo[i2] = qoi_endo[i2 + 1]
-            continue
-        z_saddle = loader.rd_pt[sdl_ridge_idx].Z
-        if z_saddle <= loader.max_Zs:
-            # The Fortran code checks if it connects one endorheic to a normal basin
-            # or merges new saddles from newly spilled basin, calling trace_out, etc.
-            # We'll do an abbreviated version:
-            # 1) remove the first from the list
-            n_qoi -= 1
-            for i2 in range(n_qoi):
-                qoi_sdl[i2] = qoi_sdl[i2 + 1]
-                qoi_endo[i2] = qoi_endo[i2 + 1]
+                qoi_sdl.append(cnt_sdl)
+                qoi_endo.append(curr)
+        if cnt_curr > n_el:
+            n_el = cnt_curr
+        
+        if qoi_sdl == []:
+            qoi_sdl = [0]
+            qoi_endo = [curr]
+            qoi_stmp[:n_el] = qoi_sdl[:n_el]
+            qoi_etmp[:n_el] = qoi_endo[:n_el]
+            qoi_sdl = []
+            qoi_endo = []
             
-            # 2) If it indeed spills out, we might set the basin's bas_type=0,
-            # call trace_out or something. For example:
-            if endo_current_obj.bas_type == 1:
-                endo_current_obj.bas_type = 0
-                # If the code merges new saddles, we copy from the newly "spilled" basin
-                # The Fortran code does do while, merges new_stmp, new_sdl, etc.
-                # We'll replicate more or less:
-                
-                # Additional arrays for the newly discovered saddles:
-                nsdl2 = endo_current_obj.nsaddle
-                # we might add them to qoi_sdl in ascending order as the Fortran does.
-                # For brevity, let's assume none or skip. If needed, replicate the same logic:
-                
-                # e.g. we do the same merge logic with new_stmp, new_sdl as in Fortran's final do.
-                # We'll skip the details for brevity, but you can do it the same way as above.
-            else:
-                # If it's not truly endorheic, we do nothing
-                pass
-        else:
-            # If it's above max_Zs, we skip
-            n_qoi -= 1
-            for i2 in range(n_qoi):
-                qoi_sdl[i2] = qoi_sdl[i2 + 1]
-                qoi_endo[i2] = qoi_endo[i2 + 1]
+        else:            
+            qoi_stmp[:n_el] = qoi_sdl[:n_el]
+            qoi_etmp[:n_el] = qoi_endo[:n_el]
     
-    # End result: we have pruned or merged the saddles for the current endorheic basin.
-    # The Fortran code ends here by deallocating arrays. We just let them go out of scope in Python.
+    qoi_sdl[:n_el] = qoi_stmp[:n_el]
+    qoi_endo[:n_el] = qoi_etmp[:n_el]
+    
+    n_qoi = n_el
+    while n_qoi > 0:
+        cnt_sdl = 1 #the first saddle is the one that currently has the lowest share
+        id_sdl = qoi_sdl[cnt_sdl-1]
+        curr = qoi_endo[cnt_sdl-1] #id of the current elements in endo
+        rp = model.rd_pt[model.l_endo_pt[curr-1].idms.value[id_sdl-1]-1] # !!!!!!! J'ai rajouté -1 à id_sdl-1. 
+        zs_cur = rp.Z
+        nsdl = model.l_endo_pt[curr-1].nsaddle
+        qoi_stmp = qoi_sdl[1:n_qoi+1]
+        qoi_etmp = qoi_endo[1:n_qoi+1]
+        n_el = n_qoi -1
+        if zs_cur <= max_Zs:
+            id_eo1 = curr
+            id_eo2 = model.l_endo_pt[curr-1].beyo_sad.value[id_sdl-1] #!!!!!!! pas certain du id_sdl-1
+            if model.l_endo_pt[id_eo1-1].bas_type + model.l_endo_pt[id_eo2-1].bas_type == 1:
+                #This saddle point connect and endorheic basin to an outlet
+                if model.l_endo_pt[id_eo1-1].bas_type == 1:
+                    model.l_endo_pt[id_eo1-1].bas_type = 0
+                    if model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value == id_eo1:
+                        id_cis_pt = rp.id_drpt1.value #id cis point of the current endo basin
+                        id_trans_pt = rp.id_drpt2.value #id trans point of the current endo basin
+                    else:
+                        id_cis_pt = rp.id_drpt2.value
+                        id_trans_pt = rp.id_drpt1.value
+                else: #that means (endo_pt(id_eo2)%bas_type == 1)
+                    model.l_endo_pt[id_eo2-1].bas_type = 0
+                    if model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value == id_eo2:
+                        id_cis_pt = rp.id_drpt1.value
+                        id_trans_pt = rp.id_drpt2.value
+                    else:
+                        id_cis_pt = rp.id_drpt2.value
+                        id_trans_pt = rp.id_drpt1.value
+                #Only saddle points that spill out have id_cis_endo and id_trans_endo gt 0
+                model.sdl_pt[rp.id_sdl-1].id_cis_endo = model.dr_pt[id_cis_pt-1].id_pnt
+                model.sdl_pt[rp.id_sdl-1].id_trans_out = model.dr_pt[id_trans_pt-1].id_pnt
+                if model.dr_pt[id_cis_pt-1].fldir_ss.value == None:
+                    model.dr_pt[id_cis_pt-1].fldir_ss = model.dr_pt[id_trans_pt-1].id_pnt
+                    model.dr_pt[model.dr_pt[id_cis_pt-1].fldir_ss.value-1].ninf += 1
+                
+                if id_cis_pt == 3429 and id_trans_pt == 3694:
+                    print("----------id_cis_pt = 3429 et id_trans_pt = 3694 depuis la fonction endo_out------------")
+                    print("----------La fonction endo_out avait alors pour argument en entrée curr ", curr)
+
+                
+                id_endo_curr = trace_out(id_cis_pt, id_trans_pt, model) #trace the path from curent endorheic to outlet
+                curr = id_endo_curr
+                nsdl = model.l_endo_pt[curr-1].nsaddle
+                cnt_new = 0
+                new_sdl = []
+                new_stmp = [0]
+                new_endo = []
+                new_etmp = [curr]
+                n_el_new = 1
+                #consider all the saddles of the current endorheic basin
+                for cnt_sdl in range (1,nsdl):
+                    shift = 0
+                    cnt_curr = 0
+                    zs_cur = model.rd_pt[model.l_endo_pt[curr-1].idms.value[cnt_sdl]-1].Z
+                    if zs_cur <= max_Zs:
+                        for cnt_qoi in range(n_el_new):
+                            if zs_cur < model.rd_pt[model.l_endo_pt[new_etmp[cnt_qoi]-1].idms.value[new_stmp[cnt_qoi]]-1].Z and shift ==0 :
+                                #the current saddle has a lower quota than the one recorded in the current position
+                                #so I insert that and then add the quota already recorded which moves
+                                cnt_curr += 1
+                                new_sdl.append(cnt_sdl)
+                                new_endo.append(curr)
+                                shift = 1
+                                cnt_sdl += 1
+                                new_sdl.append(new_stmp[cnt_qoi])
+                                new_endo.append(new_etmp[cnt_qoi])
+                            else:
+                                #the current saddle has a higher height, the saddle that was already in the current position remains
+                                cnt_curr += 1
+                                new_sdl.append(new_stmp[cnt_qoi])
+                                new_endo.append(new_etmp[cnt_qoi])
+                        # If shift is null it means that I have not inserted the saddle I have to insert anywhere because evidently
+                        # the height is greater than the heights of the saddles already present. I therefore put it last
+                        if shift == 0:
+                            shift = 1
+                            cnt_curr += 1
+                            new_sdl.append(cnt_sdl)
+                            new_endo.append(curr)
+                    
+                    
+                    if cnt_curr > n_el_new:
+                        n_el_new = cnt_curr
+                        
+                                        
+                    if new_sdl == []:
+                        new_sdl = [0]
+                        new_endo = [curr]
+                        new_stmp[:n_el_new] = new_sdl[:n_el_new]
+                        new_etmp[:n_el_new] = new_endo[:n_el_new]
+                        new_sdl = []
+                        new_endo = []
+                        
+                    else:            
+                        new_stmp[:n_el_new] = new_sdl[:n_el_new]
+                        new_etmp[:n_el_new] = new_endo[:n_el_new]
+
+                
+                cnt_new = n_el_new
+                new_sdl[:n_el_new] = new_stmp[:n_el_new]
+                new_endo[:n_el_new] = new_etmp[:n_el_new]
+                
+                cnt_curr = 0
+                mem_new = 0
+                qoi_sdl = []
+                qoi_endo = []
+                for cnt_qoi in range(n_el): #loop on the elements of the main vector
+                    for cnt_sdl in range(mem_new, cnt_new):
+                        zs_cur = model.rd_pt[model.l_endo_pt[new_endo[cnt_sdl]-1].idms.value[new_sdl[cnt_sdl]]-1].Z
+                        if zs_cur < model.rd_pt[model.l_endo_pt[qoi_etmp[cnt_qoi]-1].idms.value[qoi_stmp[cnt_qoi]]-1].Z:
+                            cnt_curr += 1
+                            qoi_sdl.append(new_sdl[cnt_sdl])
+                            qoi_endo.append(new_endo[cnt_sdl])
+                            mem_new += 1 #I count how many I've already written
+                    cnt_curr  += 1
+                    qoi_sdl.append(qoi_stmp[cnt_qoi])
+                    qoi_endo.append(qoi_etmp[cnt_qoi])
+                if mem_new < cnt_new:
+                    qoi_sdl.extend(new_sdl[mem_new:cnt_new])
+                    qoi_endo.extend(new_endo[mem_new:cnt_new])
+                
+                n_el = cnt_curr
+                qoi_stmp = qoi_sdl[:n_el]
+                qoi_etmp = qoi_endo[:n_el]
+        
+        qoi_sdl[:n_el] = qoi_stmp[:n_el]
+        qoi_endo[:n_el] = qoi_etmp[:n_el]
+        n_qoi = n_el
+    
+                
+                
+                    
+                            
+                            
+    
+                    
+                
+                
+
+                                
+ 
+                        
+    
+    
+    

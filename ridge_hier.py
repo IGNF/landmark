@@ -78,7 +78,8 @@ def rdl_trace(id_rd, n_rdnet, Zcurr, model):
         j_end = model.rd_pt[id_nxpt-1].j
         new_rl.length = model.delta_x*0.5*((i_start-i_end)**2+(j_start-j_end)**2)**0.5
         curr_rp.nen = 0
-        if curr_rp.md == 1:
+        # if curr_rp.md == 1:
+        if curr_rp.id_sdl != None:
             curr_rp.n_ptsa = 0 #splling saddle
         curr_rp.id_neigh[0] = None
         curr_rp.nrdl = 1

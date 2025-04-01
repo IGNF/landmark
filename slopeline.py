@@ -29,7 +29,7 @@ def calculate_slopelines(model):
     ----------
     model : object
         An instance of your data model class which must have at least:
-           - dr_pt: list of DrainagePoint objects (sorted in ascending order of elevation)
+           - dr_pt: list of DrainagePoint objects 
            - mat_id: 2D numpy array with DrainagePoint objects at positions (i*2, j*2)
            - N, M: dimensions of the DEM (number of rows, number of columns)
            - delta_x, delta_y: grid spacings
@@ -39,82 +39,42 @@ def calculate_slopelines(model):
     
     # Initialize drainage network and endorheic lists.
     model.dr_net = []      # List of DrainageNetwork objects.
-    model.endo_pt = []     # List of EndoPoint objects.
+    model.l_endo_pt = []     # List of EndoPoint objects.
     model.endorheic_count = 0  # Counter for endorheic points.
     
-    
-    # Process drainage points in descending order (assuming model.dr_pt is sorted in ascending order)
-    dr_pt_dict = {p.id_pnt: p for p in model.dr_pt}  
-    dr_net_dict = {}  
-    
-    for dp in tqdm(model.dr_pt[::-1], desc="Building drainage networks", unit="point"):
+        
+    for id_dr in tqdm(model.qoi[::-1], desc="Building drainage networks", unit="point"):
+        dp = model.dr_pt[id_dr-1]
     
         if dp.ninf > 0:
-            if dp.Linflow:
-                i_max = np.argmax(dp.Linflow.value)  
-                l_max = dp.Linflow.value[i_max]
-                dp.upl = l_max
-                dp.sumdev = dp.Sinflow.value[i_max] 
-                id_up_max = dp.inflow.value[i_max] 
-    
-                up_dp = dr_pt_dict.get(id_up_max)
-                if up_dp:
-                    dp.id_ch = up_dp.id_ch
-                    id_main = dp.id_ch
-                else:
-                    dp.id_ch = IDPointer(None)  # Ensure it's an IDPointer instance
-                    id_main = None
-    
-            for inflow_id in dp.inflow.value:  # Extract values from ListPointer
-                inflow_dp = dr_pt_dict.get(inflow_id)
-                if inflow_dp is None:
-                    continue
-            
-                curr_ch = inflow_dp.id_ch  # Keep reference to IDPointer
-                net = dr_net_dict.get(curr_ch.value)
-            
-                if net is None:
-                    # Create a new network if it doesn't exist
-                    net = DrainageNetwork(
-                        id_ch=curr_ch.value,  # Channel ID
-                        nel=0,  # Number of points in the network
-                    )
-                    net.id_pnts = ListPointer([inflow_dp.id_pnt])  # List of drainage points
-                    net.id_start_pt = IDPointer(inflow_dp.id_pnt)  # Start point
-                    net.id_end_pt = IDPointer(inflow_dp.id_pnt)  # End point
-                    net.length = 0.0  # Channel length
-                    net.id_ch_out = curr_ch  # Outflow channel ID
-                    net.n_jun = 0  # Number of tributaries
-                    net.id_in = ListPointer([])  # List of tributary IDs
-                    net.n_path = 0  # Number of downstream paths
-                    net.id_path = ListPointer([])  # List of downstream paths
-                    net.id_endo = IDPointer(None)  # Endorheic basin ID
-                    net.sso = None  # Strahler Stream Order
-                    net.hso = None  # Horton Stream Order
-            
-                    # Add to the dictionary and list
-                    dr_net_dict[curr_ch.value] = net
-                    model.dr_net.append(net)
-            
-                # Expand the list of points dynamically
-                net.id_pnts.value.append(dp.id_pnt)  # Add drainage point
-                net.nel += 1  # Update the number of elements
-                if inflow_id in dp.inflow.value:
-                    index = dp.inflow.value.index(inflow_id)  # Trouver la position de inflow_id
-                    net.length = dp.Linflow.value[index]  # Prendre la même position dans Linflow
+            # channel points
+            # all upslope points are already considered
+            i_max = np.argmax(dp.Linflow.value)  
+            l_max = dp.Linflow.value[i_max]
+            dp.upl = l_max
+            dp.sumdev = dp.Sinflow.value[i_max] 
+            id_up_max = dp.inflow.value[i_max] #Id of the point with maximum upslope length
+            dp.id_ch = model.dr_pt[id_up_max-1].id_ch 
+            id_main = dp.id_ch.value
 
-                net.id_ch_out = dp.id_ch
-                net.id_end_pt = IDPointer(dp.id_pnt)
+            
+            for length_inflow, id_inflow in zip(dp.Linflow.value,dp.inflow.value):  # Extract values from ListPointer
+                curr_ch = model.dr_pt[id_inflow-1].id_ch
+                model.dr_net[curr_ch.value-1].id_pnts.append(dp.id_pnt.value)
+                model.dr_net[curr_ch.value-1].nel+=1
+                model.dr_net[curr_ch.value-1].length = length_inflow
+                model.dr_net[curr_ch.value-1].id_ch_out = dp.id_ch
+                model.dr_net[curr_ch.value-1].id_end_pt = dp.id_pnt
+                
+
             
                 # Handle tributary channels
-                if id_main is not None and curr_ch.value != id_main.value:
-                    main_net = dr_net_dict.get(id_main.value)
-                    if main_net:
-                        if curr_ch.value not in main_net.id_in.value:
-                            main_net.id_in.value.append(curr_ch.value)  # Append tributary ID
-            
-                            # Increase the number of junctions
-                            main_net.n_jun += 1
+                if curr_ch.value != id_main:
+                    #Add triburaties index to main channel
+                    if curr_ch not in model.dr_net[id_main-1].id_in.value:
+                        model.dr_net[id_main-1].n_jun += 1
+                        model.dr_net[id_main-1].id_in.append(curr_ch)
+                        
     
         else:
             # Handling drainage points with no inflows (channel head)
@@ -123,20 +83,19 @@ def calculate_slopelines(model):
             net = DrainageNetwork(
                 id_ch=new_channel_id,
                 nel=1)
-            net.id_pnts=ListPointer([dp.id_pnt])
-            net.id_start_pt=IDPointer(dp.id_pnt)
-            net.id_end_pt=IDPointer(dp.id_pnt)
+            net.id_pnts=ListPointer([dp.id_pnt.value])
+            net.id_start_pt=dp.id_pnt
+            net.id_end_pt=dp.id_pnt
             net.length=0.0
             net.id_ch_out=IDPointer(new_channel_id)
             net.n_jun=0
             net.id_in=ListPointer([])
             net.n_path=0
-            net.id_path=ListPointer([])
-            net.id_endo=IDPointer(None)
+            net.id_path=[]
+            net.id_endo=IDPointer(0)
             net.sso=None
             net.hso=None
             
-            dr_net_dict[new_channel_id] = net
             model.dr_net.append(net)
         
         # --- Compute drainage direction using D8_LTD ---
@@ -146,12 +105,12 @@ def calculate_slopelines(model):
             # Retrieve the drainage point corresponding to the outflow direction.
             out_dp = model.mat_id[i_out * 2, j_out * 2]
             if out_dp is not None:
-                dp.fldir = IDPointer(out_dp.id_pnt)
+                dp.fldir = out_dp.id_pnt
                 dp.fldir_ss = IDPointer(None)
                 
                 # Update outflow point: increment inflow count and record the current point.
                 out_dp.ninf += 1
-                out_dp.inflow.value.append(dp.id_pnt)
+                out_dp.inflow.value.append(dp.id_pnt.value)
                 
                 # Compute the Euclidean distance between dp and out_dp.
                 distance = sqrt(((dp.i - out_dp.i) * model.delta_x) ** 2 +
@@ -166,18 +125,13 @@ def calculate_slopelines(model):
             # Create an EndoPoint for dp.
             endo = EndoPoint()
             endo.id_eo=IDPointer(model.endorheic_count)
-            endo.id_pnt=IDPointer(dp.id_pnt)
+            endo.id_pnt=dp.id_pnt
             endo.bas_type=ndfl
             endo.nsaddle=0
             
-            model.endo_pt.append(endo)
+            model.l_endo_pt.append(endo)
         
-    # Update lookup dictionaries
-    model.dr_pt_by_id = {dp.id_pnt: dp for dp in model.dr_pt}
-    model.dr_net_by_id = {net.id_ch.value: net for net in model.dr_net}
-    
-    n_drnet = len(model.dr_net)
-    print('n_drnet, size(dr_net) = ', n_drnet)
+   
     
     finish_time = time.process_time()
     elapsed_time = finish_time - start_time

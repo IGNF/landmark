@@ -20,9 +20,10 @@ def thal_net_hso_length(model, river_mask):
     # Build the list 'qoi' by sorting DrainagePoints in ascending Z
     # qoi will store the 'id_pnt' for each DrainagePoint
     qoi = [dp.id_pnt.value for dp in sorted(model.dr_pt, key=lambda dp: dp.Z)]
-    
+    #!!!!!!!!Ces 3 étapes sont très très longues
     #Reinitialize id_ch, inflow, Linflow
-    for dp in model.dr_pt:
+    print("Reset id_ch, inflow, Linflow")
+    for dp in tqdm(model.dr_pt):
         dp.id_ch = IDPointer()
         dp.inflow = ListPointer()
         dp.Linflow = ListPointer()
@@ -30,10 +31,14 @@ def thal_net_hso_length(model, river_mask):
     
     #Reinitialize dr_net
     model.dr_net = []
+    # print("Drainage network reset")
     # On recrée la liste avec des objets vides possédant les bons attributs
-    dr_net = [DrainageNetwork() for _ in range(len(model.dr_pt))]
+    dr_net = [DrainageNetwork() for _ in tqdm(range(len(model.dr_pt)), desc="Drainage network reset")]
+    # dr_net = [DrainageNetwork() for _ in range(len(model.dr_net)*2)]
+
     
-    dr_pt_in = [DrainagePointInflow() for _ in range(len(model.dr_pt))]
+    # print("Temporary drainage points")
+    dr_pt_in = [DrainagePointInflow() for _ in tqdm(range(len(model.dr_pt)), desc="Temporary drainage points")]
 
     # Reinitialize rivers
     model.mat_id = np.where(river_mask, None, model.mat_id)

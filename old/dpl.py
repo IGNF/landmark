@@ -7,11 +7,9 @@ Transcript in python of the original dpl.f90
 ! endorheic 
 """
 
+import numpy as np
 from tqdm import tqdm
 import time
-import sys
-# sys.setrecursionlimit(10000)  # Augmenter la limite (ex: 5000 appels récursifs)
-
 
 
 def dpl(model):
@@ -36,50 +34,45 @@ def dpl(model):
     start_time = time.process_time()
     
     # Process each endorheic point.
-    for endo in tqdm(model.l_endo_pt, desc="Processing endorheic channels", unit="channel"):
+    for endo in tqdm(model.endo_pt, desc="Processing endorheic channels", unit="channel"):
         # Determine the main channel for this endorheic basin:
         # main is obtained from the DrainagePoint corresponding to the endo_pt.
         # (En Fortran : main => dr_pt(endo_pt(cnt_endo)%id_pnt)%id_ch)
-        main = model.dr_pt[endo.id_pnt.value-1].id_ch
+        main_channel = model.dr_pt_by_id[endo.id_pnt.value].id_ch
+        # if main_channel is None:
+        #     continue
         # Assign the channel’s endorheic id:
-        model.dr_net[main.value-1].id_endo = endo.id_eo
+        model.dr_net_by_id[main_channel.value].id_endo = endo.id_eo
 
         # For each drainage point in the main channel:
-            
-        main_net = model.dr_net[main.value-1]
-        l1 = main_net.length
+        main_net = model.dr_net_by_id[main_channel.value]
         for dp_id in main_net.id_pnts.value:
-            dp = model.dr_pt[dp_id-1]
+            dp = model.dr_pt_by_id[dp_id]
+            # Calculate downslope path length:
+            # l1 is the channel length; l2 is the upstream length (upl) of the point.
+            l1 = main_net.length
             l2 = dp.upl
             dp.dpl = l1 - l2
-            
-            i_curr = dp.i
-            j_curr = dp.j
-            
-        
+            # Also update the matrix (mat_id) if possible.
+            i_curr, j_curr = dp.i, dp.j
             if dp.fldir.value is not None and dp.fldir.value > 0:
                 # Retrieve the outflow point.
-                out_dp = model.dr_pt[dp.fldir.value-1]
-                i_out, j_out = out_dp.i, out_dp.j
-                i_mat = i_curr * 2  + (i_out - i_curr)
-                j_mat = j_curr * 2  + (j_out - j_curr)
-                                
-                # Update the corresponding cell in mat_id with the main channel id.
-                # if model.mat_id[i_mat, j_mat] is None:
-                #     print("\ni_mat", i_mat)
-                #     print("j_mat", j_mat)
-                # if model.mat_id[i_mat, j_mat] is not None:
-                #     model.mat_id[i_mat, j_mat].id_pnt = main_net.id_ch
-                
-                model.mat_id[i_mat, j_mat] = main_net.id_ch
-
+                out_dp = model.dr_pt_by_id.get(dp.fldir.value)
+                if out_dp is not None:
+                    i_out, j_out = out_dp.i, out_dp.j
+                    # In Fortran, i_mat = i_curr*2-1 + (i_out - i_curr), etc.
+                    i_mat = i_curr * 2 - 1 + (i_out - i_curr)
+                    j_mat = j_curr * 2 - 1 + (j_out - j_curr)
+                    # Update the corresponding cell in mat_id with the main channel id.
+                    if model.mat_id[i_mat, j_mat] is not None:
+                        model.mat_id[i_mat, j_mat].id_pnt = main_net.id_ch.value
 
         # For the current channel, set the downslope path identifier:
         main_net.n_path = 1
-        main_net.id_path.append(main_net.id_ch.value)
+        main_net.id_path.value = [main_net.id_ch.value]
         
         # Now call the recursive routine to update tributaries.
-        up_recurs_recode(main.value, model)
+        up_recurs(main_channel.value, model)
         
     
     finish_time = time.process_time()
@@ -90,9 +83,7 @@ def dpl(model):
     print(f"Elapsed time (dpl): {hours}h {minutes}m {seconds:.2f}s")
 
 
-
-
-def up_recurs_recode(curr, model, visited=None):
+def up_recurs(curr, model):
     """
     Recursively processes tributary channels for downslope path length updates.
     For each tributary channel of the channel identified by 'curr', this function:
@@ -109,55 +100,37 @@ def up_recurs_recode(curr, model, visited=None):
     model : object
         The hydrological model object containing dr_pt, dr_net, etc.
     """
-    # if visited is None:
-    #     visited = set()
-
-    # # Si on est déjà passé par ce canal, on ne le traite plus
-    # if curr in visited:
-    #     return
-    # visited.add(curr)
-
-    
-    for i in range(model.dr_net[curr-1].n_jun):
-        in_curr = model.dr_net[curr-1].id_in.value[i-1]
-        for cnt_pt in range(model.dr_net[in_curr.value-1].nel-1): #last pnt belongs to main channel
-        #Marque tous les points sur les lignes de flux pour ne pas apparaitre comme points de crête pour la suite.
-            dp = model.dr_pt[model.dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1]
+    curr_net = model.dr_net_by_id[curr]
+    # Loop over each tributary channel of the current channel.
+    # In Fortran: do i=1, dr_net(curr)%n_jun, where dr_net(curr)%id_in holds tributary channels.
+    for trib in curr_net.id_in.value:
+        # Here, trib is the channel id of the tributary.
+        trib_net = model.dr_net_by_id[trib]
+        # For each drainage point in the tributary channel except the last one:
+        for dp_id in trib_net.id_pnts.value[:-1]:
+            dp = model.dr_pt_by_id[dp_id]
             # l1 is the length of the tributary channel.
-            l1 = model.dr_net[in_curr.value-1].length
+            l1 = trib_net.length
             l2 = dp.upl
-            l3 = model.dr_pt[model.dr_net[in_curr.value-1].id_end_pt.value-1].dpl
-            model.dr_pt[model.dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1].dpl = l1-l2+l3
-            i_curr = dp.i
-            j_curr = dp.j
-            # print(i_curr)
+            # l3 is the downslope length at the end point of the tributary channel.
+            end_dp = model.dr_pt_by_id[trib_net.id_end_pt.value]
+            l3 = end_dp.dpl
+            dp.dpl = l1 - l2 + l3
+            i_curr, j_curr = dp.i, dp.j
             if dp.fldir.value is not None and dp.fldir.value > 0:
-                out_dp = model.dr_pt[dp.fldir.value-1]
-                i_out, j_out = out_dp.i, out_dp.j
-                i_mat = i_curr * 2 + (i_out - i_curr)
-                j_mat = j_curr * 2 + (j_out - j_curr)
-                # print("\ni_mat", i_mat)
-                # print("j_mat", j_mat)
-
-                model.mat_id[i_mat, j_mat] = model.dr_net[in_curr.value-1].id_ch
-        
+                out_dp = model.dr_pt_by_id.get(dp.fldir)
+                if out_dp is not None:
+                    i_out, j_out = out_dp.i, out_dp.j
+                    i_mat = i_curr * 2 - 1 + (i_out - i_curr)
+                    j_mat = j_curr * 2 - 1 + (j_out - j_curr)
+                    if model.mat_id[i_mat, j_mat] is not None:
+                        model.mat_id[i_mat, j_mat].id_pnt = trib_net.id_ch.value
         # Update the tributary channel’s path:
-        model.dr_net[in_curr.value-1].n_path = model.dr_net[curr-1].n_path+1
+        trib_net.n_path = curr_net.n_path + 1
         # Build new id_path: first element is its own id_ch, then append parent's path.
-        n_path = model.dr_net[in_curr.value-1].n_path
-        # model.dr_net[in_curr.value-1].id_path = []
-        model.dr_net[in_curr.value-1].id_path.append(model.dr_net[in_curr.value-1].id_ch.value)
-        for cnt_in in range(2,n_path+1):
-            model.dr_net[in_curr.value-1].id_path.append(model.dr_net[curr-1].id_path[cnt_in-2])
+        trib_net.id_path.value = [trib_net.id_ch.value] + curr_net.id_path.value
         # Propagate the endorheic id from the parent.
-        model.dr_net[in_curr.value-1].id_endo = model.dr_net[curr-1].id_endo
-        
-        up_recurs_recode(in_curr.value, model, visited)
-        
-        
-        
+        trib_net.id_endo = curr_net.id_endo
+        # Recursively process tributary's tributaries.
+        up_recurs(trib, model)
 
-        
-            
-
-            

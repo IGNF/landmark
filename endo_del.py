@@ -83,25 +83,21 @@ def find_saddle(cnt_rdpt, id_cis, id_trans, sdl_mem, model, cnt_sdl):
     else:
         flag = 0
         for cnt_en_sdl in range(model.l_endo_pt[id_cis-1].nsaddle):
-            if ep_cis.beyo_sad.value[cnt_en_sdl-1] == id_trans:
+            if ep_cis.beyo_sad.value[cnt_en_sdl] == id_trans:
                 #already stored a saddle point between the two current endorheic basins
                 flag = 1
                 #It verify if the current is lower then the stored
-                if model.rd_pt[cnt_rdpt-1].Z < model.rd_pt[ep_cis.idms.value[cnt_en_sdl-1]-1].Z:
+                if model.rd_pt[cnt_rdpt-1].Z < model.rd_pt[ep_cis.idms.value[cnt_en_sdl]-1].Z:
                     if sdl_mem == 1:
-                        model.rd_pt[cnt_rdpt-1].id_sdl = model.rd_pt[ep_cis.idms.value[cnt_en_sdl-1]-1].id_sdl
-                        # print("\nmodel.rd_pt[ep_cis.idms.value[cnt_en_sdl-1]] :", model.rd_pt[ep_cis.idms.value[cnt_en_sdl-1]-1])
-                        model.rd_pt[ep_cis.idms.value[cnt_en_sdl-1]-1].id_sdl = None
-                        ep_cis.idms.value[cnt_en_sdl-1] = cnt_rdpt
+                        model.rd_pt[cnt_rdpt-1].id_sdl = model.rd_pt[ep_cis.idms.value[cnt_en_sdl]-1].id_sdl
+                        model.rd_pt[ep_cis.idms.value[cnt_en_sdl]-1].id_sdl = None
+                        ep_cis.idms.value[cnt_en_sdl] = cnt_rdpt
                         #saddle point
                         curr_sdl = model.rd_pt[cnt_rdpt-1].id_sdl
-                        # print("\ncnt_rdpt :", cnt_rdpt)
-
-                        # print("\ncurr_sdl :", curr_sdl)
                         model.sdl_pt[curr_sdl-1].id_rdpt = model.rd_pt[cnt_rdpt-1].id_pnt
                         flag = 1
                     else:
-                        ep_cis.idms.value[cnt_en_sdl-1] = cnt_rdpt
+                        ep_cis.idms.value[cnt_en_sdl] = cnt_rdpt
                         flag = 1
         
         if flag == 0:

@@ -1,0 +1,71 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\landmark_geotiff.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:landmark_geotiff.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\endo_del.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:endo_del.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\saddle_spill.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:saddle_spill.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "landmark_geotiff.py",
+              "DocumentMoniker": "C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\landmark_geotiff.py",
+              "RelativeDocumentMoniker": "landmark_geotiff.py",
+              "ToolTip": "C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\landmark_geotiff.py",
+              "RelativeToolTip": "landmark_geotiff.py",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAAEYAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-04-02T08:09:02.577Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "endo_del.py",
+              "DocumentMoniker": "C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\endo_del.py",
+              "RelativeDocumentMoniker": "endo_del.py",
+              "ToolTip": "C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\endo_del.py",
+              "RelativeToolTip": "endo_del.py",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-04-02T07:59:51.356Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "saddle_spill.py",
+              "DocumentMoniker": "C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\saddle_spill.py",
+              "RelativeDocumentMoniker": "saddle_spill.py",
+              "ToolTip": "C:\\Projets\\cretes_talwegs\\scripts\\implementation_23MOR\\saddle_spill.py",
+              "RelativeToolTip": "saddle_spill.py",
+              "ViewState": "AgIAAMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-04-02T07:59:26.317Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

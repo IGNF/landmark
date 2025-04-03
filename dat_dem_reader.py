@@ -148,8 +148,8 @@ def geotiff_to_dat(geotiff_path: str, output_dat_path: str, output_header_path: 
 ------------------------------------------------------------------------------
 ! HEADER
 ------------------------------------------------------------------------------
-Grid spacing along the x-direction = {grid_spacing_x:.2f}
-Grid spacing along the y-direction = {grid_spacing_y:.2f}
+Grid spacing along the x-direction = {grid_spacing_x:.5f}
+Grid spacing along the y-direction = {grid_spacing_y:.5f}
 Number of row, DEM size along the y-direction = {num_rows}
 Number of column, DEM size along the x-direction = {num_cols}
 X low left corner coordinate = {x_low_left:.8f}
@@ -189,9 +189,9 @@ if __name__ == "__main__":
     
     """geotiff to .dat"""
     #File path
-    tiff_dem_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
-    dat_dem_path = "../../out_scripts/cordevole_extrait_minimum2_6.dat"
-    dat_header_path = "../../out_scripts/cordevole_extrait_minimum2_6_header.dat"
+    tiff_dem_path = "../../QGIS/out/cordevole_debug_mini_mini.tif"
+    dat_dem_path = "../../out_scripts/cordevole_debug_mini_mini.dat"
+    dat_header_path = "../../out_scripts/cordevole_debug_mini_mini_header.dat"
     
     #Convert geotiff to .dat format
     geotiff_to_dat(tiff_dem_path, dat_dem_path, dat_header_path)

@@ -558,7 +558,6 @@ def endo_out(curr, max_Zs, model):
     qoi_etmp[0] = curr
     n_el = 1
     
-    curr_init = curr
     
     #current endorheic basin saddles are considered 
     for cnt_sdl in range (1, nsdl): #the first one is already put in the tmp 
@@ -600,8 +599,14 @@ def endo_out(curr, max_Zs, model):
             if shift == 0:
                 shift = 1
                 cnt_curr += 1
-                qoi_sdl[cnt_curr] = cnt_sdl
-                qoi_endo[cnt_curr] = curr
+                try :
+                    qoi_sdl[cnt_curr-1] = cnt_sdl #!!!!!!!!!!!!Je rajoute -1
+                except :
+                    print("cnt_curr : ", cnt_curr)
+                    print("len(qoi_sdl) : ", len(qoi_sdl))
+                    print("model.l_endo_pt[curr-1] : ", model.l_endo_pt[curr-1])
+                    sys.exit(0)
+                qoi_endo[cnt_curr-1] = curr #!!!!!!!!!!!!Je rajoute -1
         if cnt_curr > n_el:
             n_el = cnt_curr
         

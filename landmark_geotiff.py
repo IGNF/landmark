@@ -22,7 +22,6 @@ from endo_del import endo_del
 from saddle_spill import saddle_spill
 from ridge_point import find_ridge_neighbors
 from ridge_hier import ridge_hier
-from junc_update import junc_update
 
 
 class HydroModel(LoadData, SlopelineMixin):
@@ -32,10 +31,12 @@ class HydroModel(LoadData, SlopelineMixin):
 if __name__ == "__main__":
 
     # dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
-    # dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
+    dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
     # dtm_path = "../../QGIS/out/cordevole_extrait/cordevole_extrait_extrait.tif"
+    # dtm_path = "../../QGIS/out/cordevole_debug_mini.tif"
+    # dtm_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_mini_mini.tif"
-    dtm_path = "../../QGIS/out/cordevole_debug.tif"
+    # dtm_path = "../../QGIS/out/cordevole_debug.tif"
 
 
 
@@ -45,17 +46,17 @@ if __name__ == "__main__":
     
     #Shapefiles path
     slopelines_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test"
-    slopelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test_debug"
+    slopelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test"
 
     drainage_points_HSO_shapefile_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test"
     
     ridge_points_HSO_shapefile_path = f"../../out_scripts_test_temp/ridge_points_HSO{file_name[:-4]}_test"
     
-    ridgelines_HSO_shapefile_path = f"../../out_scripts_test_temp/ridgelines_HSO_{file_name[:-4]}_test_debug"
-    ridgelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test_debug"
+    ridgelines_HSO_shapefile_path = f"../../out_scripts_test_temp/ridgelines_HSO_{file_name[:-4]}_test"
+    ridgelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test"
     
     
-    saddle_points_HSO_shapefile_path = f"../../out_scripts_test_temp/saddle_points_HSO_filtre_{file_name[:-4]}_test_debug"
+    saddle_points_HSO_shapefile_path = f"../../out_scripts_test_temp/saddle_points_HSO_filtre_{file_name[:-4]}_test"
     
     endo_points_HSO_shapefile_path  = f"../../out_scripts_test_temp/endo_points_HSO{file_name[:-4]}_test"
 
@@ -67,6 +68,7 @@ if __name__ == "__main__":
     #Export threshold value:
     A_spread = 0 #Ridge dispersion area
     A_out = 0 #Thalweg drainage area
+    HSO_th = 5 # Horton stream order theshold
     
 
         
@@ -75,6 +77,7 @@ if __name__ == "__main__":
     model_geotiff.type_of_landscape = type_of_landscape
     model_geotiff.a_spread_threshold = A_spread
     model_geotiff.a_out_threshold = A_out
+    model_geotiff.hso_th = HSO_th
     
     
     print("Loading data...")
@@ -105,19 +108,17 @@ if __name__ == "__main__":
     print("Ridge hierarchization")
     ridge_hier(model_geotiff)
     
-    print("Calculate junc value")
-    junc_update(model_geotiff)
     
     
     # print("Export drainage points HSO in shapefile")
     # model_geotiff.export_drainage_point(drainage_points_HSO_shapefile_path)
     
-    # print("\nExport endo points in shapefile")
-    # model_geotiff.export_endo_points(endo_points_HSO_shapefile_path)
+    print("\nExport endo points in shapefile")
+    model_geotiff.export_endo_points(endo_points_HSO_shapefile_path)
 
 
-    # print("Export slopelines HSO to shapefile")
-    # model_geotiff.export_slopelines_to_shapefile(slopelines_HSO_shapefile_path)
+    print("Export slopelines HSO to shapefile")
+    model_geotiff.export_slopelines_to_shapefile(slopelines_HSO_shapefile_path)
     
     print("Export slopelines single element HSO to shapefile")
     model_geotiff.export_slopelines_single_element_to_shapefile(slopelines_se_HSO_shapefile_path)

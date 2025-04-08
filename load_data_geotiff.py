@@ -122,35 +122,36 @@ class LoadData:
         a_unit = self.delta_x * self.delta_y
         
         for net in tqdm(self.dr_net):
-            coords = []
-            for pnt_id in net.id_pnts.value:
-                dp = self.dr_pt[pnt_id - 1]
-                if dp:
-                    x, y = self.transform * (dp.j, dp.i)
-                    coords.append((x + self.delta_x / 2, y - self.delta_y / 2))
-            
-            if len(coords) > 1:
-                lines.append(LineString(coords))
-    
-                # Nettoyage et conversion des valeurs
-                attributes.append({
-                    "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
-                    "nel": int(net.nel),
-                    "id_pnts": str([int(p) if p is not None else 0 for p in net.id_pnts.value])[:254],
-                    "id_start_pt": int(net.id_start_pt.value) if net.id_start_pt.value is not None else 0,
-                    "id_end_pt": int(net.id_end_pt.value) if net.id_end_pt.value is not None else 0,
-                    "length": float(net.length),
-                    "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
-                    "id_ch_main": int(net.id_path[-1]),
-                    "A_out": int(self.dr_pt[net.id_pnts.value[-2]-1].A_in*a_unit),
-                    "n_jun": int(net.n_jun),
-                    "id_in": [int(i.value) if i.value is not None else 0 for i in net.id_in.value] if net.id_in is not None else [],
-                    "n_path": int(net.n_path),
-                    "id_path": str([int(i) if i is not None else 0 for i in net.id_path] if net.id_path is not None else [])[:254],
-                    "id_endo": int(net.id_endo.value) if net.id_endo.value is not None else 0,
-                    "sso": int(net.sso) if net.sso is not None else 0,
-                    "hso": int(net.hso) if net.hso is not None else 0
-                })
+            if net.hso >= self.hso_th:
+                coords = []
+                for pnt_id in net.id_pnts.value:
+                    dp = self.dr_pt[pnt_id - 1]
+                    if dp:
+                        x, y = self.transform * (dp.j, dp.i)
+                        coords.append((x + self.delta_x / 2, y - self.delta_y / 2))
+                
+                if len(coords) > 1:
+                    lines.append(LineString(coords))
+        
+                    # Nettoyage et conversion des valeurs
+                    attributes.append({
+                        "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
+                        "nel": int(net.nel),
+                        "id_pnts": str([int(p) if p is not None else 0 for p in net.id_pnts.value])[:254],
+                        "id_start_pt": int(net.id_start_pt.value) if net.id_start_pt.value is not None else 0,
+                        "id_end_pt": int(net.id_end_pt.value) if net.id_end_pt.value is not None else 0,
+                        "length": float(net.length),
+                        "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
+                        "id_ch_main": int(net.id_path[-1]),
+                        "A_out": int(self.dr_pt[net.id_pnts.value[-2]-1].A_in*a_unit),
+                        "n_jun": int(net.n_jun),
+                        "id_in": [int(i.value) if i.value is not None else 0 for i in net.id_in.value] if net.id_in is not None else [],
+                        "n_path": int(net.n_path),
+                        "id_path": str([int(i) if i is not None else 0 for i in net.id_path] if net.id_path is not None else [])[:254],
+                        "id_endo": int(net.id_endo.value) if net.id_endo.value is not None else 0,
+                        "sso": int(net.sso) if net.sso is not None else 0,
+                        "hso": int(net.hso) if net.hso is not None else 0
+                    })
     
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
@@ -171,35 +172,36 @@ class LoadData:
         a_unit = self.delta_x * self.delta_y
     
         for net in tqdm(self.dr_net):
-            points_ids = net.id_pnts.value
-            for idx in range(len(points_ids) - 1):
-                dp1 = self.dr_pt[points_ids[idx] - 1]
-                dp2 = self.dr_pt[points_ids[idx + 1] - 1]
-    
-                if dp1 and dp2:
-                    a_out = dp1.A_in * a_unit
-                    if a_out >= self.a_out_threshold:
-                        x1, y1 = self.transform * (dp1.j, dp1.i)
-                        x2, y2 = self.transform * (dp2.j, dp2.i)
-                        line = LineString([
-                            (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
-                            (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
-                        ])
+            if net.hso >= self.hso_th:
+                points_ids = net.id_pnts.value
+                for idx in range(len(points_ids) - 1):
+                    dp1 = self.dr_pt[points_ids[idx] - 1]
+                    dp2 = self.dr_pt[points_ids[idx + 1] - 1]
         
-                        lines.append(line)
-        
-                        # Nettoyage et conversion des valeurs
-                        attributes.append({
-                            "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
-                            "start_pnt": int(dp1.id_pnt.value) if dp1.id_pnt.value is not None else 0,
-                            "end_pnt": int(dp2.id_pnt.value) if dp2.id_pnt.value is not None else 0,
-                            "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
-                            "id_ch_main": int(net.id_path[-1]),
-                            "A_out": int(dp1.A_in * a_unit),
-                            "length": float(line.length),
-                            "sso": int(net.sso) if net.sso is not None else 0,
-                            "hso": int(net.hso) if net.hso is not None else 0
-                        })
+                    if dp1 and dp2:
+                        a_out = dp1.A_in * a_unit
+                        if a_out >= self.a_out_threshold:
+                            x1, y1 = self.transform * (dp1.j, dp1.i)
+                            x2, y2 = self.transform * (dp2.j, dp2.i)
+                            line = LineString([
+                                (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
+                                (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
+                            ])
+            
+                            lines.append(line)
+            
+                            # Nettoyage et conversion des valeurs
+                            attributes.append({
+                                "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
+                                "start_pnt": int(dp1.id_pnt.value) if dp1.id_pnt.value is not None else 0,
+                                "end_pnt": int(dp2.id_pnt.value) if dp2.id_pnt.value is not None else 0,
+                                "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
+                                "id_ch_main": int(net.id_path[-1]),
+                                "A_out": int(dp1.A_in * a_unit),
+                                "length": float(line.length),
+                                "sso": int(net.sso) if net.sso is not None else 0,
+                                "hso": int(net.hso) if net.hso is not None else 0
+                            })
     
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
@@ -370,30 +372,39 @@ class LoadData:
         attributes = []
     
         for net in tqdm(self.rd_net):
-            coords = []
-            for pnt_id in net.id_pnts:
-                rp = self.rd_pt[pnt_id - 1]  # RidgePoint
-                if rp:
-                    x, y = self.transform * (rp.j / 2, rp.i / 2)
-                    coords.append((x + self.delta_x / 2, y - self.delta_y / 2))
-    
-            if len(coords) > 1:
-                lines.append(LineString(coords))
-    
-                attributes.append({
-                    "id_rdl": int(net.id_rdl),
-                    "nel": int(net.nel),
-                    "id_pnts": str(net.id_pnts)[:254],
-                    "length": float(net.length),
-                    "Zmean": float(net.Zmean),
-                    "nrdpt_down": int(net.nrdpt_down),
-                    "n_down": int(net.n_down),
-                    "Zmean_down": float(net.Zmean_down),
-                    "Z_diff": float(net.Zmean-net.Zmean_down) if net.Zmean_down > 0 else 0,
-                    "A_in": float((self.rd_pt[net.id_pnts[0]-1].A_in+1)*self.delta_x*self.delta_y),
-                    "A_in_min": float((self.rd_pt[net.id_pnts[0]-1].A_in_min+1)*self.delta_x*self.delta_y),
-                    "jun_el": int(net.jun_el)
-                })
+            if net.jun_el >0: #Permet de ne garder que les réseaux de crêtes correspondant aux bassins versantsfiltrés par le seuil HSO
+                coords = []
+                # for cnt_pnt in range(net.jun_el, net.nel): #!!!!!!J'hésite en tre les 2 : 
+                    #si on commence à jun_el on se rapproche du code Fortran mais on a un trou au saddle point
+                    #Mais ce n'est pas important à l'echelle ou ce sera utilisé et surtout on va filtrer la spread area qui est faible à ces endroits.
+                    #Mais cela crée des trou dans les ridges lines, ce qui est mauvais si je veux calculer la courbure.
+                for cnt_pnt in range(0, net.nel):
+
+
+                # for pnt_id in net.id_pnts:
+                    pnt_id = net.id_pnts[cnt_pnt]
+                    rp = self.rd_pt[pnt_id - 1]  # RidgePoint
+                    if rp:
+                        x, y = self.transform * (rp.j / 2, rp.i / 2)
+                        coords.append((x + self.delta_x / 2, y - self.delta_y / 2))
+        
+                if len(coords) > 1:
+                    lines.append(LineString(coords))
+        
+                    attributes.append({
+                        "id_rdl": int(net.id_rdl),
+                        "nel": int(net.nel),
+                        "id_pnts": str(net.id_pnts)[:254],
+                        "length": float(net.length),
+                        "Zmean": float(net.Zmean),
+                        "nrdpt_down": int(net.nrdpt_down),
+                        "n_down": int(net.n_down),
+                        "Zmean_down": float(net.Zmean_down),
+                        "Z_diff": float(net.Zmean-net.Zmean_down) if net.Zmean_down > 0 else 0,
+                        "A_in": float((self.rd_pt[net.id_pnts[0]-1].A_in+1)*self.delta_x*self.delta_y),
+                        "A_in_min": float((self.rd_pt[net.id_pnts[0]-1].A_in_min+1)*self.delta_x*self.delta_y),
+                        "jun_el": int(net.jun_el)
+                    })
     
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
@@ -413,33 +424,36 @@ class LoadData:
         attributes = []
     
         for net in tqdm(self.rd_net):
-            points_ids = net.id_pnts
-            for idx in range(len(points_ids) - 1):
-                rp1 = self.rd_pt[points_ids[idx] - 1]
-                rp2 = self.rd_pt[points_ids[idx + 1] - 1]
-    
-                if rp1 and rp2:
-                    A_last = (1 / (rp2.n_jun)) * self.delta_x * self.delta_y
-                    a_spread = (rp1.n_ptsa*0.5*self.delta_x*self.delta_y ) + A_last 
-                    
-                    if a_spread >= self.a_spread_threshold:
-                        x1, y1 = self.transform * (rp1.j / 2, rp1.i / 2)
-                        x2, y2 = self.transform * (rp2.j / 2, rp2.i / 2)
-                        line = LineString([
-                            (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
-                            (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
-                        ])
+            if net.jun_el >0: 
+                points_ids = net.id_pnts
+                # for idx in range(net.jun_el, net.nel - 1):
+                for idx in range(0, net.nel - 1):
+
+                    rp1 = self.rd_pt[points_ids[idx] - 1]
+                    rp2 = self.rd_pt[points_ids[idx + 1] - 1]
         
-                        lines.append(line)
-        
-                        attributes.append({
-                            "id_rdl": int(net.id_rdl),
-                            "start_pnt": int(rp1.id_pnt),
-                            "end_pnt": int(rp2.id_pnt),
-                            "length": float(line.length),
-                            "jun_el": int(net.jun_el),
-                            "A_spread": float(a_spread ) 
-                        })
+                    if rp1 and rp2:
+                        A_last = (1 / (rp2.n_jun)) * self.delta_x * self.delta_y
+                        a_spread = (rp1.n_ptsa*0.5*self.delta_x*self.delta_y ) + A_last 
+                        
+                        if a_spread >= self.a_spread_threshold:
+                            x1, y1 = self.transform * (rp1.j / 2, rp1.i / 2)
+                            x2, y2 = self.transform * (rp2.j / 2, rp2.i / 2)
+                            line = LineString([
+                                (x1 + self.delta_x / 2, y1 - self.delta_y / 2),
+                                (x2 + self.delta_x / 2, y2 - self.delta_y / 2)
+                            ])
+            
+                            lines.append(line)
+            
+                            attributes.append({
+                                "id_rdl": int(net.id_rdl),
+                                "start_pnt": int(rp1.id_pnt),
+                                "end_pnt": int(rp2.id_pnt),
+                                "length": float(line.length),
+                                "jun_el": int(net.jun_el),
+                                "A_spread": float(a_spread ) 
+                            })
     
         # Création du GeoDataFrame et exportation en fichier Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)

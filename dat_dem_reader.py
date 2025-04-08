@@ -189,9 +189,9 @@ if __name__ == "__main__":
     
     """geotiff to .dat"""
     #File path
-    tiff_dem_path = "../../QGIS/out/cordevole_debug_mini_mini.tif"
-    dat_dem_path = "../../out_scripts/cordevole_debug_mini_mini.dat"
-    dat_header_path = "../../out_scripts/cordevole_debug_mini_mini_header.dat"
+    tiff_dem_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
+    dat_dem_path = "../../out_scripts/cordevole_debug_riquiqui.dat"
+    dat_header_path = "../../out_scripts/cordevole_debug_riquiqui_header.dat"
     
     #Convert geotiff to .dat format
     geotiff_to_dat(tiff_dem_path, dat_dem_path, dat_header_path)

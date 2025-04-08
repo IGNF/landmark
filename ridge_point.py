@@ -14,6 +14,7 @@ from data_structures import RidgePoint, DrainagePoint, IDPointer
 from thal_net_hso_length import thal_net_hso_length
 from dpl_ss import dpl_ss
 from a_endo import a_endo
+from junc_update import junc_update
 
 
 
@@ -312,6 +313,7 @@ def find_ridge_neighbors(model):
     
     dpl_ss(model)
     a_endo(model)
+    junc_update(model)
     
     #Mise à jour des valeurs de mutual distance
     print("Update ridge points mutual distance")

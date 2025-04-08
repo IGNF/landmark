@@ -170,3 +170,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+#old scripts
+old/
+
+#Visual Studio Code
+.vs/

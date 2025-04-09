@@ -1,101 +1,110 @@
 # -*- coding: utf-8 -*-
 """
 Centralizes data structures and global parameters for hydrological analysis.
-From pnt_net.f90 Fortran code
+Originally translated and adapted from Fortran (pnt_net.f90).
 """
 
 
-# Data Structures
+# --- Pointer simulation classes ---
 
 class IDPointer:
-    """Simulates a pointer in Python by encapsulating a mutable value."""
+    """Wrapper class to simulate a mutable integer value (used to emulate pointers).
+
+    Attributes
+    ----------
+    value : int or None
+        Stored integer value.
+    """
     def __init__(self, value=None):
         self.value = value
 
 
 class ListPointer:
-    """Simulates a pointer to a list in Python by encapsulating a mutable list."""
+    """Wrapper class to simulate a mutable list (used to emulate pointer to list).
+
+    Attributes
+    ----------
+    value : list
+        Stored list.
+    """
     def __init__(self, value=None):
         if value is None:
             value = []
         self.value = value
-        
+
     def append(self, item):
         """Appends an item to the list."""
         self.value.append(item)
 
 
+# --- Domain-specific structures ---
 
 class DrainagePoint:
-    """
-    Class representing a drainage point, with attributes simulating pointers in Fortran.
+    """Represents a point in the drainage system.
 
-    Attributes:
-      i, j: int
-          Row and column indices in the DEM.
-      Z: float
-          Elevation of the point.
-      id_pnt: int
-          Unique identifier of the drainage point.
-      fldir: IDPointer
-          Identifier of the downstream point.
-      fldir_ss: IDPointer
-          Identifier of the downstream point in endorheic basins.
-      A_in: int
-          Inflow area in number of cells.
-      upl: float
-          Upslope path length.
-      dpl: float
-          Downslope path length.
-      sumdev: float
-          Cumulative deviation (used in flow direction calculations).
-      id_endo: int
-          Identifier of the endorheic basin, if applicable.
-      ninf: int
-          Number of inflow points.
-      inflow: list
-          List of identifiers of inflow points.
-      Linflow: list
-          List of upstream flow path lengths for each inflow.
-      Sinflow: list
-          List of deviations (or slopes) associated with each inflow.
-      id_ch: IDPointer
-          Identifier of the channel (or network) to which this point belongs.
+    Attributes
+    ----------
+    i, j : int
+        Row and column indices in the DEM.
+    Z : float
+        Elevation of the point.
+    id_pnt : IDPointer
+        Unique identifier of the drainage point.
+    fldir : IDPointer
+        Flow direction index (point id).
+    fldir_ss : IDPointer
+        Secondary flow direction index.
+    A_in : int
+        Inflow area in number of cells.
+    upl : float
+        Upland path length.
+    dpl : float
+        Downslope path length.
+    sumdev : float
+        Cumulative elevation deviation.
+    id_endo : IDPointer
+        Associated endorheic basin ID.
+    ninf : int
+        Number of inflow directions.
+    inflow, Linflow, Sinflow : ListPointer
+        IDs, lengths, and slopes of inflow segments.
+    id_ch : IDPointer
+        Associated channel ID.
     """
     def __init__(self, i, j, Z, id_pnt):
         self.i = i
         self.j = j
         self.Z = Z
         self.id_pnt = IDPointer(id_pnt)
-        self.fldir = IDPointer(None)      # Simulates a pointer
-        self.fldir_ss = IDPointer(None)   # Simulates a pointer
+        self.fldir = IDPointer(None)
+        self.fldir_ss = IDPointer(None)
         self.A_in = 0
         self.upl = 0.0
         self.dpl = 0.0
         self.sumdev = 0.0
         self.id_endo = IDPointer(0)
         self.ninf = 0
-        self.inflow = ListPointer()  # Simulates a pointer to a list
+        self.inflow = ListPointer()
         self.Linflow = ListPointer()
         self.Sinflow = ListPointer()
-        self.id_ch = IDPointer(None)  # Simulates a pointer
+        self.id_ch = IDPointer(None)
 
     def __repr__(self):
         attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
-    
-    
+
+
 class DrainagePointInflow:
+    """Represents inflow data for a drainage point during network construction.
+
+    Attributes
+    ----------
+    ninf : int
+        Number of inflow directions.
+    inflow : list of int
+        IDs of the inflow points.
     """
-    Class needed in drainage network saddle spill construction.
-    Attributes:
-      ninf: int
-          Number of inflow points.
-      inflow: list
-          List of identifiers of inflow points.
-    """
-    
     def __init__(self):
         self.ninf = 0
         self.inflow = []
@@ -105,67 +114,62 @@ class DrainagePointInflow:
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
 
-        
 
 class DrainageNetwork:
+    """Represents a drainage network or channel composed of drainage points.
+
+    Attributes
+    ----------
+    id_ch : IDPointer
+        Identifier of the channel.
+    nel : int
+        Number of points.
+    id_pnts : ListPointer
+        List of drainage point IDs.
+    id_start_pt, id_end_pt : IDPointer
+        IDs of the start and end points of the channel.
+    length : float
+        Total channel length.
+    id_ch_out : IDPointer
+        Downstream channel ID.
+    n_jun : int
+        Number of upstream tributaries.
+    id_in : ListPointer
+        List of IDs of upstream channels.
+    n_path : int
+        Number of segments in downstream path.
+    id_path : list of int
+        IDs of channels in the downstream path.
+    id_endo : IDPointer
+        Endorheic basin ID if any.
+    sso, hso : int
+        Stream segment and Horton orders.
     """
-    Represents a drainage network (or channel) composed of several drainage points.
-    
-    Attributes:
-      id_ch: int
-          Identifier of the channel.
-      nel: int
-          Number of points of the channel
-      id_pnts: list
-          List of identifiers of drainage points belonging to the channel.
-      id_start_pt: int
-          Identifier of the head point of the channel.
-      id_end_pt: int
-          Identifier of the terminal point of the channel.
-      length: float
-          Total length of the channel.
-      id_ch_out: int
-          Identifier of the main channel (for outflow direction).
-      n_jun: int
-          Number of tributaries (number of upstream connected channels).
-      id_in: list
-          List of identifiers of tributary channels.
-      n_path: int
-          Number of flow paths (optional, for additional analyses).
-      id_path: int
-          id of the downslope channel path.
-      id_endo: int
-          id of endorheic basin that the current channel belongs.
-      sso: int
-          Sttrhaler Stream Order for hso calculation, at the end sso=hso.
-      hso: int
-          Horton Stream Order
-    """
-    def __init__(self, id_ch = None, nel = 0):
-        self.id_ch = IDPointer(id_ch)  # Simulates a pointer
+    def __init__(self, id_ch=None, nel=0):
+        self.id_ch = IDPointer(id_ch)
         self.nel = nel
-        self.id_pnts = ListPointer()  # Simulates a pointer to a list of points
-        self.id_start_pt = IDPointer(None)  # Simulates a pointer
-        self.id_end_pt = IDPointer(None)  # Simulates a pointer
+        self.id_pnts = ListPointer()
+        self.id_start_pt = IDPointer(None)
+        self.id_end_pt = IDPointer(None)
         self.length = 0.0
-        self.id_ch_out = IDPointer(None)  # Simulates a pointer
+        self.id_ch_out = IDPointer(None)
         self.n_jun = 0
-        self.id_in = ListPointer()  # Simulates a pointer to a list
+        self.id_in = ListPointer()
         self.n_path = 0
         self.id_path = []
-        self.id_endo = IDPointer(0)  # Simulates a pointer
+        self.id_endo = IDPointer(0)
         self.sso = None
         self.hso = None
-        
+
     def __repr__(self):
         attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
+
         
 
 class EndoPoint:
-    """
-    Represents an endorheic (closed-basin) point or an outflow point for endorheic basins.
+    """Represents an endorheic (closed-basin) point or an outflow point for endorheic basins.
     
     Attributes:
       id_eo: int
@@ -178,16 +182,16 @@ class EndoPoint:
           Number of saddles (if applicable).
       beyo_sad: list (optional)
           List of identifiers of points located on the other side of the saddle (if needed).
-      idms: list (optional)
+      idms: list
           List of identifiers of saddle minima.
     """
     def __init__(self):
-        self.id_eo = IDPointer()  # Simulates a pointer
-        self.id_pnt = IDPointer()  # Simulates a pointer
+        self.id_eo = IDPointer() 
+        self.id_pnt = IDPointer() 
         self.bas_type = None
         self.nsaddle = None
-        self.beyo_sad = ListPointer()  # Simulates a pointer to a list
-        self.idms = ListPointer()  # Simulates a pointer to a list
+        self.beyo_sad = ListPointer() 
+        self.idms = ListPointer() 
     
     def __repr__(self):
         attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
@@ -197,31 +201,55 @@ class EndoPoint:
     
 
 class RidgePoint:
-    """
-    Ridge point class, equivalent to `rd_pt_type` in Fortran.
-    Represents a point on the ridgeline network with associated attributes.
+    """Represents a point on the ridgeline network.
+
+    Attributes
+    ----------
+    i, j : int
+        Indices in the working matrix (may differ from DEM grid).
+    Z : float
+        Elevation.
+    id_pnt : int
+        Unique ridge point ID.
+    md : float
+        Minimum mutual distance between associated drainage points.
+    id_drpt1, id_drpt2 : IDPointer
+        IDs of neighboring drainage points.
+    A_in, A_in_min : float
+        Max and min inflow areas from drainage neighbors.
+    nen, n_jun : int
+        Number of neighbors and junctions.
+    id_neigh : list
+        IDs of neighboring ridge points.
+    id_sdl : int
+        ID of associated saddle point.
+    nrdl : int
+        Number of ridge segments connected.
+    id_rdl : list
+        IDs of connected ridge segments.
+    junc : int
+        Junction flag (0: no junction, 1: junction).
+    n_ptsa : float
+        Number of points used for area estimation.
     """
     def __init__(self, i, j, Z, id_pnt):
-        self.i = i  # Row index in mat_id (not necessarily the same as DEM grid indices)
-        self.j = j  # Column index in mat_id
-        self.Z = Z  # Elevation of the ridge point
-        self.id_pnt = id_pnt # Unique identifier of this ridge point
-        
-        self.md = None  # Mutual distance between two drainage points
-        self.id_drpt1 = IDPointer(None) # ID of the first neighboring drainage point
-        self.id_drpt2 = IDPointer(None)  # ID of the second neighboring drainage point
-        self.A_in = None  # Maximum inflow area between the two drainage points
-        self.A_in_min = None  # Minimum inflow area of the two drainage points
-        
-        self.nen = 0  # Number of neighboring points
-        self.n_jun = 0  # Number of junctions (equals `nen` in Fortran)
-        self.id_neigh = []  # List of neighboring ridge points
-        self.id_sdl = None  # ID of the corresponding saddle point
-        
-        self.nrdl = 0  # Number of ridgeline segments this point belongs to
-        self.id_rdl = [None, None, None, None]  # List of ridgeline IDs associated with this point
-        self.junc = 0  # Junction flag (0 = no junction, 1 = junction)
-        self.n_ptsa = 1  # Number of ridge points defining the spread area (related to DEM resolution)
+        self.i = i
+        self.j = j
+        self.Z = Z
+        self.id_pnt = id_pnt
+        self.md = None
+        self.id_drpt1 = IDPointer(None)
+        self.id_drpt2 = IDPointer(None)
+        self.A_in = None
+        self.A_in_min = None
+        self.nen = 0
+        self.n_jun = 0
+        self.id_neigh = []
+        self.id_sdl = None
+        self.nrdl = 0
+        self.id_rdl = [None, None, None, None]
+        self.junc = 0
+        self.n_ptsa = 1
 
     def __repr__(self):
         attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
@@ -230,21 +258,29 @@ class RidgePoint:
 
 
 class SaddlePoint:
-    """
-    Saddle point class, equivalent to `sdl_pt_type` in Fortran.
-    Represents a saddle point connecting different drainage areas.
+    """Represents a saddle point connecting ridges and drainage basins.
+
+    Attributes
+    ----------
+    id_pnt : int
+        Saddle point ID.
+    id_rdpt, id_rdpt2 : int
+        IDs of associated ridge points.
+    id_cis_endo : IDPointer
+        Endorheic basin ID (cis-side).
+    id_trans_out : IDPointer
+        Downstream outflow ID (trans-side).
+    A_endo : float
+        Associated endorheic area.
     """
     def __init__(self, id_pnt):
-        self.id_pnt = id_pnt  # Unique identifier of the saddle point
-    
-        self.id_rdpt = 0  # ID of the corresponding ridge point (linked to `rd_pt.id_pnt`)
-        self.id_rdpt2 = 0 # ID of the secondary ridge point if the saddle is split
-    
-        self.id_cis_endo = IDPointer(None)  # ID of the endorheic basin on one side of the saddle
-        self.id_trans_out = IDPointer(None)  # ID of the outflow point for the other side of the saddle
-    
-        self.A_endo = None  # Area of the endorheic basin affected by the saddle
-    
+        self.id_pnt = id_pnt
+        self.id_rdpt = 0
+        self.id_rdpt2 = 0
+        self.id_cis_endo = IDPointer(None)
+        self.id_trans_out = IDPointer(None)
+        self.A_endo = None
+
     def __repr__(self):
         attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
                       for key, value in vars(self).items()}
@@ -253,12 +289,18 @@ class SaddlePoint:
 
 
 class OutNetwork:
-    """
-    Class representing an outflow network, with attributes simulating pointers in Fortran.
+    """Represents an outflow network composed of drainage point IDs.
+
+    Attributes
+    ----------
+    nel : int
+        Number of points.
+    id_pnts : ListPointer
+        List of drainage point IDs.
     """
     def __init__(self, nel):
-        self.nel = nel # Number of points of of the channel
-        self.id_pnts = ListPointer()  # Each points to the point in the dr_pt
+        self.nel = nel
+        self.id_pnts = ListPointer()
 
     def __repr__(self):
         attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
@@ -268,21 +310,40 @@ class OutNetwork:
 
 
 class RidgeNetwork:
-    """
-    Ridge network class, equivalent to `rd_net_type` in Fortran.
-    Represents a ridgeline segment with associated attributes.
+    """Represents a segment of a ridgeline in the topographic network.
+
+    Attributes
+    ----------
+    id_rdl : int
+        Ridgeline ID.
+    length : float
+        Total length of the ridgeline.
+    nel : int
+        Number of points in the ridgeline.
+    id_pnts : list of int
+        List of ridge point IDs.
+    Zmean : float
+        Mean elevation.
+    nrdpt_down : int
+        Number of connected downstream ridge points.
+    n_down : int
+        Number of downstream ridge segments.
+    Zmean_down : float
+        Mean elevation of connected downstream segments.
+    jun_el : int
+        Index of the junction point within the segment.
     """
     def __init__(self, id_rdl):
-        self.id_rdl = id_rdl  # Unique identifier of the ridgeline segment
-        self.length = 0.0  # Length of the ridgeline segment
-        self.nel = 0  # Number of points in the ridgeline
-        self.id_pnts = []  # List of point IDs in the ridgeline
-        self.Zmean = 0.0  # Mean elevation of the ridgeline
-        self.nrdpt_down = 0  # Number of ridge points connected, including the current ridge
-        self.n_down = 0  # Number of ridges connected to this ridge segment
-        self.Zmean_down = 0.0  # Mean elevation of the ridges connected to this one
-        self.jun_el = 0  # Index of the ridgeline element that serves as a junction
-        
+        self.id_rdl = id_rdl
+        self.length = 0.0
+        self.nel = 0
+        self.id_pnts = []
+        self.Zmean = 0.0
+        self.nrdpt_down = 0
+        self.n_down = 0
+        self.Zmean_down = 0.0
+        self.jun_el = 0
+
     def __repr__(self):
         attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
                       for key, value in vars(self).items()}

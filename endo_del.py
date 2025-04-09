@@ -10,32 +10,49 @@ from data_structures import SaddlePoint
 
 
 def endo_del(model):
-    """
-    Delineates endorheic basins by processing ridge points whose mutual distance is equal to a very high value.
-    For each ridge point (rd_pt) whose md attribute equals a large value (1e10),
-    the function calls find_saddle to find or create saddle points.
+    """Delineates endorheic basins by processing ridge points whose mutual distance is extremely high.
+
+    For each ridge point (from model.rd_pt) whose `md` attribute equals a threshold value (1e10),
+    this function infers that the two associated drainage points belong to different basins.
+    It then creates saddle points (if not already present) by calling `find_saddle`.
+
+    Parameters
+    ----------
+    model : object
+        Hydrological model containing ridge points (model.rd_pt),
+        drainage points (model.dr_pt), drainage networks (model.dr_net),
+        and storing created saddle points into model.sdl_pt.
     """
 
-    # Initialize the list of saddle points.
-    model.sdl_pt = []  # List of SaddlePoint objects.
-    cnt_sdl = 0       # Counter for saddle points.
+    # Initialize the list of saddle points (to be filled).
+    model.sdl_pt = []   # Will store SaddlePoint objects.
+    cnt_sdl = 0         # Saddle point counter.
 
+    # Iterate over all ridge points
     for i in tqdm(range(len(model.rd_pt))):
         rp = model.rd_pt[i]
+
+        # Process only ridge points whose mutual distance is infinite.
+        # These likely separate two different basins (e.g. at the boundary).
         if rp.md == 1e10:
-            # Retrieve id_eo1 and id_eo2:
-            # For id_eo1: access the DrainagePoint corresponding to rd.id_drpt1, then get its channel, then endo id.
-            id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
-            id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
+
+            # Get the endorheic basin ID for each associated drainage point.
+            id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1.value - 1].id_ch.value - 1].id_endo.value
+            id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2.value - 1].id_ch.value - 1].id_endo.value
+
+            # First pass: record saddle in direction id_eo1 → id_eo2
             sdl_mem = 1
             cnt_sdl = find_saddle(rp.id_pnt, id_eo1, id_eo2, sdl_mem, model, cnt_sdl)
+
+            # Second pass: record reverse direction id_eo2 → id_eo1
             sdl_mem = 0
             cnt_sdl = find_saddle(rp.id_pnt, id_eo2, id_eo1, sdl_mem, model, cnt_sdl)
-    
+
+    # Assign the coordinates and elevation to each saddle point using its associated ridge point.
     for sd_pt in model.sdl_pt:
-        sd_pt.i = model.rd_pt[sd_pt.id_rdpt-1].i
-        sd_pt.j = model.rd_pt[sd_pt.id_rdpt-1].j
-        sd_pt.Z = model.rd_pt[sd_pt.id_rdpt-1].Z
+        sd_pt.i = model.rd_pt[sd_pt.id_rdpt - 1].i
+        sd_pt.j = model.rd_pt[sd_pt.id_rdpt - 1].j
+        sd_pt.Z = model.rd_pt[sd_pt.id_rdpt - 1].Z
 
 
             

@@ -53,22 +53,6 @@ def find_ridge_neighbors(model):
     right = np.roll(ridge_mask, shift=-1, axis=1)  
     right[:,-1] = False
     
-    # bottom_left = np.roll(np.roll(ridge_mask, shift=-1, axis=0), shift=1, axis=1) 
-    # bottom_left[-1, :] = False  
-    # bottom_left[:, 0] = False 
-    
-    # bottom_right = np.roll(np.roll(ridge_mask, shift=-1, axis=0), shift=-1, axis=1) 
-    # bottom_right[-1, :] = False  
-    # bottom_right[:, -1] = False 
-    
-    # top_right = np.roll(np.roll(ridge_mask, shift=1, axis=0), shift=-1, axis=1) 
-    # top_right[0, :] = False  
-    # top_right[:, -1] = False 
-    
-    # top_left = np.roll(np.roll(ridge_mask, shift=1, axis=0), shift=1, axis=1) 
-    # top_left[0, :] = False  
-    # top_left[:, 0] = False 
-
 
 
     # Iterate over ridge points and assign neighbors based on the computed neighbor mask
@@ -315,7 +299,7 @@ def find_ridge_neighbors(model):
     a_endo(model)
     junc_update(model)
     
-    #Mise à jour des valeurs de mutual distance
+    #Mutual distance update
     print("Update ridge points mutual distance")
     for rp in tqdm(model.rd_pt, desc="Calculating md for ridge points"):
         if model.dr_pt[rp.id_drpt1.value-1].dpl > 0 and model.dr_pt[rp.id_drpt2.value-1].dpl > 0:

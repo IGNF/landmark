@@ -5,42 +5,41 @@ This code translates the Fortran subroutine 'mutual_dist' (and its helper 'md')
 into Python. It assumes that the hydrological model (model) contains the following:
   - model.N, model.M: dimensions of the DEM.
   - model.mat_id: 2D numpy array (size (2*N-1, 2*M-1)) containing DrainagePoint objects.
-  - model.dr_pt_by_id: dict mapping drainage point id (dp.id_pnt) to the DrainagePoint object.
-  - model.dr_net_by_id: dict mapping channel id (net.id_ch) to the DrainageNetwork object.
   - model.dr_pt: list of all DrainagePoint objects.
   - model.dr_net: list of all DrainageNetwork objects.
 """
 
-import time
 from tqdm import tqdm
 
 from data_structures import RidgePoint
 
 
 def mutual_dist(model):
-    """
-    Computes the mutual distances (the "rejunction paths") for each ridge point.
-    It creates a list of ridge points (rd_pt) and fills in their attributes based on the 
-    drainage points in the matrix model.mat_id.
-    
-    The procedure is performed separately for:
-      - Vertical cardinal directions,
-      - Horizontal cardinal directions,
-      - Diagonal directions.
-    
-    The function updates model.rd_pt (a list of RidgePoint objects) and prints timing information.
-    
+    """Compute the mutual distance (md) for each ridge point in the grid.
+
+    This function scans through the model's grid and identifies potential ridge points
+    by examining neighboring drainage points in cardinal and diagonal directions.
+    For each valid ridge point, it computes the mutual distance using the `md` function
+    and adds the resulting RidgePoint to `model.rd_pt`.
+
     Parameters
     ----------
     model : object
-         The hydrological model object containing:
-            - N, M: dimensions (used to iterate over the mat_id grid of size (2*N-1, 2*M-1))
-            - mat_id: 2D numpy array with DrainagePoint objects at positions (i*2-1, j*2-1)
-            - dr_pt_by_id: dict mapping drainage point id -> DrainagePoint
-            - dr_net_by_id: dict mapping channel id -> DrainageNetwork
-            - dr_pt: list of DrainagePoint objects.
-    """
+        The hydrological model object with the following attributes:
 
+        - N, M : int
+            Grid dimensions.
+        - mat_id : np.ndarray
+            2D grid of objects including DrainagePoint and RidgePoint.
+        - dr_pt : list
+            List of DrainagePoint objects.
+        - dr_net : list
+            List of DrainageNetwork objects.
+
+    Returns
+    -------
+    None
+    """
     cnt_rdpt = 0  # counter for ridge points
     rd_pt = []
     N2 = model.N * 2 - 1
@@ -196,8 +195,7 @@ def mutual_dist(model):
 
 
 def md(dp1, dp2, model):
-    """
-    Computes the mutual distance (mutdist) between two drainage points (dp1 and dp2)
+    """Computes the mutual distance (mutdist) between two drainage points (dp1 and dp2)
     using the channel path information stored in their respective drainage networks.
     
     Parameters
@@ -206,13 +204,15 @@ def md(dp1, dp2, model):
          The two drainage points (identified by their id_pnt) whose mutual distance is to be computed.
     model : object
          The hydrological model object containing:
-           - dr_pt_by_id: dict mapping id_pnt -> DrainagePoint
-           - dr_net_by_id: dict mapping channel id -> DrainageNetwork
+        - dr_pt : list
+            List of DrainagePoint objects.
+        - dr_net : list
+            List of DrainageNetwork objects.
            
     Returns
     -------
     mutdist : float
-         The computed mutual distance. A very high value (e.g. 1e11) is returned if the two points belong to different basins.
+         The computed mutual distance. A very high value (e.g. 1e10) is returned if the two points belong to different basins.
     """
     curr_ch1 = dp1.id_ch
     curr_ch2 = dp2.id_ch
@@ -233,15 +233,6 @@ def md(dp1, dp2, model):
     for cnt_path in range(min_n_pth, 0, -1): 
         curr_cnt1 = cnt_path + n_path1 - min_n_pth  
         curr_cnt2 = cnt_path + n_path2 - min_n_pth
-        # print("\nn_path1 : ", n_path1)
-        # print("\nn_path2 : ", n_path2)
-
-        
-        # print("\ncurr_cnt1 : ", curr_cnt1)
-        # print("\ncurr_cnt2 : ", curr_cnt2)
-
-        # print(f'\nnet1.id_path : {[i.value for i in net1.id_path]}')
-        # print(f'\nnet2.id_path : {[i.value for i in net2.id_path]}')
         if net1.id_path[curr_cnt1 - 1] == net2.id_path[curr_cnt2 - 1]:
             n_com += 1
     
@@ -271,8 +262,6 @@ def md(dp1, dp2, model):
                 if (n_path2 == min_n_pth) and (n_path1 != n_path2):
                     jun2 = dp2.id_pnt.value
                 else:
-                    # print("dp1.id_pnt.value :",dp1.id_pnt.value )
-                    # print("dp2.id_pnt.value :",dp2.id_pnt.value )
                     jun2_channel_id = net2.id_path[n_path2 - n_com - 1]
                     jun2 = model.dr_net[jun2_channel_id-1].id_end_pt.value
             if (jun1 is None) or (jun2 is None):

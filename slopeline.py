@@ -5,19 +5,17 @@ Module for constructing drainage networks (slopelines) based on the D8-LTD algor
 This module uses the previously loaded DEM data (via the model) and calls the D8_LTD algorithm.
 """
 
-import time
 from math import sqrt
 import numpy as np
 from tqdm import tqdm
 
 # Import the data structures.
 from data_structures import DrainageNetwork, EndoPoint, IDPointer, ListPointer
-
+from hydro_utils_cython import d8_ltd_cython
 
 
 def calculate_slopelines(model):
-    """
-    Constructs drainage networks (slopelines) by processing each drainage point.
+    """Constructs drainage networks (slopelines) by processing each drainage point.
     For each point (processed in descending order of elevation), the function:
       - If the point has upstream inflows (ninf > 0), updates the corresponding drainage network.
       - If the point has no inflows, it is treated as a channel head and a new network is created.
@@ -35,12 +33,12 @@ def calculate_slopelines(model):
            - delta_x, delta_y: grid spacings
            - nodata: no-data value for the DEM
     """
-    start_time = time.process_time()
     
     # Initialize drainage network and endorheic lists.
-    model.dr_net = []      # List of DrainageNetwork objects.
+    model.dr_net = [None] * len(model.dr_pt)      # List of DrainageNetwork objects.
     model.l_endo_pt = []     # List of EndoPoint objects.
     model.endorheic_count = 0  # Counter for endorheic points.
+    inet = 0
     
         
     for id_dr in tqdm(model.qoi[::-1], desc="Building drainage networks", unit="point"):
@@ -78,7 +76,8 @@ def calculate_slopelines(model):
     
         else:
             # Handling drainage points with no inflows (channel head)
-            new_channel_id = len(model.dr_net) + 1
+            inet += 1
+            new_channel_id = inet
             dp.id_ch = IDPointer(new_channel_id)
             net = DrainageNetwork(
                 id_ch=new_channel_id,
@@ -96,9 +95,23 @@ def calculate_slopelines(model):
             net.sso=None
             net.hso=None
             
-            model.dr_net.append(net)
+            model.dr_net[inet-1] = net
         
         # --- Compute drainage direction using D8_LTD ---
+        # i = dp.i
+        # j = dp.j
+        # sumdev_in = dp.sumdev
+        # mat_id = model.mat_id
+        # N = model.N
+        # M = model.M
+        # delta_x = model.delta_x
+        # delta_y = model.delta_y
+        # nodata = model.nodata
+        # i_out, j_out, ndfl, sumdev = d8_ltd_cython(
+        #     i, j, sumdev_in,
+        #     mat_id, N, M,
+        #     delta_x, delta_y, nodata
+        # )
         i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)
         
         if i_out is not None and j_out is not None:
@@ -130,15 +143,7 @@ def calculate_slopelines(model):
             endo.nsaddle=0
             
             model.l_endo_pt.append(endo)
+            
+            
+    model.dr_net = model.dr_net[:inet]
         
-   
-    
-    finish_time = time.process_time()
-    elapsed_time = finish_time - start_time
-    hours = int(elapsed_time // 3600)
-    minutes = int((elapsed_time % 3600) // 60)
-    seconds = elapsed_time % 60
-    print(f"Elapsed time: {hours}h {minutes}m {seconds:.2f}s")
-
-
-

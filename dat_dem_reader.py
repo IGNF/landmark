@@ -111,8 +111,7 @@ def export_to_geotiff(output_path: str, dem: np.ndarray, metadata: Dict[str, flo
 
 
 def geotiff_to_dat(geotiff_path: str, output_dat_path: str, output_header_path: str):
-    """
-    Converts a GeoTIFF file to .dat format and creates a corresponding header.dat file.
+    """Converts a GeoTIFF file to .dat format and creates a corresponding header.dat file.
 
     Parameters
     ----------
@@ -172,9 +171,9 @@ if __name__ == "__main__":
     
     """.dat to geotiff"""
     # #file path
-    # header_path  = "../../out_scripts/cordevole_extrait_coord_header.dat"
-    # dat_dem_path = "../../out_scripts/cordevole_extrait_coord.dat"
-    # tiff_dem_path = "../../out_scripts_test_temp/cordevole_extrait_cooord_from_dat.tif"
+    # header_path  = "./header.dat"
+    # dat_dem_path = "./dtm.dat"
+    # tiff_dem_path = "./dtm_from_dat.tif"
     
     
     # #header info extraction
@@ -189,9 +188,9 @@ if __name__ == "__main__":
     
     """geotiff to .dat"""
     #File path
-    tiff_dem_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
-    dat_dem_path = "../../out_scripts/cordevole_debug_riquiqui.dat"
-    dat_header_path = "../../out_scripts/cordevole_debug_riquiqui_header.dat"
+    tiff_dem_path = "./dtm.tif"
+    dat_dem_path = "./dtm.dat"
+    dat_header_path = "./header.dat"
     
     #Convert geotiff to .dat format
     geotiff_to_dat(tiff_dem_path, dat_dem_path, dat_header_path)

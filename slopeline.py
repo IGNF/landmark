@@ -97,7 +97,7 @@ def calculate_slopelines(model):
             
             model.dr_net[inet-1] = net
         
-        # --- Compute drainage direction using D8_LTD ---
+        #--- Compute drainage direction using D8_LTD ---
         # i = dp.i
         # j = dp.j
         # sumdev_in = dp.sumdev

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     
     #Shapefiles path
     slopelines_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test"
-    slopelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test_cython"
+    slopelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test_cython_debug"
 
     drainage_points_HSO_shapefile_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test"
     
@@ -88,26 +88,26 @@ if __name__ == "__main__":
     calculate_slopelines(model_geotiff)
     
         
-    print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
-    dpl(model_geotiff)
+    # print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
+    # dpl(model_geotiff)
     
-    print ("calculates the mutual distance between the two neighbor drainage points")
-    mutual_dist(model_geotiff)
+    # print ("calculates the mutual distance between the two neighbor drainage points")
+    # mutual_dist(model_geotiff)
     
     
-    print("Delineating endorheic basins")
-    endo_del(model_geotiff)
+    # print("Delineating endorheic basins")
+    # endo_del(model_geotiff)
         
     
-    print("Connect basin by sadlle spill")
-    saddle_spill(model_geotiff)
+    # print("Connect basin by sadlle spill")
+    # saddle_spill(model_geotiff)
     
      
-    print("Define the relationship between ridge points")
-    find_ridge_neighbors(model_geotiff)
+    # print("Define the relationship between ridge points")
+    # find_ridge_neighbors(model_geotiff)
 
-    print("Ridge hierarchization")
-    ridge_hier(model_geotiff)
+    # print("Ridge hierarchization")
+    # ridge_hier(model_geotiff)
     
     
     
@@ -121,8 +121,8 @@ if __name__ == "__main__":
     # print("Export slopelines HSO to shapefile")
     # model_geotiff.export_slopelines_to_shapefile(slopelines_HSO_shapefile_path)
     
-    print("Export slopelines single element HSO to shapefile")
-    model_geotiff.export_slopelines_single_element_to_shapefile(slopelines_se_HSO_shapefile_path)
+    # print("Export slopelines single element HSO to shapefile")
+    # model_geotiff.export_slopelines_single_element_to_shapefile(slopelines_se_HSO_shapefile_path)
 
     
     # print("Export saddle points in shapefile")
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     # print("Export ridgelines HSO to shapefile")
     # model_geotiff.export_ridgelines_to_shapefile(ridgelines_HSO_shapefile_path)
     
-    print("Export ridgelines single element HSO to shapefile")
-    model_geotiff.export_ridgelines_single_element_to_shapefile(ridgelines_se_HSO_shapefile_path)
+    # print("Export ridgelines single element HSO to shapefile")
+    # model_geotiff.export_ridgelines_single_element_to_shapefile(ridgelines_se_HSO_shapefile_path)
 
     

@@ -250,7 +250,7 @@ def md(dp1, dp2, model):
                 jun2_channel_id = net2.id_path[n_path2 - n_com - 1]
                 #id of the first point of the path #1 belonging to the same path after the rejunction
                 jun1 = model.dr_net[jun1_channel_id-1].id_end_pt.value
-                #d of the first point of the path #2 belonging to the same path after the rejunction
+                #id of the first point of the path #2 belonging to the same path after the rejunction
                 jun2 = model.dr_net[jun2_channel_id-1].id_end_pt.value
             else:
                 #the two points belongs to the same basin

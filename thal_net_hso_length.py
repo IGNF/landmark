@@ -44,13 +44,15 @@ def thal_net_hso_length(model, river_mask):
 
     # ▸ Step 2: Reinitialize pointers and structures (VERY SLOW)
     print("Reset id_ch, inflow, Linflow")
+    # for dp in tqdm(model.dr_pt):
+    #     dp.id_ch = IDPointer()
+    #     dp.inflow = ListPointer()
+    #     dp.Linflow = ListPointer()
     for dp in tqdm(model.dr_pt):
-        dp.id_ch = IDPointer()
-        dp.inflow = ListPointer()
-        dp.Linflow = ListPointer()
+        dp.reset_flow_data()
 
     # ▸ Step 3: Prepare clean containers
-    model.dr_net = []
+    del(model.dr_net)
     dr_net = [DrainageNetwork() for _ in tqdm(range(len(model.dr_pt)), desc="Drainage network reset")]
     dr_pt_in = [DrainagePointInflow() for _ in tqdm(range(len(model.dr_pt)), desc="Temporary drainage points")]
     model.mat_id = np.where(river_mask, None, model.mat_id)

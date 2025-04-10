@@ -30,8 +30,8 @@ class HydroModel(LoadData, SlopelineMixin):
 
 if __name__ == "__main__":
 
-    dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
-    # dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
+    # dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
+    dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
     # dtm_path = "../../QGIS/out/cordevole_extrait/cordevole_extrait_extrait.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_mini.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     ridge_points_HSO_shapefile_path = f"../../out_scripts_test_temp/ridge_points_HSO{file_name[:-4]}_test"
     
     ridgelines_HSO_shapefile_path = f"../../out_scripts_test_temp/ridgelines_HSO_{file_name[:-4]}_test"
-    ridgelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test_cython"
+    ridgelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test_cython_debug"
     
     
     saddle_points_HSO_shapefile_path = f"../../out_scripts_test_temp/saddle_points_HSO_filtre_{file_name[:-4]}_test"
@@ -88,26 +88,26 @@ if __name__ == "__main__":
     calculate_slopelines(model_geotiff)
     
         
-    # print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
-    # dpl(model_geotiff)
+    print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
+    dpl(model_geotiff)
     
-    # print ("calculates the mutual distance between the two neighbor drainage points")
-    # mutual_dist(model_geotiff)
+    print ("calculates the mutual distance between the two neighbor drainage points")
+    mutual_dist(model_geotiff)
     
     
-    # print("Delineating endorheic basins")
-    # endo_del(model_geotiff)
+    print("Delineating endorheic basins")
+    endo_del(model_geotiff)
         
     
-    # print("Connect basin by sadlle spill")
-    # saddle_spill(model_geotiff)
+    print("Connect basin by sadlle spill")
+    saddle_spill(model_geotiff)
     
      
-    # print("Define the relationship between ridge points")
-    # find_ridge_neighbors(model_geotiff)
+    print("Define the relationship between ridge points")
+    find_ridge_neighbors(model_geotiff)
 
-    # print("Ridge hierarchization")
-    # ridge_hier(model_geotiff)
+    print("Ridge hierarchization")
+    ridge_hier(model_geotiff)
     
     
     

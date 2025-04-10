@@ -88,6 +88,16 @@ class DrainagePoint:
         self.Linflow = ListPointer()
         self.Sinflow = ListPointer()
         self.id_ch = IDPointer(None)
+        
+    def reset_flow_data(self):
+        """Resets flow-related attributes (id_ch, inflow, Linflow) to initial state.
+    
+        This method clears any existing hydrological path information while preserving
+        object references (pointers are not replaced, only their content is reset).
+        """
+        self.id_ch.value = None
+        self.inflow.value.clear()
+        self.Linflow.value.clear()
 
     def __repr__(self):
         attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)

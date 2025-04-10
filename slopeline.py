@@ -114,7 +114,7 @@ def calculate_slopelines(model):
         )
         # i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)
         
-        if i_out is not None and j_out is not None:
+        if i_out >= 0 and j_out >= 0:
             # Retrieve the drainage point corresponding to the outflow direction.
             out_dp = model.mat_id[i_out * 2, j_out * 2]
             if out_dp is not None:

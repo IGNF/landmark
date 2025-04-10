@@ -98,21 +98,21 @@ def calculate_slopelines(model):
             model.dr_net[inet-1] = net
         
         #--- Compute drainage direction using D8_LTD ---
-        # i = dp.i
-        # j = dp.j
-        # sumdev_in = dp.sumdev
-        # mat_id = model.mat_id
-        # N = model.N
-        # M = model.M
-        # delta_x = model.delta_x
-        # delta_y = model.delta_y
-        # nodata = model.nodata
-        # i_out, j_out, ndfl, sumdev = d8_ltd_cython(
-        #     i, j, sumdev_in,
-        #     mat_id, N, M,
-        #     delta_x, delta_y, nodata
-        # )
-        i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)
+        i = dp.i
+        j = dp.j
+        sumdev_in = dp.sumdev
+        mat_id = model.mat_id
+        N = model.N
+        M = model.M
+        delta_x = model.delta_x
+        delta_y = model.delta_y
+        nodata = model.nodata
+        i_out, j_out, ndfl, sumdev = d8_ltd_cython(
+            i, j, sumdev_in,
+            mat_id, N, M,
+            delta_x, delta_y, nodata
+        )
+        # i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)
         
         if i_out is not None and j_out is not None:
             # Retrieve the drainage point corresponding to the outflow direction.

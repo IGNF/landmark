@@ -72,8 +72,8 @@ if __name__ == "__main__":
     
 
         
-    # model_geotiff = LoadData()
-    model_geotiff = HydroModel()
+    model_geotiff = LoadData()
+    # model_geotiff = HydroModel()
     model_geotiff.main_channel_choice = main_channel_choice
     model_geotiff.type_of_landscape = type_of_landscape
     model_geotiff.a_spread_threshold = A_spread

@@ -30,8 +30,8 @@ class HydroModel(LoadData, SlopelineMixin):
 
 if __name__ == "__main__":
 
-    # dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
-    dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
+    dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
+    # dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
     # dtm_path = "../../QGIS/out/cordevole_extrait/cordevole_extrait_extrait.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_mini.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     file_name = dtm_path.split("/")[-1]
     
     #Shapefiles path
-    slopelines_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test"
+    slopelines_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test_cython_debug"
     slopelines_se_HSO_shapefile_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test_cython_debug"
 
     drainage_points_HSO_shapefile_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test"
@@ -118,11 +118,11 @@ if __name__ == "__main__":
     # model_geotiff.export_endo_points(endo_points_HSO_shapefile_path)
 
 
-    # print("Export slopelines HSO to shapefile")
-    # model_geotiff.export_slopelines_to_shapefile(slopelines_HSO_shapefile_path)
+    print("Export slopelines HSO to shapefile")
+    model_geotiff.export_slopelines_to_shapefile(slopelines_HSO_shapefile_path)
     
-    # print("Export slopelines single element HSO to shapefile")
-    # model_geotiff.export_slopelines_single_element_to_shapefile(slopelines_se_HSO_shapefile_path)
+    print("Export slopelines single element HSO to shapefile")
+    model_geotiff.export_slopelines_single_element_to_shapefile(slopelines_se_HSO_shapefile_path)
 
     
     # print("Export saddle points in shapefile")
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     # print("Export ridgelines HSO to shapefile")
     # model_geotiff.export_ridgelines_to_shapefile(ridgelines_HSO_shapefile_path)
     
-    # print("Export ridgelines single element HSO to shapefile")
-    # model_geotiff.export_ridgelines_single_element_to_shapefile(ridgelines_se_HSO_shapefile_path)
+    print("Export ridgelines single element HSO to shapefile")
+    model_geotiff.export_ridgelines_single_element_to_shapefile(ridgelines_se_HSO_shapefile_path)
 
     

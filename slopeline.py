@@ -11,7 +11,6 @@ from tqdm import tqdm
 
 # Import the data structures.
 from data_structures import DrainageNetwork, EndoPoint, IDPointer, ListPointer
-from hydro_utils_cython import d8_ltd_cython
 
 
 def calculate_slopelines(model):
@@ -40,8 +39,9 @@ def calculate_slopelines(model):
     model.endorheic_count = 0  # Counter for endorheic points.
     inet = 0
     
-        
-    for id_dr in tqdm(model.qoi[::-1], desc="Building drainage networks", unit="point"):
+    qoi = [dp.id_pnt.value for dp in sorted(model.dr_pt, key=lambda dp: dp.Z)]
+
+    for id_dr in tqdm(qoi[::-1], desc="Building drainage networks", unit="point"):
         dp = model.dr_pt[id_dr-1]
     
         if dp.ninf > 0:
@@ -97,24 +97,9 @@ def calculate_slopelines(model):
             
             model.dr_net[inet-1] = net
         
-        #--- Compute drainage direction using D8_LTD ---
-        i = dp.i
-        j = dp.j
-        sumdev_in = dp.sumdev
-        mat_id = model.mat_id
-        N = model.N
-        M = model.M
-        delta_x = model.delta_x
-        delta_y = model.delta_y
-        nodata = model.nodata
-        i_out, j_out, ndfl, sumdev = d8_ltd_cython(
-            i, j, sumdev_in,
-            mat_id, N, M,
-            delta_x, delta_y, nodata
-        )
-        # i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)
+        i_out, j_out, ndfl, sumdev = model.d8_ltd(dp)
         
-        if i_out >= 0 and j_out >= 0:
+        if i_out is not None and j_out is not None:
             # Retrieve the drainage point corresponding to the outflow direction.
             out_dp = model.mat_id[i_out * 2, j_out * 2]
             if out_dp is not None:

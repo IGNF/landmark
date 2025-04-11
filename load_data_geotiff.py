@@ -21,7 +21,7 @@ class LoadData:
     Stores the DEM data and its metadata for further processing.
     """
     def __init__(self):
-        self.dem = None  # DEM as a NumPy array
+        # self.dem = None  # DEM as a NumPy array
         self.transform = None  # Affine transform for georeferencing
         self.crs = None  # Coordinate reference system
         self.nodata = None  # NoData value
@@ -51,17 +51,17 @@ class LoadData:
         """
         try:
             with rasterio.open(geotiff_file) as src:
-                self.dem = src.read(1)  # Read the first band
+                dem = src.read(1)  # Read the first band
                 self.transform = src.transform  # Store georeferencing transform
                 self.crs = src.crs  # Store coordinate reference system
                 self.nodata = -9999.00
                 
                 # Replace NoData values with NaN for easier processing
-                self.dem = np.where(self.dem == self.nodata, np.nan, self.dem)
+                dem = np.where(dem == self.nodata, np.nan, dem)
                 
                 self.delta_x = self.transform[0]
                 self.delta_y = -self.transform[4]
-                self.N, self.M = self.dem.shape
+                self.N, self.M = dem.shape
                 self.xllcorner = self.transform[2]
                 self.yllcorner = self.transform[5] - self.delta_y * self.N
                 self.dr_pt = np.full((self.N * self.M), None, dtype =object)
@@ -70,7 +70,7 @@ class LoadData:
                 
                 for id_i in tqdm(range(self.N), desc="Loading DEM", unit="row"):
                     for id_j in range(self.M):
-                        elevation = self.dem[id_i, id_j]
+                        elevation = dem[id_i, id_j]
                         # Create a DrainagePoint (id_pnt starts at 1)
                         dp = DrainagePoint(
                             i=id_i,
@@ -85,7 +85,7 @@ class LoadData:
 
                 # Build the list 'qoi' by sorting DrainagePoints in ascending Z
                 # qoi will store the 'id_pnt' for each DrainagePoint
-                self.qoi = [dp.id_pnt.value for dp in sorted(self.dr_pt, key=lambda dp: dp.Z)]
+                # self.qoi = [dp.id_pnt.value for dp in sorted(self.dr_pt, key=lambda dp: dp.Z)]
 
                 
         except Exception as e:
@@ -93,19 +93,19 @@ class LoadData:
             
  
 
-    def get_metadata(self) -> Dict[str, any]:
-        """Returns metadata of the loaded DEM.
+    # def get_metadata(self) -> Dict[str, any]:
+    #     """Returns metadata of the loaded DEM.
 
-        Returns
-        -------
-        Dict[str, any]
-            Metadata dictionary containing transform, CRS, and NoData value.
-        """
-        return {
-            "transform": self.transform,
-            "crs": self.crs,
-            "nodata": self.nodata
-        }
+    #     Returns
+    #     -------
+    #     Dict[str, any]
+    #         Metadata dictionary containing transform, CRS, and NoData value.
+    #     """
+    #     return {
+    #         "transform": self.transform,
+    #         "crs": self.crs,
+    #         "nodata": self.nodata
+    #     }
     
     def export_slopelines_to_shapefile(self, output_shapefile: str) -> None:
         """Export the drainage network (slopelines) as a Shapefile.

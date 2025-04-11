@@ -7,6 +7,8 @@ The subroutine Downslope Path Legth calculates the legth of the path
  endorheic. This task is crried out after the definition of saddle spill path
 """
 
+from tqdm import tqdm
+
 from hydro_utils_cython import up_recurs_ss_cython
 
 
@@ -26,7 +28,7 @@ def dpl_ss(model):
         - dr_net : list of DrainageNetwork
         - dr_pt_in : list of DrainagePointInflow
     """
-    for ep in model.l_endo_pt:
+    for ep in tqdm(model.l_endo_pt) :
         dp = model.dr_pt[ep.id_pnt.value - 1]
         if dp.upl != 0:  # Only consider points that have an upland path
 
@@ -48,6 +50,7 @@ def dpl_ss(model):
 
                     up_recurs_ss_cython(in_curr, model.dr_net, model.dr_pt, model.dr_pt_in)
     
+    del(model.dr_pt_in)
     
     
 # def up_recurs_ss(curr, model):

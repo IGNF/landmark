@@ -7,6 +7,7 @@ the elevation of the spill
 
 
 import numpy as np
+from tqdm import tqdm
 
 from data_structures import DrainagePoint
 
@@ -43,7 +44,7 @@ def a_endo(model):
     drainage_mask = np.vectorize(lambda x: isinstance(x, DrainagePoint))(model.mat_id)
 
     # Iterate over each saddle point
-    for sp in model.sdl_pt:
+    for sp in tqdm(model.sdl_pt):
         if sp.id_cis_endo.value is not None:
 
             # Get elevation of the saddle (threshold for contributing points)

@@ -71,6 +71,7 @@ def saddle_spill(model):
             id_endo_curr = trace_out(id_cis_pt, id_trans_pt, model)
             endo_out(id_endo_curr, max_Zs, model)
     
+    del(model.out_net)
 
             
 def trace_out(id_endopt, id_beypt, model):

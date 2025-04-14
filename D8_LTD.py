@@ -60,7 +60,7 @@ def facet(e0: float, e1: float, e2: float, delta_x: float, delta_y: float) -> Tu
 
 
 class SlopelineMixin:
-    def d8_ltd(self, dp) -> Tuple[Optional[int], Optional[int], int, float]:
+    def d8_ltd(self, dp) -> Tuple[int, int, int, float]:
         """Compute the D8 flow direction and cumulative deviation from a drainage point.
 
         Parameters

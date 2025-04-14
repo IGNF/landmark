@@ -27,26 +27,21 @@ def dpl_ss(model):
         - dr_net : list of DrainageNetwork
         - dr_pt_in : list of DrainagePointInflow
     """
-    for ep in tqdm(model.l_endo_pt) :
-        dp = model.dr_pt[ep.id_pnt.value - 1]
-        if dp.upl != 0:  # Only consider points that have an upland path
+    for ep in model.l_endo_pt:
+        if model.dr_pt[ep.id_pnt.value-1].upl != 0:
 
-            net = model.dr_net[dp.id_ch.value - 1]
-            if net.id_end_pt.value == dp.id_pnt.value:
-                main = dp.id_ch.value
-
-                net.id_endo = ep.id_eo
-                net.n_path = 1
-                net.id_path = [net.id_ch.value]
-
-                # Update each tributary channel connected upstream
-                for in_curr in model.dr_pt_in[ep.id_pnt.value - 1].inflow:
+            if model.dr_net[model.dr_pt[ep.id_pnt.value-1].id_ch.value-1].id_end_pt.value == model.dr_pt[ep.id_pnt.value-1].id_pnt.value:
+                main = model.dr_pt[ep.id_pnt.value-1].id_ch.value
+                model.dr_net[main-1].id_endo = ep.id_eo
+                model.dr_net[main-1].n_path = 1
+                model.dr_net[main-1].id_path = [model.dr_net[main-1].id_ch.value]
+                                
+                for in_curr in model.dr_pt_in[ep.id_pnt.value-1].inflow:
                     if in_curr != main:
-                        inflow_net = model.dr_net[in_curr - 1]
-                        inflow_net.n_path = net.n_path + 1
-                        inflow_net.id_path = [inflow_net.id_ch.value]
-                        inflow_net.id_path.extend(net.id_path[:inflow_net.n_path - 1])
-
+                        model.dr_net[in_curr-1].n_path = model.dr_net[main-1].n_path + 1
+                        model.dr_net[in_curr-1].id_path = [model.dr_net[in_curr-1].id_ch.value]
+                        model.dr_net[in_curr-1].id_path.extend(model.dr_net[main-1].id_path[:model.dr_net[in_curr-1].n_path-1])
+                    
                     up_recurs_ss(in_curr, model)
     
     del(model.dr_pt_in)

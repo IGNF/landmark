@@ -92,8 +92,8 @@ class LoadData:
             
  
     
-    def export_slopelines_to_shapefile(self, output_shapefile: str) -> None:
-        """Export the drainage network (slopelines) as a Shapefile.
+    def export_slopelines(self, output_file: str) -> None:
+        """Export the drainage network (slopelines) as a GeoPackage (.gpkg) file.
 
         Only networks whose stream order (`hso`) is greater than or equal to a threshold
         (`self.hso_th`) are included. Each slopeline is converted to a LineString geometry,
@@ -101,8 +101,8 @@ class LoadData:
 
         Parameters
         ----------
-        output_shapefile : str
-            Path to the output Shapefile (.shp) file.
+        output_file : str
+            Path to the output Geopackage (.gpkg) file.
 
         Returns
         -------
@@ -174,21 +174,21 @@ class LoadData:
                         "hso": int(net.hso) if net.hso is not None else 0
                     })
 
-        # Create GeoDataFrame and export to a Shapefile
+        # Create GeoDataFrame and export to a Geopackage
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
-        gdf.to_file(output_shapefile)
+        gdf.to_file(output_file+".gpkg", driver="GPKG")
         
     
-    def export_slopelines_single_element_to_shapefile(self, output_shapefile: str) -> None:
-        """Export the drainage network (slopelines) as individual segments into a Shapefile.
+    def export_slopelines_single_element(self, output_file: str) -> None:
+        """Export the drainage network (slopelines) as individual segments into a GeoPackage (.gpkg) file.
 
         Each segment between two consecutive drainage points is exported as a separate LineString,
         provided it passes the stream order (`hso`) and contributing area (`A_out`) thresholds.
 
         Parameters
         ----------
-        output_shapefile : str
-            Path to the output Shapefile (.shp) file.
+        output_file : str
+            Path to the output Geopackage (.gpkg) file.
 
         Returns
         -------
@@ -253,22 +253,22 @@ class LoadData:
                                 "hso": int(net.hso) if net.hso is not None else 0
                             })
 
-        # Create GeoDataFrame and export to a Shapefile
+        # Create GeoDataFrame and export to a Geopackage
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
-        gdf.to_file(output_shapefile)
+        gdf.to_file(output_file+".gpkg", driver="GPKG")
 
         
         
-    def export_drainage_point(self, output_shapefile: str) -> None:
-        """Export all drainage points as a Shapefile.
+    def export_drainage_point(self, output_file: str) -> None:
+        """Export all drainage points as a Geopackage.
 
         Each drainage point is represented as a Point geometry, with a comprehensive
         set of hydrological and topological attributes.
 
         Parameters
         ----------
-        output_shapefile : str
-            Path to the output Shapefile (.shp) file.
+        output_file : str
+            Path to the output Geopackage (.gpkg) file.
 
         Returns
         -------
@@ -331,11 +331,12 @@ class LoadData:
 
         # Create GeoDataFrame and export to a Shapefile
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
-        gdf.to_file(output_shapefile)
+        gdf.to_file(output_file+".gpkg", driver="GPKG")       
+        
+        
             
-            
-    def export_ridge_point(self, output_shapefile: str) -> None:
-        """Export ridge points as a Shapefile.
+    def export_ridge_point(self, output_file: str) -> None:
+        """Export ridge points as a Geopackage.
 
         Each ridge point corresponds to a cell located along the ridge network.
         These points are stored with their hydrological and topological properties.
@@ -343,7 +344,7 @@ class LoadData:
         Parameters
         ----------
         output_shapefile : str
-            Path to the output Shapefile (.shp) file.
+            Path to the output Geopackage (.gpkg) file.
 
         Returns
         -------
@@ -387,7 +388,7 @@ class LoadData:
                 "i": int(rp.i),
                 "j": int(rp.j),
                 "Z": float(rp.Z),
-                "md": min(float(rp.md), 99999999) if rp.md is not None else 0.0,  # Shapefile value limit
+                "md": min(float(rp.md), 1e6) if rp.md is not None else 0.0,
                 "id_drpt1": int(rp.id_drpt1.value) if rp.id_drpt1 and rp.id_drpt1.value is not None else 0,
                 "id_drpt2": int(rp.id_drpt2.value) if rp.id_drpt2 and rp.id_drpt2.value is not None else 0,
                 "A_in": int(rp.A_in) if rp.A_in is not None else 0,
@@ -402,22 +403,21 @@ class LoadData:
                 "n_ptsa": float(rp.n_ptsa*0.5*self.delta_x*self.delta_y ) if rp.n_ptsa is not None else 0
             })
     
-        # Create GeoDataFrame and export to a Shapefile
+        # Create GeoDataFrame and export to a Geopackage
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
-        gdf.to_file(output_shapefile)
-   
+        gdf.to_file(output_file+".gpkg", driver="GPKG")   
    
     
-    def export_saddle_points(self, output_shapefile: str) -> None:
-        """Export saddle points as a Shapefile.
+    def export_saddle_points(self, output_file: str) -> None:
+        """Export saddle points as a Geopackage.
 
         Saddle points represent topographic thresholds between basins.
         Only saddle points linked to an endorheic basin are exported.
 
         Parameters
         ----------
-        output_shapefile : str
-            Path to the output Shapefile (.shp) file.
+        output_file : str
+            Path to the output Geopackage (.gpkg) file.
 
         Returns
         -------
@@ -458,19 +458,18 @@ class LoadData:
                 })
     
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
-        gdf.to_file(output_shapefile) 
+        gdf.to_file(output_file+".gpkg", driver="GPKG")
 
-
-    def export_endo_points(self, output_shapefile: str) -> None:
-        """Export endorheic basin points as a Shapefile.
+    def export_endo_points(self, output_file: str) -> None:
+        """Export endorheic basin points as a Geopackage.
 
         Endorheic points are drainage endpoints where water does not reach the sea.
         The points are derived from the drainage points list.
 
         Parameters
         ----------
-        output_shapefile : str
-            Path to the output Shapefile (.shp) file.
+        output_file : str
+            Path to the output Geopackage (.gpkg) file.
 
         Returns
         -------
@@ -511,19 +510,19 @@ class LoadData:
             })
     
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)
-        gdf.to_file(output_shapefile) 
+        gdf.to_file(output_file+".gpkg", driver="GPKG")        
         
         
-    def export_ridgelines_to_shapefile(self, output_shapefile: str) -> None:
-        """Export ridgeline networks as a Shapefile.
+    def export_ridgelines(self, output_file: str) -> None:
+        """Export ridgeline networks as a Geopackage.
 
         Only ridgelines corresponding to watersheds that pass a stream order threshold (`jun_el > 0`)
         are included. Each ridgeline is exported as a LineString geometry with associated attributes.
 
         Parameters
         ----------
-        output_shapefile : str
-            Path to the output Shapefile (.shp) file.
+        output_geopackage : str
+            Path to the output Geopackage (.gpkg) file.
 
         Returns
         -------
@@ -590,14 +589,13 @@ class LoadData:
                         "jun_el": int(net.jun_el)
                     })
 
-        # Create GeoDataFrame and export to a Shapefile
+        # Create GeoDataFrame and export to a Geopackage
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
-        gdf.to_file(output_shapefile)
+        gdf.to_file(output_file+".gpkg", driver="GPKG")
 
 
-
-    def export_ridgelines_single_element_to_shapefile(self, output_shapefile: str) -> None:
-        """Export ridgeline networks as individual segments into a Shapefile.
+    def export_ridgelines_single_element(self, output_file: str) -> None:
+        """Export ridgeline networks as individual segments into a Geopackage.
 
         Each elementary segment between two consecutive ridge points is exported as a LineString,
         provided the spread area (`A_spread`) exceeds a given threshold. This allows filtering
@@ -605,8 +603,8 @@ class LoadData:
 
         Parameters
         ----------
-        output_shapefile : str
-            Path to the output Shapefile (.shp) file.
+        output_file: str
+            Path to the output Geopackage (.gpkg) file.
 
         Returns
         -------
@@ -672,10 +670,9 @@ class LoadData:
                                 "A_spread": float(a_spread)
                             })
 
-        # Create GeoDataFrame and export to a Shapefile
+        # Create GeoDataFrame and export to a Geopackage
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
-        gdf.to_file(output_shapefile)
-
+        gdf.to_file(output_file+".gpkg", driver="GPKG")
 
 if __name__ == "__main__":
     dtm_path = "./dtm.tif"

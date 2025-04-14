@@ -7,7 +7,6 @@ Include export methods
 #Extern import
 import numpy as np
 import rasterio
-from typing import Dict
 from tqdm import tqdm
 import geopandas as gpd
 from shapely.geometry import LineString, Point
@@ -92,20 +91,6 @@ class LoadData:
             raise RuntimeError(f"Error reading GeoTIFF file '{geotiff_file}': {e}")
             
  
-
-    # def get_metadata(self) -> Dict[str, any]:
-    #     """Returns metadata of the loaded DEM.
-
-    #     Returns
-    #     -------
-    #     Dict[str, any]
-    #         Metadata dictionary containing transform, CRS, and NoData value.
-    #     """
-    #     return {
-    #         "transform": self.transform,
-    #         "crs": self.crs,
-    #         "nodata": self.nodata
-    #     }
     
     def export_slopelines_to_shapefile(self, output_shapefile: str) -> None:
         """Export the drainage network (slopelines) as a Shapefile.

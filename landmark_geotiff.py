@@ -12,6 +12,9 @@ Transcript in python of the original landmark.f90
 ! Constructs a hierarchically ordered ridglines network.
 """
 
+import sys
+sys.setrecursionlimit(5000)
+
 #Internal import
 from load_data_geotiff import LoadData
 from D8_LTD import SlopelineMixin

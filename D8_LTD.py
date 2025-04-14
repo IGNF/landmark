@@ -7,57 +7,55 @@ import numpy as np
 from math import sin, sqrt, pi, atan2
 from typing import Tuple, Optional
 
-from hydro_utils_cython import facet
-
 # A small epsilon for floating point comparisons.
 EPSILON = np.finfo(np.float32).eps 
 
-# def facet(e0: float, e1: float, e2: float, delta_x: float, delta_y: float) -> Tuple[float, float]:
-#     """
-#     Calculate the aspect and maximum slope for a triangular facet.
+def facet(e0: float, e1: float, e2: float, delta_x: float, delta_y: float) -> Tuple[float, float]:
+    """
+    Calculate the aspect and maximum slope for a triangular facet.
 
-#     Parameters
-#     ----------
-#     e0 : float
-#         Elevation at the central point.
-#     e1 : float
-#         Elevation at the first neighbor point.
-#     e2 : float
-#         Elevation at the second neighbor point.
-#     delta_x : float
-#         Grid spacing in the x-direction.
-#     delta_y : float
-#         Grid spacing in the y-direction.
+    Parameters
+    ----------
+    e0 : float
+        Elevation at the central point.
+    e1 : float
+        Elevation at the first neighbor point.
+    e2 : float
+        Elevation at the second neighbor point.
+    delta_x : float
+        Grid spacing in the x-direction.
+    delta_y : float
+        Grid spacing in the y-direction.
 
-#     Returns
-#     -------
-#     tuple of float
-#         r : float
-#             Computed aspect in radians.
-#         s_max_facet : float
-#             Maximum slope of the facet (positive downward).
-#     """    
-#     s1 = (e0 - e1) / delta_x
-#     s2 = (e1 - e2) / delta_x
-#     if abs(s1) < EPSILON:
-#         if s2 >= 0.0:
-#             r_val = pi / 2.0
-#         else:
-#             r_val = -pi / 2.0
-#     else:
-#         r_val = atan2(s2, s1)
-#     sp = sqrt(s1**2 + s2**2)
-#     sd = (e0 - e2) / sqrt(delta_x**2 + delta_y**2)
-#     if (r_val >= 0.0 and r_val <= pi/4.0 and s1 >= 0.0):
-#         s_max_facet = sp
-#     else:
-#         if s1 > sd:
-#             s_max_facet = s1
-#             r_val = 0.0
-#         else:
-#             s_max_facet = sd
-#             r_val = pi/4.0
-#     return r_val, s_max_facet
+    Returns
+    -------
+    tuple of float
+        r : float
+            Computed aspect in radians.
+        s_max_facet : float
+            Maximum slope of the facet (positive downward).
+    """    
+    s1 = (e0 - e1) / delta_x
+    s2 = (e1 - e2) / delta_x
+    if abs(s1) < EPSILON:
+        if s2 >= 0.0:
+            r_val = pi / 2.0
+        else:
+            r_val = -pi / 2.0
+    else:
+        r_val = atan2(s2, s1)
+    sp = sqrt(s1**2 + s2**2)
+    sd = (e0 - e2) / sqrt(delta_x**2 + delta_y**2)
+    if (r_val >= 0.0 and r_val <= pi/4.0 and s1 >= 0.0):
+        s_max_facet = sp
+    else:
+        if s1 > sd:
+            s_max_facet = s1
+            r_val = 0.0
+        else:
+            s_max_facet = sd
+            r_val = pi/4.0
+    return r_val, s_max_facet
 
 
 

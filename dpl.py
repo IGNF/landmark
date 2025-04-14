@@ -6,10 +6,7 @@ The path length is computed from each cell to the outflow point of its associate
 
 from tqdm import tqdm
 import numpy as np
-import sys
-# sys.setrecursionlimit(10000)  
 
-from hydro_utils_cython import up_recurs_cython
 from data_structures import IDPointer
 
 
@@ -44,7 +41,6 @@ def dpl(model):
     -------
     None
     """
-    mat_val = np.full_like(model.mat_id, fill_value=None, dtype=object)
     # Process each endorheic point.
     for endo in tqdm(model.l_endo_pt, desc="Processing endorheic channels", unit="channel"):
         # Determine the main channel for this endorheic basin:
@@ -73,79 +69,69 @@ def dpl(model):
                 i_mat = i_curr * 2  + (i_out - i_curr)
                 j_mat = j_curr * 2  + (j_out - j_curr)
                                                 
-                mat_val[i_mat, j_mat] = main_net.id_ch.value
-
+                model.mat_id[i_mat, j_mat] = main_net.id_ch
 
         # For the current channel, set the downslope path identifier:
         main_net.n_path = 1
         main_net.id_path.append(main_net.id_ch.value)
         
         # Now call the recursive routine to update tributaries.
-        up_recurs_cython(main.value, model, mat_val)
+        up_recurs(main.value, model)
         
-    # Replace mat_id values with the content of mat_val
-    rows, cols = model.mat_id.shape
-    for i in range(rows):
-        for j in range(cols):
-            if mat_val[i, j] is not None:
-                model.mat_id[i, j] = IDPointer(mat_val[i, j])
 
-    del mat_val
         
 
 
-# def up_recurs(curr, model, visited=None):
-#     """Recursively updates tributary drainage networks with downslope path length.
+def up_recurs(curr, model):
+    """Recursively updates tributary drainage networks with downslope path length.
 
-#     For each tributary channel:
-#     - Computes the downstream path length for each of its drainage points.
-#     - Updates the path matrix (mat_id).
-#     - Propagates the flow path and endorheic basin ID.
+    For each tributary channel:
+    - Computes the downstream path length for each of its drainage points.
+    - Updates the path matrix (mat_id).
+    - Propagates the flow path and endorheic basin ID.
 
-#     Parameters
-#     ----------
-#     curr : int
-#         ID of the current (parent) channel.
-#     model : object
-#         Hydrological model object (same as in `dpl`).
-#     visited : set, optional
-#         Internal use to prevent loops (unused here).
+    Parameters
+    ----------
+    curr : int
+        ID of the current (parent) channel.
+    model : object
+        Hydrological model object (same as in `dpl`).
 
-#     Returns
-#     -------
-#     None
-#     """
-#     for i in range(model.dr_net[curr-1].n_jun):
-#         in_curr = model.dr_net[curr-1].id_in.value[i-1]
-#         for cnt_pt in range(model.dr_net[in_curr.value-1].nel-1): #last pnt belongs to main channel
-#             dp = model.dr_pt[model.dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1]
-#             # l1 is the length of the tributary channel.
-#             l1 = model.dr_net[in_curr.value-1].length
-#             l2 = dp.upl
-#             l3 = model.dr_pt[model.dr_net[in_curr.value-1].id_end_pt.value-1].dpl
-#             model.dr_pt[model.dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1].dpl = l1-l2+l3
-#             i_curr = dp.i
-#             j_curr = dp.j
-#             if dp.fldir.value is not None and dp.fldir.value > 0:
-#                 out_dp = model.dr_pt[dp.fldir.value-1]
-#                 i_out, j_out = out_dp.i, out_dp.j
-#                 i_mat = i_curr * 2 + (i_out - i_curr)
-#                 j_mat = j_curr * 2 + (j_out - j_curr)
+    Returns
+    -------
+    None
+    """
+    for i in range(model.dr_net[curr-1].n_jun):
+        in_curr = model.dr_net[curr-1].id_in.value[i-1]
+        for cnt_pt in range(model.dr_net[in_curr.value-1].nel-1): #last pnt belongs to main channel
+            dp = model.dr_pt[model.dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1]
+            # l1 is the length of the tributary channel.
+            l1 = model.dr_net[in_curr.value-1].length
+            l2 = dp.upl
+            l3 = model.dr_pt[model.dr_net[in_curr.value-1].id_end_pt.value-1].dpl
+            model.dr_pt[model.dr_net[in_curr.value-1].id_pnts.value[cnt_pt]-1].dpl = l1-l2+l3
+            i_curr = dp.i
+            j_curr = dp.j
+            if dp.fldir.value is not None and dp.fldir.value > 0:
+                out_dp = model.dr_pt[dp.fldir.value-1]
+                i_out, j_out = out_dp.i, out_dp.j
+                i_mat = i_curr * 2 + (i_out - i_curr)
+                j_mat = j_curr * 2 + (j_out - j_curr)
 
-#                 model.mat_id[i_mat, j_mat] = model.dr_net[in_curr.value-1].id_ch
+                model.mat_id[i_mat, j_mat] = model.dr_net[in_curr.value-1].id_ch
         
-#         # Update the tributary channel’s path:
-#         model.dr_net[in_curr.value-1].n_path = model.dr_net[curr-1].n_path+1
-#         # Build new id_path: first element is its own id_ch, then append parent's path.
-#         n_path = model.dr_net[in_curr.value-1].n_path
-#         # model.dr_net[in_curr.value-1].id_path = []
-#         model.dr_net[in_curr.value-1].id_path.append(model.dr_net[in_curr.value-1].id_ch.value)
-#         for cnt_in in range(2,n_path+1):
-#             model.dr_net[in_curr.value-1].id_path.append(model.dr_net[curr-1].id_path[cnt_in-2])
-#         # Propagate the endorheic id from the parent.
-#         model.dr_net[in_curr.value-1].id_endo = model.dr_net[curr-1].id_endo
+        # Update the tributary channel’s path:
+        model.dr_net[in_curr.value-1].n_path = model.dr_net[curr-1].n_path+1
+        # Build new id_path: first element is its own id_ch, then append parent's path.
+        n_path = model.dr_net[in_curr.value-1].n_path
+        # model.dr_net[in_curr.value-1].id_path = []
+        model.dr_net[in_curr.value-1].id_path.append(model.dr_net[in_curr.value-1].id_ch.value)
+        for cnt_in in range(2,n_path+1):
+            model.dr_net[in_curr.value-1].id_path.append(model.dr_net[curr-1].id_path[cnt_in-2])
+        # Propagate the endorheic id from the parent.
+        model.dr_net[in_curr.value-1].id_endo = model.dr_net[curr-1].id_endo
         
-#         up_recurs(in_curr.value, model, visited)
+        up_recurs(in_curr.value, model)
         
         
         

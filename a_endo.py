@@ -45,7 +45,7 @@ def a_endo(model):
 
     # Iterate over each saddle point
     for sp in tqdm(model.sdl_pt):
-        if sp.id_cis_endo.value is not None:
+        if sp.id_cis_endo is not None:
 
             # Get elevation of the saddle (threshold for contributing points)
             Z_saddle = model.rd_pt[sp.id_rdpt - 1].Z
@@ -53,7 +53,7 @@ def a_endo(model):
             # Initialize FIFO queue (manual implementation)
             cnt_fifo = 1
             pos_fifo = 1
-            fifo = [sp.id_cis_endo.value]  # Start from the point just upstream of the saddle
+            fifo = [sp.id_cis_endo]  # Start from the point just upstream of the saddle
 
             # Begin flood-fill loop
             while cnt_fifo >= pos_fifo:
@@ -71,9 +71,9 @@ def a_endo(model):
                             if drainage_mask[ir, ic]:
                                 neighbor = model.mat_id[ir, ic]
                                 # Check if neighbor flows to current cell and is below saddle
-                                if neighbor.fldir.value == id_curr and neighbor.Z <= Z_saddle:
+                                if neighbor.fldir == id_curr and neighbor.Z <= Z_saddle:
                                     cnt_fifo += 1
-                                    fifo.append(neighbor.id_pnt.value)
+                                    fifo.append(neighbor.id_pnt)
 
                 pos_fifo += 1
 

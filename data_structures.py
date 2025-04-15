@@ -5,38 +5,6 @@ Originally translated and adapted from Fortran (pnt_net.f90).
 """
 
 
-# --- Pointer simulation classes ---
-
-class IDPointer:
-    """Wrapper class to simulate a mutable integer value (used to emulate pointers).
-
-    Attributes
-    ----------
-    value : int or None
-        Stored integer value.
-    """
-    def __init__(self, value=None):
-        self.value = value
-
-
-class ListPointer:
-    """Wrapper class to simulate a mutable list (used to emulate pointer to list).
-
-    Attributes
-    ----------
-    value : list
-        Stored list.
-    """
-    def __init__(self, value=None):
-        if value is None:
-            value = []
-        self.value = value
-
-    def append(self, item):
-        """Appends an item to the list."""
-        self.value.append(item)
-
-
 # --- Domain-specific structures ---
 
 class DrainagePoint:
@@ -48,11 +16,11 @@ class DrainagePoint:
         Row and column indices in the DEM.
     Z : float
         Elevation of the point.
-    id_pnt : IDPointer
+    id_pnt : int
         Unique identifier of the drainage point.
-    fldir : IDPointer
+    fldir : int
         Flow direction index (point id).
-    fldir_ss : IDPointer
+    fldir_ss : int
         Secondary flow direction index.
     A_in : int
         Inflow area in number of cells.
@@ -62,32 +30,32 @@ class DrainagePoint:
         Downslope path length.
     sumdev : float
         Cumulative elevation deviation.
-    id_endo : IDPointer
+    id_endo : int
         Associated endorheic basin ID.
     ninf : int
         Number of inflow directions.
-    inflow, Linflow, Sinflow : ListPointer
+    inflow, Linflow, Sinflow : List
         IDs, lengths, and slopes of inflow segments.
-    id_ch : IDPointer
+    id_ch : int
         Associated channel ID.
     """
     def __init__(self, i, j, Z, id_pnt):
         self.i = i
         self.j = j
         self.Z = Z
-        self.id_pnt = IDPointer(id_pnt)
-        self.fldir = IDPointer(None)
-        self.fldir_ss = IDPointer(None)
+        self.id_pnt = id_pnt
+        self.fldir = None
+        self.fldir_ss = None
         self.A_in = 0
         self.upl = 0.0
         self.dpl = 0.0
         self.sumdev = 0.0
-        self.id_endo = IDPointer(0)
+        self.id_endo = 0
         self.ninf = 0
-        self.inflow = ListPointer()
-        self.Linflow = ListPointer()
-        self.Sinflow = ListPointer()
-        self.id_ch = IDPointer(None)
+        self.inflow = []
+        self.Linflow = []
+        self.Sinflow = []
+        self.id_ch = None
         
     def reset_flow_data(self):
         """Resets flow-related attributes (id_ch, inflow, Linflow) to initial state.
@@ -95,12 +63,12 @@ class DrainagePoint:
         This method clears any existing hydrological path information while preserving
         object references (pointers are not replaced, only their content is reset).
         """
-        self.id_ch.value = None
-        self.inflow.value.clear()
-        self.Linflow.value.clear()
+        self.id_ch = None
+        self.inflow.clear()
+        self.Linflow.clear()
 
     def __repr__(self):
-        attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
+        attributes = {key: value
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
 
@@ -120,7 +88,7 @@ class DrainagePointInflow:
         self.inflow = []
 
     def __repr__(self):
-        attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
+        attributes = {key: value
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
 
@@ -130,49 +98,49 @@ class DrainageNetwork:
 
     Attributes
     ----------
-    id_ch : IDPointer
+    id_ch : int
         Identifier of the channel.
     nel : int
         Number of points.
-    id_pnts : ListPointer
+    id_pnts : List
         List of drainage point IDs.
-    id_start_pt, id_end_pt : IDPointer
+    id_start_pt, id_end_pt : int
         IDs of the start and end points of the channel.
     length : float
         Total channel length.
-    id_ch_out : IDPointer
+    id_ch_out : int
         Downstream channel ID.
     n_jun : int
         Number of upstream tributaries.
-    id_in : ListPointer
+    id_in : List
         List of IDs of upstream channels.
     n_path : int
         Number of segments in downstream path.
     id_path : list of int
         IDs of channels in the downstream path.
-    id_endo : IDPointer
+    id_endo : int
         Endorheic basin ID if any.
     sso, hso : int
         Stream segment and Horton orders.
     """
     def __init__(self, id_ch=None, nel=0):
-        self.id_ch = IDPointer(id_ch)
+        self.id_ch = id_ch
         self.nel = nel
-        self.id_pnts = ListPointer()
-        self.id_start_pt = IDPointer(None)
-        self.id_end_pt = IDPointer(None)
+        self.id_pnts = []
+        self.id_start_pt = None
+        self.id_end_pt = None
         self.length = 0.0
-        self.id_ch_out = IDPointer(None)
+        self.id_ch_out = None
         self.n_jun = 0
-        self.id_in = ListPointer()
+        self.id_in = []
         self.n_path = 0
         self.id_path = []
-        self.id_endo = IDPointer(0)
+        self.id_endo = 0
         self.sso = None
         self.hso = None
 
     def __repr__(self):
-        attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
+        attributes = {key: value
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
 
@@ -196,15 +164,15 @@ class EndoPoint:
           List of identifiers of saddle minima.
     """
     def __init__(self):
-        self.id_eo = IDPointer() 
-        self.id_pnt = IDPointer() 
+        self.id_eo = None 
+        self.id_pnt = None 
         self.bas_type = None
         self.nsaddle = None
-        self.beyo_sad = ListPointer() 
-        self.idms = ListPointer() 
+        self.beyo_sad = []
+        self.idms = []
     
     def __repr__(self):
-        attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
+        attributes = {key: value
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
     
@@ -223,7 +191,7 @@ class RidgePoint:
         Unique ridge point ID.
     md : float
         Minimum mutual distance between associated drainage points.
-    id_drpt1, id_drpt2 : IDPointer
+    id_drpt1, id_drpt2 : int
         IDs of neighboring drainage points.
     A_in, A_in_min : float
         Max and min inflow areas from drainage neighbors.
@@ -248,8 +216,8 @@ class RidgePoint:
         self.Z = Z
         self.id_pnt = id_pnt
         self.md = None
-        self.id_drpt1 = IDPointer(None)
-        self.id_drpt2 = IDPointer(None)
+        self.id_drpt1 = None
+        self.id_drpt2 = None
         self.A_in = None
         self.A_in_min = None
         self.nen = 0
@@ -262,7 +230,7 @@ class RidgePoint:
         self.n_ptsa = 1
 
     def __repr__(self):
-        attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
+        attributes = {key: value
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
 
@@ -287,12 +255,12 @@ class SaddlePoint:
         self.id_pnt = id_pnt
         self.id_rdpt = 0
         self.id_rdpt2 = 0
-        self.id_cis_endo = IDPointer(None)
-        self.id_trans_out = IDPointer(None)
+        self.id_cis_endo = None
+        self.id_trans_out = None
         self.A_endo = None
 
     def __repr__(self):
-        attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
+        attributes = {key: value
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
 
@@ -305,15 +273,15 @@ class OutNetwork:
     ----------
     nel : int
         Number of points.
-    id_pnts : ListPointer
+    id_pnts : List
         List of drainage point IDs.
     """
     def __init__(self, nel):
         self.nel = nel
-        self.id_pnts = ListPointer()
+        self.id_pnts = []
 
     def __repr__(self):
-        attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
+        attributes = {key: value
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
 
@@ -355,7 +323,7 @@ class RidgeNetwork:
         self.jun_el = 0
 
     def __repr__(self):
-        attributes = {key: (value.value if isinstance(value, (IDPointer, ListPointer)) else value)
+        attributes = {key: value
                       for key, value in vars(self).items()}
         return f"{self.__class__.__name__}({attributes})"
     

@@ -5,7 +5,7 @@ D8_LTD algoritm from the original D8_LTD.f90 Fortran code
 
 import numpy as np
 from math import sin, sqrt, pi, atan2
-from typing import Tuple, Optional
+from typing import Tuple
 
 # A small epsilon for floating point comparisons.
 EPSILON = np.finfo(np.float32).eps 
@@ -204,10 +204,6 @@ class SlopelineMixin:
         # Triangle 087: uses e[7] and e[6] (Fortran indices 8 and 7).
         if abs(e[7] * e[6]) > EPSILON:
             r_val, s_max_facet = facet(e0, e[7], e[6], self.delta_x, self.delta_y)
-            # if dp.id_pnt.value == 3474 :
-            #     print('e0 = ', e0)
-            #     print('e1 = ', e[7])
-            #     print('e2 = ', e[6])
                 
             e1_fmax[6] = e[7]
             e2_fmax[6] = e[6]

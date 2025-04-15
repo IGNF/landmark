@@ -82,10 +82,6 @@ class LoadData:
                         self.mat_id[id_i * 2, id_j * 2] = dp
 
 
-                # Build the list 'qoi' by sorting DrainagePoints in ascending Z
-                # qoi will store the 'id_pnt' for each DrainagePoint
-                # self.qoi = [dp.id_pnt.value for dp in sorted(self.dr_pt, key=lambda dp: dp.Z)]
-
                 
         except Exception as e:
             raise RuntimeError(f"Error reading GeoTIFF file '{geotiff_file}': {e}")
@@ -141,7 +137,7 @@ class LoadData:
         for net in tqdm(self.dr_net):
             if net.hso >= self.hso_th:
                 coords = []
-                for pnt_id in net.id_pnts.value:
+                for pnt_id in net.id_pnts:
                     dp = self.dr_pt[pnt_id - 1]
                     if dp:
                         # Transform row/column indices to spatial coordinates
@@ -154,22 +150,22 @@ class LoadData:
 
                     # Prepare attributes dictionary for the current line
                     attributes.append({
-                        "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
+                        "id_ch": int(net.id_ch) if net.id_ch is not None else 0,
                         "nel": int(net.nel),
-                        "id_pnts": str([int(p) if p is not None else 0 for p in net.id_pnts.value])[:254],
-                        "id_start_pt": int(net.id_start_pt.value) if net.id_start_pt.value is not None else 0,
-                        "id_end_pt": int(net.id_end_pt.value) if net.id_end_pt.value is not None else 0,
+                        "id_pnts": str([int(p) if p is not None else 0 for p in net.id_pnts])[:254],
+                        "id_start_pt": int(net.id_start_pt) if net.id_start_pt is not None else 0,
+                        "id_end_pt": int(net.id_end_pt) if net.id_end_pt is not None else 0,
                         "length": float(net.length),
-                        "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
+                        "id_ch_out": int(net.id_ch_out) if net.id_ch_out is not None else 0,
                         "id_ch_main": int(net.id_path[-1]),
-                        "A_out": int(self.dr_pt[net.id_pnts.value[-2] - 1].A_in * a_unit),
+                        "A_out": int(self.dr_pt[net.id_pnts[-2] - 1].A_in * a_unit),
                         "n_jun": int(net.n_jun),
-                        "id_in": [int(i.value) if i.value is not None else 0 for i in net.id_in.value]
+                        "id_in": [int(i) if i is not None else 0 for i in net.id_in]
                                 if net.id_in is not None else [],
                         "n_path": int(net.n_path),
                         "id_path": str([int(i) if i is not None else 0 for i in net.id_path]
                                     if net.id_path is not None else [])[:254],
-                        "id_endo": int(net.id_endo.value) if net.id_endo.value is not None else 0,
+                        "id_endo": int(net.id_endo) if net.id_endo is not None else 0,
                         "sso": int(net.sso) if net.sso is not None else 0,
                         "hso": int(net.hso) if net.hso is not None else 0
                     })
@@ -219,7 +215,7 @@ class LoadData:
 
         for net in tqdm(self.dr_net):
             if net.hso >= self.hso_th:
-                points_ids = net.id_pnts.value
+                points_ids = net.id_pnts
 
                 for idx in range(len(points_ids) - 1):
                     dp1 = self.dr_pt[points_ids[idx] - 1]
@@ -242,10 +238,10 @@ class LoadData:
 
                             # Collect attributes for the current segment
                             attributes.append({
-                                "id_ch": int(net.id_ch.value) if net.id_ch.value is not None else 0,
-                                "start_pnt": int(dp1.id_pnt.value) if dp1.id_pnt.value is not None else 0,
-                                "end_pnt": int(dp2.id_pnt.value) if dp2.id_pnt.value is not None else 0,
-                                "id_ch_out": int(net.id_ch_out.value) if net.id_ch_out.value is not None else 0,
+                                "id_ch": int(net.id_ch) if net.id_ch is not None else 0,
+                                "start_pnt": int(dp1.id_pnt) if dp1.id_pnt is not None else 0,
+                                "end_pnt": int(dp2.id_pnt) if dp2.id_pnt is not None else 0,
+                                "id_ch_out": int(net.id_ch_out) if net.id_ch_out is not None else 0,
                                 "id_ch_main": int(net.id_path[-1]),
                                 "A_out": int(dp1.A_in * a_unit),
                                 "length": float(line.length),
@@ -311,22 +307,22 @@ class LoadData:
 
             # Prepare attribute dictionary for this drainage point
             attributes.append({
-                "id_pnt": int(dp.id_pnt.value) if dp.id_pnt.value is not None else 0,
+                "id_pnt": int(dp.id_pnt) if dp.id_pnt is not None else 0,
                 "i": int(dp.i),
                 "j": int(dp.j),
                 "Z": float(dp.Z),
-                "fldir": int(dp.fldir.value) if dp.fldir.value is not None else 0,
-                "fldir_ss": int(dp.fldir_ss.value) if dp.fldir_ss.value is not None else 0,
+                "fldir": int(dp.fldir) if dp.fldir is not None else 0,
+                "fldir_ss": int(dp.fldir_ss) if dp.fldir_ss is not None else 0,
                 "A_in": int(dp.A_in),
                 "upl": float(dp.upl),
                 "dpl": float(dp.dpl),
                 "sumdev": float(dp.sumdev),
-                "id_endo": int(dp.id_endo.value) if dp.id_endo.value is not None else 0,
+                "id_endo": int(dp.id_endo) if dp.id_endo is not None else 0,
                 "ninf": int(dp.ninf) if dp.ninf is not None else 0,
-                "inflow": str(dp.inflow.value) if dp.inflow.value is not None else "NULL",
-                "Linflow": str(dp.Linflow.value) if dp.Linflow.value is not None else "NULL",
-                "Sinflow": str(dp.Sinflow.value) if dp.Sinflow.value is not None else "NULL",
-                "id_ch": int(dp.id_ch.value) if dp.id_ch.value is not None else 0
+                "inflow": str(dp.inflow) if dp.inflow is not None else "NULL",
+                "Linflow": str(dp.Linflow) if dp.Linflow is not None else "NULL",
+                "Sinflow": str(dp.Sinflow) if dp.Sinflow is not None else "NULL",
+                "id_ch": int(dp.id_ch) if dp.id_ch is not None else 0
             })
 
         # Create GeoDataFrame and export to a Shapefile
@@ -389,8 +385,8 @@ class LoadData:
                 "j": int(rp.j),
                 "Z": float(rp.Z),
                 "md": min(float(rp.md), 1e6) if rp.md is not None else 0.0,
-                "id_drpt1": int(rp.id_drpt1.value) if rp.id_drpt1 and rp.id_drpt1.value is not None else 0,
-                "id_drpt2": int(rp.id_drpt2.value) if rp.id_drpt2 and rp.id_drpt2.value is not None else 0,
+                "id_drpt1": int(rp.id_drpt1) if rp.id_drpt1 and rp.id_drpt1 is not None else 0,
+                "id_drpt2": int(rp.id_drpt2) if rp.id_drpt2 and rp.id_drpt2 is not None else 0,
                 "A_in": int(rp.A_in) if rp.A_in is not None else 0,
                 "A_in_min": int(rp.A_in_min) if rp.A_in_min is not None else 0,
                 "nen": int(rp.nen) if rp.nen is not None else 0,  
@@ -443,7 +439,7 @@ class LoadData:
         attributes = []
         
         for sp in tqdm(self.sdl_pt): 
-            if sp.id_cis_endo.value != None :
+            if sp.id_cis_endo != None :
                 x, y = self.transform * (sp.j / 2, sp.i / 2)
                 points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
         
@@ -452,8 +448,8 @@ class LoadData:
                     "id_rdpt": int(sp.id_rdpt) if sp.id_rdpt is not None else 0,
                     "id_rdpt2": int(sp.id_rdpt2) if sp.id_rdpt2 is not None else 0,
                     "Z": float(sp.Z),
-                    "id_cis_endo": int(sp.id_cis_endo.value) if sp.id_cis_endo and sp.id_cis_endo.value is not None else 0,
-                    "id_trans_out": int(sp.id_trans_out.value) if sp.id_trans_out and sp.id_trans_out.value is not None else 0,
+                    "id_cis_endo": int(sp.id_cis_endo) if sp.id_cis_endo and sp.id_cis_endo is not None else 0,
+                    "id_trans_out": int(sp.id_trans_out) if sp.id_trans_out and sp.id_trans_out is not None else 0,
                     "A_endo": float(sp.A_endo) if sp.A_endo is not None else 0.0
                 })
     
@@ -494,19 +490,19 @@ class LoadData:
         attributes = []
         
         for ep in tqdm(self.l_endo_pt):
-            dp = self.dr_pt[ep.id_pnt.value-1]
+            dp = self.dr_pt[ep.id_pnt-1]
     
             x, y = self.transform * (dp.j, dp.i)
             points.append(Point(x + self.delta_x / 2, y - self.delta_y / 2))
             
     
             attributes.append({
-                "id_eo": int(ep.id_eo.value) if ep.id_eo.value is not None else 0,
-                "id_pnt": int(ep.id_pnt.value) if ep.id_pnt.value is not None else 0,
+                "id_eo": int(ep.id_eo) if ep.id_eo is not None else 0,
+                "id_pnt": int(ep.id_pnt) if ep.id_pnt is not None else 0,
                 "bas_type": int(ep.bas_type) if ep.bas_type is not None else 0,
                 "nsaddle": int(ep.nsaddle) if ep.nsaddle is not None else 0,
-                "beyo_sad": str(ep.beyo_sad.value) if ep.beyo_sad.value is not None else "NULL",
-                "idms": str(ep.idms.value) if ep.idms.value is not None else "NULL",
+                "beyo_sad": str(ep.beyo_sad) if ep.beyo_sad is not None else "NULL",
+                "idms": str(ep.idms) if ep.idms is not None else "NULL",
             })
     
         gdf = gpd.GeoDataFrame(attributes, geometry=points, crs=self.crs)

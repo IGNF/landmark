@@ -10,7 +10,7 @@ from tqdm import tqdm
 import numpy as np
 
 from mutual_dist import md
-from data_structures import RidgePoint, DrainagePoint, IDPointer
+from data_structures import RidgePoint, DrainagePoint
 from thal_net_hso_length import thal_net_hso_length
 from dpl_ss import dpl_ss
 from a_endo import a_endo
@@ -39,14 +39,14 @@ def find_ridge_neighbors(model):
      # Create a boolean mask where True indicates a RidgePoint
     ridge_mask = np.vectorize(lambda x: isinstance(x, RidgePoint))(model.mat_id)
     drainage_mask = np.vectorize(lambda x: isinstance(x, DrainagePoint))(model.mat_id)
-    river_mask = np.vectorize(lambda x: isinstance(x, IDPointer))(model.mat_id)
+    river_mask = np.vectorize(lambda x: isinstance(x, int))(model.mat_id)
 
     associated_mask = ridge_mask + drainage_mask + river_mask
 
     # Shifted arrays to find direct neighbors
-    up = np.roll(ridge_mask, shift=1, axis=0) #Il faut décaler dans le sens opposé
+    up = np.roll(ridge_mask, shift=1, axis=0) #You have to shift in the opposite direction
     up[0,:] = False
-    down = np.roll(ridge_mask, shift=-1, axis=0) #Il faut décaler dans le sens opposé
+    down = np.roll(ridge_mask, shift=-1, axis=0) #You have to shift in the opposite direction
     down[-1,:] = False
     left = np.roll(ridge_mask, shift=1, axis=1)  
     left[:,0] = False
@@ -95,8 +95,8 @@ def find_ridge_neighbors(model):
                     if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
                         if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
                             if not ridge_mask[irr1, icc1]:
-                                if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
-                                    and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
+                                if (model.mat_id[irr1, icc1].fldir != model.mat_id[irr2, icc2].id_pnt 
+                                    and model.mat_id[irr2, icc2].fldir != model.mat_id[irr1, icc1].id_pnt):
                                     rp.id_neigh.append(model.mat_id[i+1,j-1].id_pnt)
                                     rp.nen += 1
         
@@ -118,8 +118,8 @@ def find_ridge_neighbors(model):
                     if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
                         if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
                             if not ridge_mask[irr1, icc1]:
-                                if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
-                                    and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
+                                if (model.mat_id[irr1, icc1].fldir != model.mat_id[irr2, icc2].id_pnt 
+                                    and model.mat_id[irr2, icc2].fldir != model.mat_id[irr1, icc1].id_pnt):
                                     rp.id_neigh.append(model.mat_id[i+1,j+1].id_pnt)
                                     rp.nen += 1
                                 
@@ -141,8 +141,8 @@ def find_ridge_neighbors(model):
                     if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
                         if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
                             if not ridge_mask[irr1, icc1]:
-                                if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
-                                    and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
+                                if (model.mat_id[irr1, icc1].fldir != model.mat_id[irr2, icc2].id_pnt 
+                                    and model.mat_id[irr2, icc2].fldir != model.mat_id[irr1, icc1].id_pnt):
                                     rp.id_neigh.append(model.mat_id[i-1,j+1].id_pnt)
                                     rp.nen += 1
 
@@ -165,8 +165,8 @@ def find_ridge_neighbors(model):
                     if 0 <= irr1 <= i_max and 0 <= icc1 <= j_max:
                         if associated_mask[irr1, icc1] and associated_mask[irr2, icc2]:
                             if not ridge_mask[irr1, icc1]:
-                                if (model.mat_id[irr1, icc1].fldir.value != model.mat_id[irr2, icc2].id_pnt.value 
-                                    and model.mat_id[irr2, icc2].fldir.value != model.mat_id[irr1, icc1].id_pnt.value):
+                                if (model.mat_id[irr1, icc1].fldir != model.mat_id[irr2, icc2].id_pnt 
+                                    and model.mat_id[irr2, icc2].fldir != model.mat_id[irr1, icc1].id_pnt):
                                     rp.id_neigh.append(model.mat_id[i-1,j-1].id_pnt)
                                     rp.nen += 1
 
@@ -176,13 +176,13 @@ def find_ridge_neighbors(model):
     for cnt_sdl in tqdm(range(len(model.sdl_pt))):
         irs = model.sdl_pt[cnt_sdl].id_rdpt
         if model.rd_pt[irs-1].md == 1e10 and model.rd_pt[irs-1].id_sdl != None:
-            if model.sdl_pt[cnt_sdl].id_cis_endo.value != None:
+            if model.sdl_pt[cnt_sdl].id_cis_endo != None:
                 cnt_nen1 = 0
                 tmp_neigh1 = []
                 for cnt_el in range(model.rd_pt[irs-1].nen):
                     id_ne = model.rd_pt[irs-1].id_neigh[cnt_el]
                     if model.rd_pt[id_ne-1].md == 1e10 and model.rd_pt[id_ne-1].id_sdl != None:
-                        if model.sdl_pt[model.rd_pt[id_ne-1].id_sdl-1].id_cis_endo.value != None:
+                        if model.sdl_pt[model.rd_pt[id_ne-1].id_sdl-1].id_cis_endo != None:
                             # it means that the neighbor point is a saddle point too
                             # the reference to the neighbor saddle in the current saddle is deleted
                             cnt_nen2 = 0
@@ -212,7 +212,7 @@ def find_ridge_neighbors(model):
         irs = model.sdl_pt[cnt_sdl].id_rdpt
         rp_irs = model.rd_pt[irs-1]
         if rp_irs.nen > 0:
-            if rp_irs.md == 1e10 and model.sdl_pt[cnt_sdl].id_cis_endo.value != None:
+            if rp_irs.md == 1e10 and model.sdl_pt[cnt_sdl].id_cis_endo != None:
                 # the if below was added  to account for
                 # saddles with more than two adjacent points that need to be
                 # simplified by leaving only two points and the excess
@@ -243,8 +243,8 @@ def find_ridge_neighbors(model):
                                     rr4=rr_sdl-(rr_sdl-rr+rr_sdl-rr2)
                                     cr4=cr_sdl-(cr_sdl-cr+cr_sdl-cr2)
                                     if (d == 2**0.5):
-                                        if not(model.sdl_pt[cnt_sdl].id_cis_endo.value == model.mat_id[rr4, cr4].id_pnt.value #channel spilling from saddle 
-                                            or model.sdl_pt[cnt_sdl].id_trans_out.value == model.mat_id[rr4, cr4].id_pnt.value):
+                                        if not(model.sdl_pt[cnt_sdl].id_cis_endo == model.mat_id[rr4, cr4].id_pnt #channel spilling from saddle 
+                                            or model.sdl_pt[cnt_sdl].id_trans_out == model.mat_id[rr4, cr4].id_pnt):
                                             #no channel between points (rr,cr) and (rr2,cr2) 
                                             tmp_elab[cnt_el2] = None
                                             tmp_elab2 = model.rd_pt[id_ne-1].id_neigh
@@ -285,7 +285,6 @@ def find_ridge_neighbors(model):
         rp = model.rd_pt[cnt_rdpt]
         for cnt_el in range(rp.nen):
             id_ne = rp.id_neigh[cnt_el]
-            # id_org = model.sdl_pt[rp.id_sdl-1].id_rdpt2.value
             id_ne2 = rp.id_neigh[cnt_el]
             for cnt_el2 in range(model.rd_pt[id_ne2-1].nen):
                 if model.rd_pt[id_ne2-1].id_neigh[cnt_el2] == rp.id_pnt:
@@ -302,11 +301,11 @@ def find_ridge_neighbors(model):
     #Mutual distance update
     print("Update ridge points mutual distance")
     for rp in tqdm(model.rd_pt, desc="Calculating md for ridge points"):
-        if model.dr_pt[rp.id_drpt1.value-1].dpl > 0 and model.dr_pt[rp.id_drpt2.value-1].dpl > 0:
-            rp.md = md(model.dr_pt[rp.id_drpt1.value-1], model.dr_pt[rp.id_drpt2.value-1], model)
+        if model.dr_pt[rp.id_drpt1-1].dpl > 0 and model.dr_pt[rp.id_drpt2-1].dpl > 0:
+            rp.md = md(model.dr_pt[rp.id_drpt1-1], model.dr_pt[rp.id_drpt2-1], model)
         
-        rp.A_in = max(model.dr_pt[rp.id_drpt1.value-1].A_in, model.dr_pt[rp.id_drpt2.value-1].A_in)
-        rp.A_in_min = min(model.dr_pt[rp.id_drpt1.value-1].A_in, model.dr_pt[rp.id_drpt2.value-1].A_in)
+        rp.A_in = max(model.dr_pt[rp.id_drpt1-1].A_in, model.dr_pt[rp.id_drpt2-1].A_in)
+        rp.A_in_min = min(model.dr_pt[rp.id_drpt1-1].A_in, model.dr_pt[rp.id_drpt2-1].A_in)
 
         
     

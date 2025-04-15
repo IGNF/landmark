@@ -42,8 +42,8 @@ def saddle_spill(model):
         id_sdl = qoi[cnt_sdl]
         sp = model.sdl_pt[id_sdl-1]
         rp = model.rd_pt[sp.id_rdpt-1]
-        id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1.value-1].id_ch.value-1].id_endo.value
-        id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2.value-1].id_ch.value-1].id_endo.value
+        id_eo1 = model.dr_net[model.dr_pt[rp.id_drpt1-1].id_ch-1].id_endo
+        id_eo2 = model.dr_net[model.dr_pt[rp.id_drpt2-1].id_ch-1].id_endo
         
 
         if model.l_endo_pt[id_eo1-1].bas_type + model.l_endo_pt[id_eo2-1].bas_type == 1:
@@ -52,19 +52,19 @@ def saddle_spill(model):
         
             max_Zs = rp.Z
             if model.l_endo_pt[id_eo1-1].bas_type == 1:
-                id_cis_pt = rp.id_drpt1.value #id cis point of the current endo basin
-                id_trans_pt = rp.id_drpt2.value #id trans point of the current endo basin
+                id_cis_pt = rp.id_drpt1 #id cis point of the current endo basin
+                id_trans_pt = rp.id_drpt2 #id trans point of the current endo basin
                 model.l_endo_pt[id_eo1-1].bas_type = 0
             else: #that means (endo_pt(id_eo2)%bas_type == 1)
-                id_cis_pt = rp.id_drpt2.value #id cis point of the current endo basin
-                id_trans_pt = rp.id_drpt1.value #id trans point of the current endo basin
+                id_cis_pt = rp.id_drpt2 #id cis point of the current endo basin
+                id_trans_pt = rp.id_drpt1 #id trans point of the current endo basin
                 model.l_endo_pt[id_eo2-1].bas_type = 0
             # Only saddle points that spill out have id_cis_endo and in_trans_endo gt 0
             sp.id_cis_endo = model.dr_pt[id_cis_pt-1].id_pnt
             sp.id_trans_out = model.dr_pt[id_trans_pt-1].id_pnt
-            if model.dr_pt[id_cis_pt-1].fldir_ss.value == None:
+            if model.dr_pt[id_cis_pt-1].fldir_ss == None:
                 model.dr_pt[id_cis_pt-1].fldir_ss = model.dr_pt[id_trans_pt-1].id_pnt
-                model.dr_pt[model.dr_pt[id_cis_pt-1].fldir_ss.value-1].ninf += 1
+                model.dr_pt[model.dr_pt[id_cis_pt-1].fldir_ss-1].ninf += 1
                 
 
             
@@ -107,21 +107,21 @@ def trace_out(id_endopt, id_beypt, model):
     taop = []  # Accumulate point IDs forming the outflow path
 
     # ▸ Phase 1: From endorheic basin low point to its outlet
-    curr_ch = model.dr_pt[id_endopt - 1].id_ch.value
-    npt_curr = model.dr_net[curr_ch - 1].id_pnts.value.index(id_endopt)
+    curr_ch = model.dr_pt[id_endopt - 1].id_ch
+    npt_curr = model.dr_net[curr_ch - 1].id_pnts.index(id_endopt)
 
     # Append remaining points in the current channel starting at id_endopt
-    taop.extend(model.dr_net[curr_ch - 1].id_pnts.value[npt_curr:])
+    taop.extend(model.dr_net[curr_ch - 1].id_pnts[npt_curr:])
 
-    id_endo = model.dr_net[curr_ch - 1].id_endo.value  # Remember endorheic basin ID
+    id_endo = model.dr_net[curr_ch - 1].id_endo  # Remember endorheic basin ID
 
     # Trace downstream path across the hierarchical channels
     nelpath = model.dr_net[curr_ch - 1].n_path
     for _ in range(1, nelpath):
-        id_lstpt = model.dr_net[curr_ch - 1].id_end_pt.value
-        curr_ch = model.dr_pt[id_lstpt - 1].id_ch.value
-        npt_curr = model.dr_net[curr_ch - 1].id_pnts.value.index(id_lstpt)
-        taop.extend(model.dr_net[curr_ch - 1].id_pnts.value[npt_curr + 1:])
+        id_lstpt = model.dr_net[curr_ch - 1].id_end_pt
+        curr_ch = model.dr_pt[id_lstpt - 1].id_ch
+        npt_curr = model.dr_net[curr_ch - 1].id_pnts.index(id_lstpt)
+        taop.extend(model.dr_net[curr_ch - 1].id_pnts[npt_curr + 1:])
 
     # Add reversed path to model.out_net (to go upstream → downstream)
     new_outflow = {
@@ -134,24 +134,24 @@ def trace_out(id_endopt, id_beypt, model):
     # ▸ Update fldir_ss for the reversed path
     for cnt_taop in range(len(taop), 1, -1):
         dp = model.dr_pt[taop[cnt_taop - 1] - 1]
-        if dp.fldir_ss.value is None:
-            dp.fldir_ss.value = taop[cnt_taop - 2]
-            model.dr_pt[dp.fldir_ss.value - 1].ninf += 1
+        if dp.fldir_ss is None:
+            dp.fldir_ss = taop[cnt_taop - 2]
+            model.dr_pt[dp.fldir_ss - 1].ninf += 1
             dp.ninf -= 1
 
     # ▸ Phase 2: From the saddle outflow point to the true outlet
     taop = []
 
-    curr_ch = model.dr_pt[id_beypt - 1].id_ch.value
-    npt_curr = model.dr_net[curr_ch - 1].id_pnts.value.index(id_beypt)
-    taop.extend(model.dr_net[curr_ch - 1].id_pnts.value[npt_curr:])
+    curr_ch = model.dr_pt[id_beypt - 1].id_ch
+    npt_curr = model.dr_net[curr_ch - 1].id_pnts.index(id_beypt)
+    taop.extend(model.dr_net[curr_ch - 1].id_pnts[npt_curr:])
 
     nelpath = model.dr_net[curr_ch - 1].n_path
     for _ in range(1, nelpath):
-        id_lstpt = model.dr_net[curr_ch - 1].id_end_pt.value
-        curr_ch = model.dr_pt[id_lstpt - 1].id_ch.value
-        npt_curr = model.dr_net[curr_ch - 1].id_pnts.value.index(id_lstpt)
-        taop.extend(model.dr_net[curr_ch - 1].id_pnts.value[npt_curr + 1:])
+        id_lstpt = model.dr_net[curr_ch - 1].id_end_pt
+        curr_ch = model.dr_pt[id_lstpt - 1].id_ch
+        npt_curr = model.dr_net[curr_ch - 1].id_pnts.index(id_lstpt)
+        taop.extend(model.dr_net[curr_ch - 1].id_pnts[npt_curr + 1:])
 
     new_outflow = {
         "id_pnts": taop,
@@ -204,11 +204,11 @@ def endo_out(curr, max_Zs, model):
     for cnt_sdl in range(1, nsdl):
         shift = 0
         cnt_curr = 0
-        zs_cur = model.rd_pt[model.l_endo_pt[curr - 1].idms.value[cnt_sdl] - 1].Z
+        zs_cur = model.rd_pt[model.l_endo_pt[curr - 1].idms[cnt_sdl] - 1].Z
 
         if zs_cur <= max_Zs:
             for cnt_qoi in range(n_el):
-                ref_z = model.rd_pt[model.l_endo_pt[qoi_etmp[cnt_qoi] - 1].idms.value[qoi_stmp[cnt_qoi]] - 1].Z
+                ref_z = model.rd_pt[model.l_endo_pt[qoi_etmp[cnt_qoi] - 1].idms[qoi_stmp[cnt_qoi]] - 1].Z
                 if zs_cur < ref_z and shift == 0:
                     cnt_curr += 1
                     qoi_sdl[cnt_curr - 1] = cnt_sdl
@@ -241,7 +241,7 @@ def endo_out(curr, max_Zs, model):
     while n_qoi > 0:
         id_sdl = qoi_sdl[0]
         curr = qoi_endo[0]
-        rp = model.rd_pt[model.l_endo_pt[curr - 1].idms.value[id_sdl] - 1]
+        rp = model.rd_pt[model.l_endo_pt[curr - 1].idms[id_sdl] - 1]
         zs_cur = rp.Z
 
         # Remove the current entry from the top of the priority queue
@@ -251,36 +251,36 @@ def endo_out(curr, max_Zs, model):
 
         if zs_cur <= max_Zs:
             id_eo1 = curr
-            id_eo2 = model.l_endo_pt[curr - 1].beyo_sad.value[id_sdl]
+            id_eo2 = model.l_endo_pt[curr - 1].beyo_sad[id_sdl]
 
             # Check whether one of the two connected basins is still endorheic
             if model.l_endo_pt[id_eo1 - 1].bas_type + model.l_endo_pt[id_eo2 - 1].bas_type == 1:
                 # Convert endorheic basin into open (bas_type = 0)
                 if model.l_endo_pt[id_eo1 - 1].bas_type == 1:
                     model.l_endo_pt[id_eo1 - 1].bas_type = 0
-                    if model.dr_net[model.dr_pt[rp.id_drpt1.value - 1].id_ch.value - 1].id_endo.value == id_eo1:
-                        id_cis_pt = rp.id_drpt1.value
-                        id_trans_pt = rp.id_drpt2.value
+                    if model.dr_net[model.dr_pt[rp.id_drpt1 - 1].id_ch - 1].id_endo == id_eo1:
+                        id_cis_pt = rp.id_drpt1
+                        id_trans_pt = rp.id_drpt2
                     else:
-                        id_cis_pt = rp.id_drpt2.value
-                        id_trans_pt = rp.id_drpt1.value
+                        id_cis_pt = rp.id_drpt2
+                        id_trans_pt = rp.id_drpt1
                 else:
                     model.l_endo_pt[id_eo2 - 1].bas_type = 0
-                    if model.dr_net[model.dr_pt[rp.id_drpt1.value - 1].id_ch.value - 1].id_endo.value == id_eo2:
-                        id_cis_pt = rp.id_drpt1.value
-                        id_trans_pt = rp.id_drpt2.value
+                    if model.dr_net[model.dr_pt[rp.id_drpt1 - 1].id_ch - 1].id_endo == id_eo2:
+                        id_cis_pt = rp.id_drpt1
+                        id_trans_pt = rp.id_drpt2
                     else:
-                        id_cis_pt = rp.id_drpt2.value
-                        id_trans_pt = rp.id_drpt1.value
+                        id_cis_pt = rp.id_drpt2
+                        id_trans_pt = rp.id_drpt1
 
                 # Record connection information in saddle point
                 model.sdl_pt[rp.id_sdl - 1].id_cis_endo = model.dr_pt[id_cis_pt - 1].id_pnt
                 model.sdl_pt[rp.id_sdl - 1].id_trans_out = model.dr_pt[id_trans_pt - 1].id_pnt
 
                 # Set subsurface direction if not already set
-                if model.dr_pt[id_cis_pt - 1].fldir_ss.value is None:
+                if model.dr_pt[id_cis_pt - 1].fldir_ss is None:
                     model.dr_pt[id_cis_pt - 1].fldir_ss = model.dr_pt[id_trans_pt - 1].id_pnt
-                    model.dr_pt[model.dr_pt[id_cis_pt - 1].fldir_ss.value - 1].ninf += 1
+                    model.dr_pt[model.dr_pt[id_cis_pt - 1].fldir_ss - 1].ninf += 1
 
                 # Trace and process the new outflow from this basin
                 id_endo_curr = trace_out(id_cis_pt, id_trans_pt, model)
@@ -299,10 +299,10 @@ def endo_out(curr, max_Zs, model):
                 for cnt_sdl in range(1, nsdl):
                     shift = 0
                     cnt_curr = 0
-                    zs_cur = model.rd_pt[model.l_endo_pt[curr - 1].idms.value[cnt_sdl] - 1].Z
+                    zs_cur = model.rd_pt[model.l_endo_pt[curr - 1].idms[cnt_sdl] - 1].Z
                     if zs_cur <= max_Zs:
                         for cnt_qoi in range(n_el_new):
-                            ref_z = model.rd_pt[model.l_endo_pt[new_etmp[cnt_qoi] - 1].idms.value[new_stmp[cnt_qoi]] - 1].Z
+                            ref_z = model.rd_pt[model.l_endo_pt[new_etmp[cnt_qoi] - 1].idms[new_stmp[cnt_qoi]] - 1].Z
                             if zs_cur < ref_z and shift == 0:
                                 cnt_curr += 1
                                 new_sdl[cnt_curr - 1] = cnt_sdl
@@ -335,8 +335,8 @@ def endo_out(curr, max_Zs, model):
                 qoi_endo = [0] * (n_el + cnt_new)
                 for cnt_qoi in range(n_el):
                     for cnt_sdl in range(mem_new, cnt_new):
-                        zs_cur = model.rd_pt[model.l_endo_pt[new_endo[cnt_sdl] - 1].idms.value[new_sdl[cnt_sdl]] - 1].Z
-                        ref_z = model.rd_pt[model.l_endo_pt[qoi_etmp[cnt_qoi] - 1].idms.value[qoi_stmp[cnt_qoi]] - 1].Z
+                        zs_cur = model.rd_pt[model.l_endo_pt[new_endo[cnt_sdl] - 1].idms[new_sdl[cnt_sdl]] - 1].Z
+                        ref_z = model.rd_pt[model.l_endo_pt[qoi_etmp[cnt_qoi] - 1].idms[qoi_stmp[cnt_qoi]] - 1].Z
                         if zs_cur < ref_z:
                             cnt_curr += 1
                             qoi_sdl[cnt_curr - 1] = new_sdl[cnt_sdl]

@@ -50,17 +50,17 @@ def junc_update(model):
             if ncell_th > 0:
                 n_pnt_A_th = 0
                 for cnt_pnt in range(n_pnt):
-                    if model.dr_pt[net.id_pnts.value[cnt_pnt] - 1].A_in + 1 >= ncell_th:
+                    if model.dr_pt[net.id_pnts[cnt_pnt] - 1].A_in + 1 >= ncell_th:
                         n_pnt_A_th += 1
             else:
                 n_pnt_A_th = n_pnt
 
             if n_pnt_A_th > 1:
                 # Get coordinates of last and second-to-last drainage points
-                i_last_dtm = model.dr_pt[net.id_pnts.value[-1] - 1].i
-                j_last_dtm = model.dr_pt[net.id_pnts.value[-1] - 1].j
-                i_slast_dtm = model.dr_pt[net.id_pnts.value[-2] - 1].i
-                j_slast_dtm = model.dr_pt[net.id_pnts.value[-2] - 1].j
+                i_last_dtm = model.dr_pt[net.id_pnts[-1] - 1].i
+                j_last_dtm = model.dr_pt[net.id_pnts[-1] - 1].j
+                i_slast_dtm = model.dr_pt[net.id_pnts[-2] - 1].i
+                j_slast_dtm = model.dr_pt[net.id_pnts[-2] - 1].j
 
                 i_passo_dtm = i_slast_dtm - i_last_dtm
                 j_passo_dtm = j_slast_dtm - j_last_dtm

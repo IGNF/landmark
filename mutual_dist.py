@@ -77,8 +77,8 @@ def mutual_dist(model):
                     rd_pt.append(new_rd)
                     # Update mat_id: assign the ridge point to the cell.
                     model.mat_id[rr, cr] = new_rd
-                    id_eo1 = model.dr_net[dp1.id_ch.value-1].id_endo.value
-                    id_eo2 = model.dr_net[dp2.id_ch.value-1].id_endo.value
+                    id_eo1 = model.dr_net[dp1.id_ch-1].id_endo
+                    id_eo2 = model.dr_net[dp2.id_ch-1].id_endo
                     if (id_eo1 <= id_eo2):
                         new_rd.id_drpt1 = dp1.id_pnt
                         new_rd.id_drpt2 = dp2.id_pnt
@@ -121,8 +121,8 @@ def mutual_dist(model):
                     rd_pt.append(new_rd)
                     # Update mat_id: assign the ridge point to the cell.
                     model.mat_id[rr, cr] = new_rd
-                    id_eo1 = model.dr_net[dp1.id_ch.value-1].id_endo.value
-                    id_eo2 = model.dr_net[dp2.id_ch.value-1].id_endo.value
+                    id_eo1 = model.dr_net[dp1.id_ch-1].id_endo
+                    id_eo2 = model.dr_net[dp2.id_ch-1].id_endo
                     if (id_eo1 <= id_eo2):
                         new_rd.id_drpt1 = dp1.id_pnt
                         new_rd.id_drpt2 = dp2.id_pnt
@@ -173,8 +173,8 @@ def mutual_dist(model):
                     model.mat_id[rr, cr] = new_rd
                     id_max = 0 if mtldst_ar[0] >= mtldst_ar[1] else 1
                     if id_max == 0:
-                        id_eo1 = model.dr_net[dp1.id_ch.value-1].id_endo.value
-                        id_eo2 = model.dr_net[dp1.id_ch.value-1].id_endo.value
+                        id_eo1 = model.dr_net[dp1.id_ch-1].id_endo
+                        id_eo2 = model.dr_net[dp1.id_ch-1].id_endo
                         if id_eo1 <= id_eo2:
                             new_rd.id_drpt1 = dp1.id_pnt
                             new_rd.id_drpt2 = dp2.id_pnt
@@ -182,8 +182,8 @@ def mutual_dist(model):
                             new_rd.id_drpt1 = dp2.id_pnt
                             new_rd.id_drpt2 = dp1.id_pnt
                     else:
-                        id_eo3 = model.dr_net[dp3.id_ch.value-1].id_endo.value
-                        id_eo4 = model.dr_net[dp4.id_ch.value-1].id_endo.value
+                        id_eo3 = model.dr_net[dp3.id_ch-1].id_endo
+                        id_eo4 = model.dr_net[dp4.id_ch-1].id_endo
                         if id_eo3 <= id_eo4:
                             new_rd.id_drpt1 = dp3.id_pnt
                             new_rd.id_drpt2 = dp4.id_pnt
@@ -217,8 +217,8 @@ def md(dp1, dp2, model):
     curr_ch1 = dp1.id_ch
     curr_ch2 = dp2.id_ch
     # Access the drainage networks.
-    net1 = model.dr_net[curr_ch1.value-1]
-    net2 = model.dr_net[curr_ch2.value-1]
+    net1 = model.dr_net[curr_ch1-1]
+    net2 = model.dr_net[curr_ch2-1]
     if net1 is None or net2 is None:
         return 1e10
 
@@ -249,21 +249,21 @@ def md(dp1, dp2, model):
                 jun1_channel_id = net1.id_path[n_path1 - n_com - 1]
                 jun2_channel_id = net2.id_path[n_path2 - n_com - 1]
                 #id of the first point of the path #1 belonging to the same path after the rejunction
-                jun1 = model.dr_net[jun1_channel_id-1].id_end_pt.value
+                jun1 = model.dr_net[jun1_channel_id-1].id_end_pt
                 #id of the first point of the path #2 belonging to the same path after the rejunction
-                jun2 = model.dr_net[jun2_channel_id-1].id_end_pt.value
+                jun2 = model.dr_net[jun2_channel_id-1].id_end_pt
             else:
                 #the two points belongs to the same basin
                 if (n_path1 == min_n_pth) and (n_path1 != n_path2):
-                    jun1 = dp1.id_pnt.value
+                    jun1 = dp1.id_pnt
                 else:
                     jun1_channel_id = net1.id_path[n_path1 - n_com - 1]
-                    jun1 = model.dr_net[jun1_channel_id-1].id_end_pt.value
+                    jun1 = model.dr_net[jun1_channel_id-1].id_end_pt
                 if (n_path2 == min_n_pth) and (n_path1 != n_path2):
-                    jun2 = dp2.id_pnt.value
+                    jun2 = dp2.id_pnt
                 else:
                     jun2_channel_id = net2.id_path[n_path2 - n_com - 1]
-                    jun2 = model.dr_net[jun2_channel_id-1].id_end_pt.value
+                    jun2 = model.dr_net[jun2_channel_id-1].id_end_pt
             if (jun1 is None) or (jun2 is None):
                 mutdist = 1e10
             else:

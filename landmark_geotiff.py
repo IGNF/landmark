@@ -33,8 +33,8 @@ class HydroModel(LoadData, SlopelineMixin):
 
 if __name__ == "__main__":
 
-    # dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
-    dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
+    dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
+    # dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
     # dtm_path = "../../QGIS/out/cordevole_extrait/cordevole_extrait_extrait.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_mini.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
@@ -49,14 +49,14 @@ if __name__ == "__main__":
     
     #Geopackage path
     slopelines_HSO_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test_nopointer_nocython"
-    slopelines_se_HSO_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test_nopointer_nocython"
+    slopelines_se_HSO_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test_nopointer_nocython_slope_curvature"
 
     drainage_points_HSO_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test_nopointer_nocython"
     
     ridge_points_HSO_path = f"../../out_scripts_test_temp/ridge_points_HSO{file_name[:-4]}_test_nopointer_nocython"
     
     ridgelines_HSO_path = f"../../out_scripts_test_temp/ridgelines_HSO_{file_name[:-4]}_test_nopointer_nocython"
-    ridgelines_se_HSO_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test_nopointer_nocython"
+    ridgelines_se_HSO_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test_nopointer_nocython_slope_curvature"
     
     
     saddle_points_HSO_path = f"../../out_scripts_test_temp/saddle_points_HSO_filtre_{file_name[:-4]}_test_nopointer_nocython"
@@ -73,14 +73,21 @@ if __name__ == "__main__":
     A_out = 0 #Thalweg drainage area
     HSO_th = 0 # Horton stream order theshold
     
+    #Calculate cuvature and slope
+    calculate_curvature_slope = False
+    
+    #Calculate slope
+    n_pts_calc_slope = 5 # Number of points to use to calculate the slope
 
-        
+
     model_geotiff = HydroModel()
     model_geotiff.main_channel_choice = main_channel_choice
     model_geotiff.type_of_landscape = type_of_landscape
     model_geotiff.a_spread_threshold = A_spread
     model_geotiff.a_out_threshold = A_out
     model_geotiff.hso_th = HSO_th
+    model_geotiff.curvature_slope = calculate_curvature_slope
+    model_geotiff.n_pts_calc_slope = n_pts_calc_slope
     
     
     print("Loading data...")
@@ -123,8 +130,8 @@ if __name__ == "__main__":
     # print("Export slopelines HSO")
     # model_geotiff.export_slopelines(slopelines_HSO_path)
     
-    # print("Export slopelines single element HSO")
-    # model_geotiff.export_slopelines_single_element(slopelines_se_HSO_path)
+    print("Export slopelines single element HSO")
+    model_geotiff.export_slopelines_single_element(slopelines_se_HSO_path)
 
     
     # print("Export saddle points")
@@ -137,7 +144,7 @@ if __name__ == "__main__":
     # print("Export ridgelines HSO")
     # model_geotiff.export_ridgelines(ridgelines_HSO_path)
     
-    # print("Export ridgelines single element HSO")
-    # model_geotiff.export_ridgelines_single_element(ridgelines_se_HSO_path)
+    print("Export ridgelines single element HSO")
+    model_geotiff.export_ridgelines_single_element(ridgelines_se_HSO_path)
 
     

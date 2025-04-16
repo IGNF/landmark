@@ -65,6 +65,14 @@ class LoadData:
                 self.yllcorner = self.transform[5] - self.delta_y * self.N
                 self.dr_pt = np.full((self.N * self.M), None, dtype =object)
                 self.mat_id = np.full((self.N * 2 - 1, self.M * 2 - 1), None, dtype=object)
+                
+                print(f"Pixel dimensions: {src.width} x {src.height}")
+                print(f"Pixel size: {src.res[0]} x {src.res[1]}")
+                width_km = (src.width * src.res[0]) / 1000
+                height_km = (src.height * src.res[1]) / 1000
+                print(f"Spatial extent: {width_km:.2f} km x {height_km:.2f} km")
+                print(f"CRS: {src.crs}")
+
 
                 
                 for id_i in tqdm(range(self.N), desc="Loading DEM", unit="row"):
@@ -86,7 +94,247 @@ class LoadData:
         except Exception as e:
             raise RuntimeError(f"Error reading GeoTIFF file '{geotiff_file}': {e}")
             
- 
+
+
+    def calculate_curvature_window(self, n: int = 5) -> None:
+        """
+        Compute curvature as the second derivative of Z with respect to curvilinear distance
+        using a centered window of `n` points (must be odd).
+    
+        This is a generalization of the 3-point second difference to a larger window,
+        improving robustness to noise. Results are stored in self.curvature_dict.
+    
+        Parameters
+        ----------
+        n : int
+            Number of points used for curvature estimation (must be odd and >= 3).
+        """
+        import numpy as np
+    
+        assert n >= 3 and n % 2 == 1, "n must be an odd integer >= 3"
+    
+        self.curvature_dict = {}
+    
+        half = n // 2
+        dr_net_sorted = sorted(self.dr_net, key=lambda net: net.length, reverse=True)
+    
+        for net in tqdm(dr_net_sorted):
+            pids = net.id_pnts.value if hasattr(net.id_pnts, 'value') else net.id_pnts
+    
+            if len(pids) < n:
+                for pid in pids:
+                    if pid not in self.curvature_dict:
+                        self.curvature_dict[pid] = 0.0
+                continue
+    
+            for i in range(half, len(pids) - half):
+                idx_range = pids[i - half: i + half + 1]
+                pts = []
+                for pid in idx_range:
+                    dp = self.dr_pt[pid - 1]
+                    x, y = self.transform * (dp.j, dp.i)
+                    pts.append((x + self.delta_x / 2, y - self.delta_y / 2, dp.Z))
+    
+                s = [0.0]
+                for j in range(1, len(pts)):
+                    ds = np.linalg.norm(np.array(pts[j][:2]) - np.array(pts[j - 1][:2]))
+                    s.append(s[-1] + ds)
+    
+                z = [p[2] for p in pts]
+                s = np.array(s)
+                z = np.array(z)
+    
+                A = np.vstack([s**2, s, np.ones_like(s)]).T
+                coeffs, _, _, _ = np.linalg.lstsq(A, z, rcond=None)
+                a = coeffs[0]  # coefficient of s^2
+    
+                if pids[i] not in self.curvature_dict:
+                    self.curvature_dict[pids[i]] = 2 * a  # second derivative
+    
+            for pid in pids[:half] + pids[-half:]:
+                if pid not in self.curvature_dict:
+                    self.curvature_dict[pid] = 0.0
+
+
+
+    def calculate_ridge_curvature_window(self, n: int = 5) -> None:
+        """
+        Compute curvature as the second derivative of Z with respect to curvilinear distance
+        using a centered window of `n` ridge points (must be odd).
+    
+        This extends the 3-point curvature to a windowed regression approach to reduce noise.
+        Results are stored in self.ridge_curvature_dict.
+    
+        Parameters
+        ----------
+        n : int
+            Number of points used for curvature estimation (must be odd and >= 3).
+        """
+        import numpy as np
+    
+        assert n >= 3 and n % 2 == 1, "n must be an odd integer >= 3"
+    
+        self.ridge_curvature_dict = {}
+    
+        half = n // 2
+        rd_net_sorted = sorted(self.rd_net, key=lambda net: net.length, reverse=True)
+    
+        for net in tqdm(rd_net_sorted):
+            pids = net.id_pnts
+    
+            if len(pids) < n:
+                for pid in pids:
+                    if pid not in self.ridge_curvature_dict:
+                        self.ridge_curvature_dict[pid] = 0.0
+                continue
+    
+            for i in range(half, len(pids) - half):
+                idx_range = pids[i - half: i + half + 1]
+                pts = []
+                for pid in idx_range:
+                    rp = self.rd_pt[pid - 1]
+                    x, y = self.transform * (rp.j / 2, rp.i / 2)
+                    pts.append((x + self.delta_x / 2, y - self.delta_y / 2, rp.Z))
+    
+                s = [0.0]
+                for j in range(1, len(pts)):
+                    ds = np.linalg.norm(np.array(pts[j][:2]) - np.array(pts[j - 1][:2]))
+                    s.append(s[-1] + ds)
+    
+                z = [p[2] for p in pts]
+                s = np.array(s)
+                z = np.array(z)
+    
+                A = np.vstack([s**2, s, np.ones_like(s)]).T
+                coeffs, _, _, _ = np.linalg.lstsq(A, z, rcond=None)
+                a = coeffs[0]
+    
+                if pids[i] not in self.ridge_curvature_dict:
+                    self.ridge_curvature_dict[pids[i]] = 2 * a
+    
+            for pid in pids[:half] + pids[-half:]:
+                if pid not in self.ridge_curvature_dict:
+                    self.ridge_curvature_dict[pid] = 0.0
+
+
+
+    def calculate_average_slope_window(self, n: int = 5) -> None:
+        """
+        Compute the average slope around each drainage point using a centered window of size `n`.
+    
+        The slope is estimated using a linear regression of Z versus curvilinear distance.
+        Results are stored in self.average_slope_dict.
+    
+        Parameters
+        ----------
+        n : int
+            Number of points in the window (must be odd and >= 3).
+        """
+    
+        assert n >= 3 and n % 2 == 1, "n must be an odd integer >= 3"
+    
+        self.average_slope_dict = {}
+    
+        half = n // 2
+        dr_net_sorted = sorted(self.dr_net, key=lambda net: net.length, reverse=True)
+    
+        for net in tqdm(dr_net_sorted):
+            pids = net.id_pnts.value if hasattr(net.id_pnts, 'value') else net.id_pnts
+    
+            if len(pids) < n:
+                for pid in pids:
+                    if pid not in self.average_slope_dict:
+                        self.average_slope_dict[pid] = None
+                continue
+    
+            for i in range(half, len(pids) - half):
+                idx_range = pids[i - half: i + half + 1]
+                pts = []
+                for pid in idx_range:
+                    dp = self.dr_pt[pid - 1]
+                    x, y = self.transform * (dp.j, dp.i)
+                    pts.append((x + self.delta_x / 2, y - self.delta_y / 2, dp.Z))
+    
+                # Compute curvilinear distances
+                s = [0.0]
+                for j in range(1, len(pts)):
+                    ds = np.linalg.norm(np.array(pts[j][:2]) - np.array(pts[j - 1][:2]))
+                    s.append(s[-1] + ds)
+    
+                z = [p[2] for p in pts]
+                s = np.array(s)
+                z = np.array(z)
+    
+                A = np.vstack([s, np.ones_like(s)]).T
+                slope, _ = np.linalg.lstsq(A, z, rcond=None)[0]
+    
+                if pids[i] not in self.average_slope_dict:
+                    self.average_slope_dict[pids[i]] = slope *100
+    
+            # Fill boundaries with None if not already set
+            for pid in pids[:half] + pids[-half:]:
+                if pid not in self.average_slope_dict:
+                    self.average_slope_dict[pid] = None
+
+
+    def calculate_average_ridge_slope_window(self, n: int = 5) -> None:
+        """
+        Compute the average slope around each ridge point using a centered window of size `n`.
+    
+        The slope is estimated using a linear regression of Z versus curvilinear distance.
+        Results are stored in self.average_ridge_slope_dict.
+    
+        Parameters
+        ----------
+        n : int
+            Number of points in the window (must be odd and >= 3).
+        """
+    
+        assert n >= 3 and n % 2 == 1, "n must be an odd integer >= 3"
+    
+        self.average_ridge_slope_dict = {}
+    
+        half = n // 2
+        rd_net_sorted = sorted(self.rd_net, key=lambda net: net.length, reverse=True)
+    
+        for net in tqdm(rd_net_sorted):
+            pids = net.id_pnts
+    
+            if len(pids) < n:
+                for pid in pids:
+                    if pid not in self.average_ridge_slope_dict:
+                        self.average_ridge_slope_dict[pid] = None
+                continue
+    
+            for i in range(half, len(pids) - half):
+                idx_range = pids[i - half: i + half + 1]
+                pts = []
+                for pid in idx_range:
+                    rp = self.rd_pt[pid - 1]
+                    x, y = self.transform * (rp.j / 2, rp.i / 2)
+                    pts.append((x + self.delta_x / 2, y - self.delta_y / 2, rp.Z))
+    
+                s = [0.0]
+                for j in range(1, len(pts)):
+                    ds = np.linalg.norm(np.array(pts[j][:2]) - np.array(pts[j - 1][:2]))
+                    s.append(s[-1] + ds)
+    
+                z = [p[2] for p in pts]
+                s = np.array(s)
+                z = np.array(z)
+    
+                A = np.vstack([s, np.ones_like(s)]).T
+                slope, _ = np.linalg.lstsq(A, z, rcond=None)[0]
+    
+                if pids[i] not in self.average_ridge_slope_dict:
+                    self.average_ridge_slope_dict[pids[i]] = slope *100
+    
+            for pid in pids[:half] + pids[-half:]:
+                if pid not in self.average_ridge_slope_dict:
+                    self.average_ridge_slope_dict[pid] = None
+
+
+
     
     def export_slopelines(self, output_file: str) -> None:
         """Export the drainage network (slopelines) as a GeoPackage (.gpkg) file.
@@ -207,11 +455,17 @@ class LoadData:
         | length       | float   | Length of the segment (in spatial units, e.g. meters).       |
         | sso          | int     | Stream Segment Order.                                        |
         | hso          | int     | Horton Stream Order.                                         |
+        | slope_pct    | float   | Slope between segment endpoints (%).                         |
+        | curvature    | float   | Vertical curvature at the first point of the segment.          |
         +--------------+---------+--------------------------------------------------------------+
         """        
         lines = []
         attributes = []
         a_unit = self.delta_x * self.delta_y  # Area of one raster cell
+        
+        if self.curvature_slope : 
+            self.calculate_curvature_window(n = self.n_pts_calc_slope)
+            self.calculate_average_slope_window(n = self.n_pts_calc_slope)
 
         for net in tqdm(self.dr_net):
             if net.hso >= self.hso_th:
@@ -235,19 +489,42 @@ class LoadData:
                             ])
 
                             lines.append(line)
+                            
+                            
+                            
+                            if self.curvature_slope : 
+                                curvature = self.curvature_dict.get(dp1.id_pnt, None)
+                                slope_pct = self.average_slope_dict.get(dp1.id_pnt, None)
 
-                            # Collect attributes for the current segment
-                            attributes.append({
-                                "id_ch": int(net.id_ch) if net.id_ch is not None else 0,
-                                "start_pnt": int(dp1.id_pnt) if dp1.id_pnt is not None else 0,
-                                "end_pnt": int(dp2.id_pnt) if dp2.id_pnt is not None else 0,
-                                "id_ch_out": int(net.id_ch_out) if net.id_ch_out is not None else 0,
-                                "id_ch_main": int(net.id_path[-1]),
-                                "A_out": int(dp1.A_in * a_unit),
-                                "length": float(line.length),
-                                "sso": int(net.sso) if net.sso is not None else 0,
-                                "hso": int(net.hso) if net.hso is not None else 0
-                            })
+                                # Collect attributes for the current segment
+                                attributes.append({
+                                    "id_ch": int(net.id_ch) if net.id_ch is not None else 0,
+                                    "start_pnt": int(dp1.id_pnt) if dp1.id_pnt is not None else 0,
+                                    "end_pnt": int(dp2.id_pnt) if dp2.id_pnt is not None else 0,
+                                    "id_ch_out": int(net.id_ch_out) if net.id_ch_out is not None else 0,
+                                    "id_ch_main": int(net.id_path[-1]),
+                                    "A_out": int(dp1.A_in * a_unit),
+                                    "length": float(line.length),
+                                    "sso": int(net.sso) if net.sso is not None else 0,
+                                    "hso": int(net.hso) if net.hso is not None else 0,
+                                    "slope_pct": float(slope_pct) if slope_pct is not None else np.nan,
+                                    "curvature": float(curvature) if curvature is not None else np.nan
+                                })
+                            
+                            else : 
+                                # Collect attributes for the current segment
+                                attributes.append({
+                                    "id_ch": int(net.id_ch) if net.id_ch is not None else 0,
+                                    "start_pnt": int(dp1.id_pnt) if dp1.id_pnt is not None else 0,
+                                    "end_pnt": int(dp2.id_pnt) if dp2.id_pnt is not None else 0,
+                                    "id_ch_out": int(net.id_ch_out) if net.id_ch_out is not None else 0,
+                                    "id_ch_main": int(net.id_path[-1]),
+                                    "A_out": int(dp1.A_in * a_unit),
+                                    "length": float(line.length),
+                                    "sso": int(net.sso) if net.sso is not None else 0,
+                                    "hso": int(net.hso) if net.hso is not None else 0,
+                                })
+
 
         # Create GeoDataFrame and export to a Geopackage
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)
@@ -619,6 +896,8 @@ class LoadData:
         | length       | float   | Segment length (in spatial units, e.g., meters).             |
         | jun_el       | int     | Index of the first junction in the full ridgeline.           |
         | A_spread     | float   | Approximated spread area covered by the segment (in m²).     |
+        | slope_pct    | float   | Slope between segment endpoints (%).                         |
+        | curvature    | float   | Vertical curvature at the first point of the segment.          |
         +--------------+---------+--------------------------------------------------------------+
 
         Remarks
@@ -628,6 +907,10 @@ class LoadData:
         """
         lines = []
         attributes = []
+        
+        if self.curvature_slope:
+            self.calculate_ridge_curvature_window(n = self.n_pts_calc_slope)
+            self.calculate_average_ridge_slope_window(n = self.n_pts_calc_slope)
 
         for net in tqdm(self.rd_net):
             if net.jun_el > 0:
@@ -655,16 +938,36 @@ class LoadData:
                             ])
 
                             lines.append(line)
+                            
+                            
+                            if self.curvature_slope:
+                                curvature = self.ridge_curvature_dict.get(rp1.id_pnt, None)
+                                slope_pct = self.average_ridge_slope_dict.get(rp1.id_pnt, None)
 
-                            # Store segment attributes
-                            attributes.append({
-                                "id_rdl": int(net.id_rdl),
-                                "start_pnt": int(rp1.id_pnt),
-                                "end_pnt": int(rp2.id_pnt),
-                                "length": float(line.length),
-                                "jun_el": int(net.jun_el),
-                                "A_spread": float(a_spread)
-                            })
+    
+                                # Store segment attributes
+                                attributes.append({
+                                    "id_rdl": int(net.id_rdl),
+                                    "start_pnt": int(rp1.id_pnt),
+                                    "end_pnt": int(rp2.id_pnt),
+                                    "length": float(line.length),
+                                    "jun_el": int(net.jun_el),
+                                    "A_spread": float(a_spread),
+                                    "slope_pct": float(slope_pct) if slope_pct is not None else np.nan,
+                                    "curvature": float(curvature) if curvature is not None else np.nan,
+                                })
+                            
+                            else:
+                                # Store segment attributes
+                                attributes.append({
+                                    "id_rdl": int(net.id_rdl),
+                                    "start_pnt": int(rp1.id_pnt),
+                                    "end_pnt": int(rp2.id_pnt),
+                                    "length": float(line.length),
+                                    "jun_el": int(net.jun_el),
+                                    "A_spread": float(a_spread),
+                                })
+
 
         # Create GeoDataFrame and export to a Geopackage
         gdf = gpd.GeoDataFrame(attributes, geometry=lines, crs=self.crs)

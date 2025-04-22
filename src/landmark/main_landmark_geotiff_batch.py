@@ -37,16 +37,11 @@ if __name__ == "__main__":
     start_time = datetime.now()
     print(f"[START] Processing started at {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
     
-    dir_path = "/media/DATA/MESH_3D/MNT/"
+    dir_path = ""
     
-    file_list = ["Zone_O1_Christophe_Oisans_BDALTIV2.tif",
-                 "Zone_O1_Christophe_Oisans_2021_MNTLHD_reech25m.tif",
-                 "Zone_O1_Christophe_Oisans_2024_DTMRGE_reech2m.tif",
-                 "BDALTIV2_25M_D073_fusion.tif",
-                 "BDALTIV2_25M_D076_fusion.tif",
-                 "BDALTIV2_25M_NEfrance.tif",
-                 "Zone_O3_Modane_2022_MNTLHD_reech5m.tif",
-                 "Zone_O3_Modane_2022_MNTLHD_reech2m.tif"]
+    file_list = ["dem01.tif",
+                 "dem02.tif",
+                 ]
     
     for file in file_list:
         dtm_path = dir_path + file

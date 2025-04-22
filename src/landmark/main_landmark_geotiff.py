@@ -37,16 +37,8 @@ if __name__ == "__main__":
     start_time = datetime.now()
     print(f"[START] Processing started at {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
-    dtm_path = "../../../../QGIS/out/cordevole_extrait_minimum2_6.tif"
-    # dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
-    # dtm_path = "../../QGIS/out/cordevole_extrait/cordevole_extrait_extrait.tif"
-    # dtm_path = "../../QGIS/out/cordevole_debug_mini.tif"
-    # dtm_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
-    # dtm_path = "../../QGIS/out/cordevole_debug_mini_mini.tif"
-    # dtm_path = "../../QGIS/out/cordevole_debug.tif"
-    # dtm_path = "../../QGIS/out/BDALTIV2_25M_D076_fusion_extrait.tif"
-
-
+    dtm_path = "dem_path.tif"
+ 
     
     file_name = dtm_path.split("/")[-1]
     

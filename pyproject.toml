@@ -11,7 +11,7 @@ authors = [
 ]
 license = { file = "LICENSE.txt" }
 readme = "README.md"
-keywords = ["Landmark algorithm", "Thalweg network", "Ridge network", "Drainage area", Spread area"]
+keywords = ["Landmark algorithm", "Thalweg network", "Ridge network", "Drainage area", "Spread area"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

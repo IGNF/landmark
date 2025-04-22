@@ -23,7 +23,7 @@ dependencies = [
     "shapely",
     "tqdm",
     "rasterio", 
-    "geopandas",
+    "geopandas"
 ]
 
 [tool.setuptools]

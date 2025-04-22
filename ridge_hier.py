@@ -146,6 +146,9 @@ def rdl_trace(id_rd, n_rdnet, Zcurr, model):
 
     else:
         # ▸ Point already belongs to a ridgeline — connect it to the dominant one
+        id_nxpt = curr_rp.id_neigh[0] #id next point. The current rd_pnt have to be only one neighbour point
+        if id_nxpt is None:
+            return None, 0, n_rdnet
 
         max_Astart = model.rd_pt[model.rd_net[curr_rp.id_rdl[0]-1].id_pnts[0]-1].A_in
         
@@ -183,8 +186,7 @@ def rdl_trace(id_rd, n_rdnet, Zcurr, model):
                     id_mrl = id_crl
                 
         id_mz = id_mrl
-        #At this point %id_neigh have to be only one element
-        id_nxpt = curr_rp.id_neigh[0] #id next point. The current rd_pnt have to be only one neighbour point
+        #At this point %id_neigh have to be only one element        
         model.rd_net[id_mz-1].Zmean = max_Zmean #it updates every time I add a point and recalculate Zmean
         if model.rd_net[id_mz-1].n_down + n_down > 0:
             model.rd_net[id_mz-1].Zmean_down = ((model.rd_net[id_mz-1].Zmean_down * model.rd_net[id_mz-1].n_down) + (Zmean_down * n_down)) /\

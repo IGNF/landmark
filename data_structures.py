@@ -225,7 +225,7 @@ class RidgePoint:
         self.id_neigh = []
         self.id_sdl = None
         self.nrdl = 0
-        self.id_rdl = [None, None, None, None]
+        self.id_rdl = [None, None, None, None, None, None, None, None]
         self.junc = 0
         self.n_ptsa = 1
 

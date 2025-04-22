@@ -53,7 +53,7 @@ class LoadData:
                 dem = src.read(1)  # Read the first band
                 self.transform = src.transform  # Store georeferencing transform
                 self.crs = src.crs  # Store coordinate reference system
-                self.nodata = -9999.00
+                self.nodata = -9999
                 
                 # Replace NoData values with NaN for easier processing
                 dem = np.where(dem == self.nodata, np.nan, dem)
@@ -63,9 +63,12 @@ class LoadData:
                 self.N, self.M = dem.shape
                 self.xllcorner = self.transform[2]
                 self.yllcorner = self.transform[5] - self.delta_y * self.N
-                self.dr_pt = np.full((self.N * self.M), None, dtype =object)
+                # self.dr_pt = np.full((self.N * self.M), None, dtype =object)
+                self.dr_pt = []
                 self.mat_id = np.full((self.N * 2 - 1, self.M * 2 - 1), None, dtype=object)
+                self.n_drpt = 0
                 
+                print(f"Processed DEM : {geotiff_file}")
                 print(f"Pixel dimensions: {src.width} x {src.height}")
                 print(f"Pixel size: {src.res[0]} x {src.res[1]}")
                 width_km = (src.width * src.res[0]) / 1000
@@ -78,16 +81,19 @@ class LoadData:
                 for id_i in tqdm(range(self.N), desc="Loading DEM", unit="row"):
                     for id_j in range(self.M):
                         elevation = dem[id_i, id_j]
-                        # Create a DrainagePoint (id_pnt starts at 1)
-                        dp = DrainagePoint(
-                            i=id_i,
-                            j=id_j,
-                            Z=float(elevation),
-                            id_pnt=(id_i * self.M + id_j) + 1
-                            )
-                        self.dr_pt[id_i * self.M + id_j] = dp
-                        # Place the point in the matrix.
-                        self.mat_id[id_i * 2, id_j * 2] = dp
+                        if elevation != self.nodata and not np.isnan(elevation)  :
+                            # Create a DrainagePoint (id_pnt starts at 1)
+                            self.n_drpt += 1
+                            dp = DrainagePoint(
+                                i=id_i,
+                                j=id_j,
+                                Z=float(elevation),
+                                id_pnt=self.n_drpt
+                                )
+                            # self.dr_pt[id_i * self.M + id_j] = dp
+                            self.dr_pt.append(dp)
+                            # Place the point in the matrix.
+                            self.mat_id[id_i * 2, id_j * 2] = dp
 
 
                 

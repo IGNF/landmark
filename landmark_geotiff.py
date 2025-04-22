@@ -12,6 +12,7 @@ Transcript in python of the original landmark.f90
 ! Constructs a hierarchically ordered ridglines network.
 """
 
+from datetime import datetime
 import sys
 sys.setrecursionlimit(5000)
 
@@ -33,35 +34,37 @@ class HydroModel(LoadData, SlopelineMixin):
 
 if __name__ == "__main__":
 
-    dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
+    start_time = datetime.now()
+    print(f"[START] Processing started at {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    # dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
     # dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
     # dtm_path = "../../QGIS/out/cordevole_extrait/cordevole_extrait_extrait.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_mini.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_mini_mini.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug.tif"
-
-
+    dtm_path = "../../QGIS/out/BDALTIV2_25M_D076_fusion_extrait.tif"
 
 
     
     file_name = dtm_path.split("/")[-1]
     
     #Geopackage path
-    slopelines_HSO_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test_nopointer_nocython"
-    slopelines_se_HSO_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test_nopointer_nocython_slope_curvature"
+    slopelines_HSO_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test"
+    slopelines_se_HSO_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test"
 
-    drainage_points_HSO_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test_nopointer_nocython"
+    drainage_points_HSO_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test"
     
-    ridge_points_HSO_path = f"../../out_scripts_test_temp/ridge_points_HSO{file_name[:-4]}_test_nopointer_nocython"
+    ridge_points_HSO_path = f"../../out_scripts_test_temp/ridge_points_HSO{file_name[:-4]}_test"
     
-    ridgelines_HSO_path = f"../../out_scripts_test_temp/ridgelines_HSO_{file_name[:-4]}_test_nopointer_nocython"
-    ridgelines_se_HSO_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test_nopointer_nocython_slope_curvature"
+    ridgelines_HSO_path = f"../../out_scripts_test_temp/ridgelines_HSO_{file_name[:-4]}_test"
+    ridgelines_se_HSO_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test"
     
     
-    saddle_points_HSO_path = f"../../out_scripts_test_temp/saddle_points_HSO_filtre_{file_name[:-4]}_test_nopointer_nocython"
+    saddle_points_HSO_path = f"../../out_scripts_test_temp/saddle_points_HSO_filtre_{file_name[:-4]}_test"
     
-    endo_points_HSO_path  = f"../../out_scripts_test_temp/endo_points_HSO{file_name[:-4]}_test_nopointer_nocython"
+    endo_points_HSO_path  = f"../../out_scripts_test_temp/endo_points_HSO{file_name[:-4]}_test"
 
     
     #Landmarks option (for now, only the choices indicated are coded)
@@ -130,21 +133,27 @@ if __name__ == "__main__":
     # print("Export slopelines HSO")
     # model_geotiff.export_slopelines(slopelines_HSO_path)
     
-    print("Export slopelines single element HSO")
-    model_geotiff.export_slopelines_single_element(slopelines_se_HSO_path)
+    # print("Export slopelines single element HSO")
+    # model_geotiff.export_slopelines_single_element(slopelines_se_HSO_path)
 
     
     # print("Export saddle points")
     # model_geotiff.export_saddle_points(saddle_points_HSO_path)
 
     
-    # print("\nExport ridges points HSO")
-    # model_geotiff.export_ridge_point(ridge_points_HSO_path)
+    print("\nExport ridges points HSO")
+    model_geotiff.export_ridge_point(ridge_points_HSO_path)
     
     # print("Export ridgelines HSO")
     # model_geotiff.export_ridgelines(ridgelines_HSO_path)
     
     print("Export ridgelines single element HSO")
     model_geotiff.export_ridgelines_single_element(ridgelines_se_HSO_path)
+    
+    end_time = datetime.now()
+    duration = end_time - start_time
+    print(f"[END] Processing finished at {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"[INFO] Total elapsed time: {duration}")
+
 
     

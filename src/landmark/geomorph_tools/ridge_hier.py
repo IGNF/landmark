@@ -6,7 +6,7 @@ higher ridges points
 
 from tqdm import tqdm
 
-from data_structures import RidgeNetwork
+from geomorph_tools.data_structures import RidgeNetwork
 
 def ridge_hier(model):
     """

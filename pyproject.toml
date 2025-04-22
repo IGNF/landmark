@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "landmark"
+version = "1.0.0"
+description = "Thalweg and ridge network extraction from unaltered topographic data"
+authors = [
+    {name = "Edmond SAINT DENIS", email = "edmond.saint-denis@ign.fr"}
+]
+license = { file = "LICENSE.txt" }
+readme = "README.md"
+keywords = ["Landmark algorithm", "Thalweg network", "Ridge network", "Drainage area", Spread area"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "shapely",
+    "tqdm",
+    "rasterio", 
+    "geopandas",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -12,7 +12,7 @@ import geopandas as gpd
 from shapely.geometry import LineString, Point
 
 #intern imports
-from data_structures import DrainagePoint
+from geomorph_tools.data_structures import DrainagePoint
 
 
 class LoadData:

@@ -6,7 +6,7 @@ ENDOrheic basins DELineation
 # endo_dl.py
 from tqdm import tqdm
 
-from data_structures import SaddlePoint
+from geomorph_tools.data_structures import SaddlePoint
 
 
 def endo_del(model):

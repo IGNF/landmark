@@ -9,12 +9,12 @@ Modify fldir and id_ch
 from tqdm import tqdm
 import numpy as np
 
-from mutual_dist import md
-from data_structures import RidgePoint, DrainagePoint
-from thal_net_hso_length import thal_net_hso_length
-from dpl_ss import dpl_ss
-from a_endo import a_endo
-from junc_update import junc_update
+from geomorph_tools.mutual_dist import md
+from geomorph_tools.data_structures import RidgePoint, DrainagePoint
+from geomorph_tools.thal_net_hso_length import thal_net_hso_length
+from geomorph_tools.dpl_ss import dpl_ss
+from geomorph_tools.a_endo import a_endo
+from geomorph_tools.junc_update import junc_update
 
 
 

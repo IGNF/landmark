@@ -17,15 +17,15 @@ import sys
 sys.setrecursionlimit(5000)
 
 #Internal import
-from load_data_geotiff import LoadData
-from D8_LTD import SlopelineMixin
-from slopeline import calculate_slopelines
-from dpl import dpl
-from mutual_dist import mutual_dist
-from endo_del import endo_del
-from saddle_spill import saddle_spill
-from ridge_point import find_ridge_neighbors
-from ridge_hier import ridge_hier
+from geomorph_tools.load_data_geotiff import LoadData
+from geomorph_tools.D8_LTD import SlopelineMixin
+from geomorph_tools.slopeline import calculate_slopelines
+from geomorph_tools.dpl import dpl
+from geomorph_tools.mutual_dist import mutual_dist
+from geomorph_tools.endo_del import endo_del
+from geomorph_tools.saddle_spill import saddle_spill
+from geomorph_tools.ridge_point import find_ridge_neighbors
+from geomorph_tools.ridge_hier import ridge_hier
 
 
 class HydroModel(LoadData, SlopelineMixin):
@@ -37,14 +37,14 @@ if __name__ == "__main__":
     start_time = datetime.now()
     print(f"[START] Processing started at {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
-    # dtm_path = "../../QGIS/out/cordevole_extrait_minimum2_6.tif"
+    dtm_path = "../../../../QGIS/out/cordevole_extrait_minimum2_6.tif"
     # dtm_path = "../../QGIS/out/cordevole_extrait_coord.tif"
     # dtm_path = "../../QGIS/out/cordevole_extrait/cordevole_extrait_extrait.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_mini.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_riquiqui.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug_mini_mini.tif"
     # dtm_path = "../../QGIS/out/cordevole_debug.tif"
-    dtm_path = "../../QGIS/out/BDALTIV2_25M_D076_fusion_extrait.tif"
+    # dtm_path = "../../QGIS/out/BDALTIV2_25M_D076_fusion_extrait.tif"
 
 
     
@@ -141,14 +141,14 @@ if __name__ == "__main__":
     # model_geotiff.export_saddle_points(saddle_points_HSO_path)
 
     
-    print("\nExport ridges points HSO")
-    model_geotiff.export_ridge_point(ridge_points_HSO_path)
+    # print("\nExport ridges points HSO")
+    # model_geotiff.export_ridge_point(ridge_points_HSO_path)
     
     # print("Export ridgelines HSO")
     # model_geotiff.export_ridgelines(ridgelines_HSO_path)
     
-    print("Export ridgelines single element HSO")
-    model_geotiff.export_ridgelines_single_element(ridgelines_se_HSO_path)
+    # print("Export ridgelines single element HSO")
+    # model_geotiff.export_ridgelines_single_element(ridgelines_se_HSO_path)
     
     end_time = datetime.now()
     duration = end_time - start_time

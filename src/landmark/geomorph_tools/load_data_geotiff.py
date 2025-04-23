@@ -56,7 +56,7 @@ class LoadData:
                 self.nodata = -9999
                 
                 # Replace NoData values with NaN for easier processing
-                dem = np.where(dem == self.nodata, np.nan, dem)
+                dem = np.where(np.isin(dem, self.noData), np.nan, dem)
                 
                 self.delta_x = self.transform[0]
                 self.delta_y = -self.transform[4]
@@ -81,7 +81,7 @@ class LoadData:
                 for id_i in tqdm(range(self.N), desc="Loading DEM", unit="row"):
                     for id_j in range(self.M):
                         elevation = dem[id_i, id_j]
-                        if elevation != self.nodata and not np.isnan(elevation)  :
+                        if elevation not in self.noData and not np.isnan(elevation)  :
                             # Create a DrainagePoint (id_pnt starts at 1)
                             self.n_drpt += 1
                             dp = DrainagePoint(

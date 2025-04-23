@@ -58,6 +58,8 @@ if __name__ == "__main__":
     
     endo_points_HSO_path  = f"../../out_scripts_test_temp/endo_points_HSO{file_name[:-4]}_test"
 
+    #NoData values in the DEM
+    noData = [-9999, 0]
     
     #Landmarks option (for now, only the choices indicated are coded)
     main_channel_choice =2 #area:0, length:1, hso:2
@@ -83,6 +85,7 @@ if __name__ == "__main__":
     model_geotiff.hso_th = HSO_th
     model_geotiff.curvature_slope = calculate_curvature_slope
     model_geotiff.n_pts_calc_slope = n_pts_calc_slope
+    model_geotiff.noData = noData
     
     
     print("Loading data...")

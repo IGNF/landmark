@@ -17,15 +17,15 @@ import sys
 sys.setrecursionlimit(5000)
 
 #Internal import
-from load_data_geotiff import LoadData
-from D8_LTD import SlopelineMixin
-from slopeline import calculate_slopelines
-from dpl import dpl
-from mutual_dist import mutual_dist
-from endo_del import endo_del
-from saddle_spill import saddle_spill
-from ridge_point import find_ridge_neighbors
-from ridge_hier import ridge_hier
+from geomorph_tools.load_data_geotiff import LoadData
+from geomorph_tools.D8_LTD import SlopelineMixin
+from geomorph_tools.slopeline import calculate_slopelines
+from geomorph_tools.dpl import dpl
+from geomorph_tools.mutual_dist import mutual_dist
+from geomorph_tools.endo_del import endo_del
+from geomorph_tools.saddle_spill import saddle_spill
+from geomorph_tools.ridge_point import find_ridge_neighbors
+from geomorph_tools.ridge_hier import ridge_hier
 
 
 class HydroModel(LoadData, SlopelineMixin):
@@ -65,6 +65,8 @@ if __name__ == "__main__":
         
         endo_points_HSO_path  = f"../../outputs/endo_points_HSO{file_name[:-4]}"
     
+        #NoData values in the DEM
+        noData = [-9999, 0]
         
         #Landmarks option (for now, only the choices indicated are coded)
         main_channel_choice =2 #area:0, length:1, hso:2
@@ -90,7 +92,7 @@ if __name__ == "__main__":
         model_geotiff.hso_th = HSO_th
         model_geotiff.curvature_slope = calculate_curvature_slope
         model_geotiff.n_pts_calc_slope = n_pts_calc_slope
-        
+        model_geotiff.noData = noData
         
         print("Loading data...")
         model_geotiff.read_geotiff(dtm_path)

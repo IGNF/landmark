@@ -36,27 +36,29 @@ if __name__ == "__main__":
 
     start_time = datetime.now()
     print(f"[START] Processing started at {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
-
-    dtm_path = "dem_path.tif"
+    
+    
+    #Input DTM in geoTiff format
+    dtm_path = "dtm_path.tif"
  
     
     file_name = dtm_path.split("/")[-1]
     
-    #Geopackage path
-    slopelines_HSO_path = f"../../out_scripts_test_temp/slopelines_HSO_{file_name[:-4]}_test"
-    slopelines_se_HSO_path = f"../../out_scripts_test_temp/slopelines_se_HSO_{file_name[:-4]}_test"
+    #Output Geopackage path
+    slopelines_HSO_path = f"../../outputs/slopelines_HSO_{file_name[:-4]}"
+    slopelines_se_HSO_path = f"../../outputs/slopelines_se_HSO_{file_name[:-4]}"
 
-    drainage_points_HSO_path = f"../../out_scripts_test_temp/drain_points_HSO_{file_name[:-4]}_test"
+    drainage_points_HSO_path = f"../../outputs/drain_points_HSO_{file_name[:-4]}"
     
-    ridge_points_HSO_path = f"../../out_scripts_test_temp/ridge_points_HSO{file_name[:-4]}_test"
+    ridge_points_HSO_path = f"../../outputs/ridge_points_HSO{file_name[:-4]}"
     
-    ridgelines_HSO_path = f"../../out_scripts_test_temp/ridgelines_HSO_{file_name[:-4]}_test"
-    ridgelines_se_HSO_path = f"../../out_scripts_test_temp/ridgelines_se_HSO_{file_name[:-4]}_test"
+    ridgelines_HSO_path = f"../../outputs/ridgelines_HSO_{file_name[:-4]}"
+    ridgelines_se_HSO_path = f"../../outputs/ridgelines_se_HSO_{file_name[:-4]}"
     
     
-    saddle_points_HSO_path = f"../../out_scripts_test_temp/saddle_points_HSO_filtre_{file_name[:-4]}_test"
+    saddle_points_HSO_path = f"../../outputs/saddle_points_HSO_filtre_{file_name[:-4]}"
     
-    endo_points_HSO_path  = f"../../out_scripts_test_temp/endo_points_HSO{file_name[:-4]}_test"
+    endo_points_HSO_path  = f"../../outputs/endo_points_HSO{file_name[:-4]}"
 
     #NoData values in the DEM
     noData = [-9999, 0]
@@ -66,9 +68,9 @@ if __name__ == "__main__":
     type_of_landscape = 0 #Natural drainage basin:0, Flood Plane:1
     
     #Export threshold value:
-    A_spread = 0 #Ridge dispersion area
-    A_out = 0 #Thalweg drainage area
-    HSO_th = 0 # Horton stream order theshold
+    A_spread = 1e5 #Ridge dispersion area
+    A_out = 1e5 #Thalweg drainage area
+    HSO_th = 5 # Horton stream order theshold
     
     #Calculate cuvature and slope
     calculate_curvature_slope = False
@@ -115,35 +117,33 @@ if __name__ == "__main__":
 
     print("Ridge hierarchization")
     ridge_hier(model_geotiff)
+      
     
+    #---------------Geopackage exports-------------------------------------
+    print("Export slopelines single element HSO")
+    model_geotiff.export_slopelines_single_element(slopelines_se_HSO_path)
     
-    
+    print("Export ridgelines single element HSO")
+    model_geotiff.export_ridgelines_single_element(ridgelines_se_HSO_path)
+
+    #--------------Export for debug only-----------------------------------
     # print("Export drainage points HSO")
     # model_geotiff.export_drainage_point(drainage_points_HSO_path)
     
     # print("\nExport endo points")
     # model_geotiff.export_endo_points(endo_points_HSO_path)
 
-
     # print("Export slopelines HSO")
     # model_geotiff.export_slopelines(slopelines_HSO_path)
-    
-    # print("Export slopelines single element HSO")
-    # model_geotiff.export_slopelines_single_element(slopelines_se_HSO_path)
-
     
     # print("Export saddle points")
     # model_geotiff.export_saddle_points(saddle_points_HSO_path)
 
-    
     # print("\nExport ridges points HSO")
     # model_geotiff.export_ridge_point(ridge_points_HSO_path)
     
     # print("Export ridgelines HSO")
     # model_geotiff.export_ridgelines(ridgelines_HSO_path)
-    
-    # print("Export ridgelines single element HSO")
-    # model_geotiff.export_ridgelines_single_element(ridgelines_se_HSO_path)
     
     end_time = datetime.now()
     duration = end_time - start_time

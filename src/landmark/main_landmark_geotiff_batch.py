@@ -39,6 +39,7 @@ if __name__ == "__main__":
     
     dir_path = ""
     
+    #Input DTM file list (DTM in geoTiff format)
     file_list = ["dem01.tif",
                  "dem02.tif",
                  ]
@@ -49,7 +50,7 @@ if __name__ == "__main__":
         
         file_name = dtm_path.split("/")[-1]
         
-        #Geopackage path
+        #Output Geopackage path
         slopelines_HSO_path = f"../../outputs/slopelines_HSO_{file_name[:-4]}"
         slopelines_se_HSO_path = f"../../outputs/slopelines_se_HSO_{file_name[:-4]}"
     
@@ -125,7 +126,7 @@ if __name__ == "__main__":
         print("Export ridgelines single element HSO")
         model_geotiff.export_ridgelines_single_element(ridgelines_se_HSO_path)
 
-        #--------------EXoprt for debug only-----------------------------------
+        #--------------Export for debug only-----------------------------------
         # print("Export drainage points HSO")
         # model_geotiff.export_drainage_point(drainage_points_HSO_path)
         

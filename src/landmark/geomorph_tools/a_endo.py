@@ -9,7 +9,7 @@ the elevation of the spill
 import numpy as np
 from tqdm import tqdm
 
-from geomorph_tools.data_structures import DrainagePoint
+from landmark.geomorph_tools.data_structures import DrainagePoint
 
 
 def a_endo(model):

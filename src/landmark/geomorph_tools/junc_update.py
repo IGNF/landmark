@@ -7,7 +7,7 @@ Update junc value to delineate bassins
 from tqdm import tqdm
 import numpy as np
 
-from geomorph_tools.data_structures import RidgePoint
+from landmark.geomorph_tools.data_structures import RidgePoint
 
 
 

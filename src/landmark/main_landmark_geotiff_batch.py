@@ -17,15 +17,15 @@ import sys
 sys.setrecursionlimit(5000)
 
 #Internal import
-from geomorph_tools.load_data_geotiff import LoadData
-from geomorph_tools.D8_LTD import SlopelineMixin
-from geomorph_tools.slopeline import calculate_slopelines
-from geomorph_tools.dpl import dpl
-from geomorph_tools.mutual_dist import mutual_dist
-from geomorph_tools.endo_del import endo_del
-from geomorph_tools.saddle_spill import saddle_spill
-from geomorph_tools.ridge_point import find_ridge_neighbors
-from geomorph_tools.ridge_hier import ridge_hier
+from landmark.geomorph_tools.load_data_geotiff import LoadData
+from landmark.geomorph_tools.D8_LTD import SlopelineMixin
+from landmark.geomorph_tools.slopeline import calculate_slopelines
+from landmark.geomorph_tools.dpl import dpl
+from landmark.geomorph_tools.mutual_dist import mutual_dist
+from landmark.geomorph_tools.endo_del import endo_del
+from landmark.geomorph_tools.saddle_spill import saddle_spill
+from landmark.geomorph_tools.ridge_point import find_ridge_neighbors
+from landmark.geomorph_tools.ridge_hier import ridge_hier
 
 
 class HydroModel(LoadData, SlopelineMixin):

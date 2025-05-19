@@ -14,22 +14,127 @@ Transcript in python of the original landmark.f90
 
 from datetime import datetime
 import sys
+from pathlib import Path
+import os
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 sys.setrecursionlimit(5000)
 
 #Internal import
-from geomorph_tools.load_data_geotiff import LoadData
-from geomorph_tools.D8_LTD import SlopelineMixin
-from geomorph_tools.slopeline import calculate_slopelines
-from geomorph_tools.dpl import dpl
-from geomorph_tools.mutual_dist import mutual_dist
-from geomorph_tools.endo_del import endo_del
-from geomorph_tools.saddle_spill import saddle_spill
-from geomorph_tools.ridge_point import find_ridge_neighbors
-from geomorph_tools.ridge_hier import ridge_hier
+from landmark.geomorph_tools.load_data_geotiff import LoadData
+from landmark.geomorph_tools.D8_LTD import SlopelineMixin
+from landmark.geomorph_tools.slopeline import calculate_slopelines
+from landmark.geomorph_tools.dpl import dpl
+from landmark.geomorph_tools.mutual_dist import mutual_dist
+from landmark.geomorph_tools.endo_del import endo_del
+from landmark.geomorph_tools.saddle_spill import saddle_spill
+from landmark.geomorph_tools.ridge_point import find_ridge_neighbors
+from landmark.geomorph_tools.ridge_hier import ridge_hier
 
 
 class HydroModel(LoadData, SlopelineMixin):
     pass
+
+
+def landmark_processing(
+    mnt_path: str,
+    output_dir: str = "../../outputs",
+    a_spread: float = 1e5,
+    a_out: float = 1e5,
+    hso_th: int = 5,
+    curvature_slope: bool = False,
+    n_pts_calc_slope: int = 5,
+    no_data_values: list = [-9999, 0]
+) -> None:
+    """
+    Full LANDMARK processing pipeline applied to a single GeoTIFF DEM.
+
+    Parameters
+    ----------
+    mnt_path : str
+        Path to the input DEM (GeoTIFF format).
+    output_dir : str, optional
+        Directory where output GeoPackages will be saved. Default is "../../outputs".
+    a_spread : float, optional
+        Threshold for ridge dispersion area (in m^2). Default is 1e5.
+    a_out : float, optional
+        Threshold for drainage contributing area (in m^2). Default is 1e5.
+    hso_th : int, optional
+        Horton stream order threshold for exporting lines. Default is 5.
+
+    curvature_slope : bool, optional
+        Whether to compute slope and curvature. Default is False.
+    n_pts_calc_slope : int, optional
+        Number of points for slope estimation. Default is 5.
+    no_data_values : list, optional
+        List of NoData values to consider as invalid. Default is [-9999, 0].
+    """
+
+    # Input validation
+    if not os.path.isfile(mnt_path):
+        raise FileNotFoundError(f"DEM file not found: {mnt_path}")
+    if not isinstance(output_dir, str) or not output_dir:
+        raise ValueError("Output directory must be a non-empty string.")
+    if not isinstance(a_spread, (int, float)) or a_spread < 0:
+        raise ValueError("a_spread must be a non-negative number.")
+    if not isinstance(a_out, (int, float)) or a_out < 0:
+        raise ValueError("a_out must be a non-negative number.")
+    if not isinstance(hso_th, int) or hso_th < 0:
+        raise ValueError("hso_th must be a non-negative integer.")
+    if not isinstance(curvature_slope, bool):
+        raise ValueError("curvature_slope must be a boolean value.")
+    if not isinstance(n_pts_calc_slope, int) or n_pts_calc_slope < 3:
+        raise ValueError("n_pts_calc_slope must be an integer >= 3.")
+    if not isinstance(no_data_values, list) or not all(isinstance(v, (int, float)) for v in no_data_values):
+        raise ValueError("no_data_values must be a list of numeric values.")
+
+    file_name = os.path.splitext(os.path.basename(mnt_path))[0]
+    os.makedirs(output_dir, exist_ok=True)
+
+    start_time = datetime.now()
+    print(f"[START] {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    model = HydroModel()
+    model.main_channel_choice = 2
+    model.type_of_landscape = 0
+    model.a_spread_threshold = a_spread
+    model.a_out_threshold = a_out
+    model.hso_th = hso_th
+    model.curvature_slope = curvature_slope
+    model.n_pts_calc_slope = n_pts_calc_slope
+    model.noData = no_data_values
+
+    print("Loading DEM...")
+    model.read_geotiff(mnt_path)
+
+    print("Calculating slopelines...")
+    calculate_slopelines(model)
+
+    print("Calculating downslope paths...")
+    dpl(model)
+
+    print("Computing mutual distances...")
+    mutual_dist(model)
+
+    print("Delineating endorheic basins...")
+    endo_del(model)
+
+    print("Connecting basins via saddles...")
+    saddle_spill(model)
+
+    print("Building ridge point neighborhoods...")
+    find_ridge_neighbors(model)
+
+    print("Constructing hierarchical ridge network...")
+    ridge_hier(model)
+
+    print("Exporting ridgeline and slopeline segments...")
+    model.export_slopelines_single_element(os.path.join(output_dir, f"slopelines_se_HSO_{file_name}.gpkg"))
+    model.export_ridgelines_single_element(os.path.join(output_dir, f"ridgelines_se_HSO_{file_name}.gpkg"))
+
+    end_time = datetime.now()
+    print(f"[END] {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"[INFO] Total elapsed time: {end_time - start_time}")
 
 
 if __name__ == "__main__":
@@ -39,7 +144,7 @@ if __name__ == "__main__":
     
     
     #Input DTM in geoTiff format
-    dtm_path = "dtm_path.tif"
+    dtm_path = ""
  
     
     file_name = dtm_path.split("/")[-1]

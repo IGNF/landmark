@@ -12,7 +12,7 @@ from tqdm import tqdm
 import numpy as np
 
 
-from geomorph_tools.data_structures import DrainageNetwork, DrainagePointInflow
+from landmark.geomorph_tools.data_structures import DrainageNetwork, DrainagePointInflow
 
 
 def thal_net_hso_length(model, river_mask):

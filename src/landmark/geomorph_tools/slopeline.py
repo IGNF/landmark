@@ -10,7 +10,7 @@ import numpy as np
 from tqdm import tqdm
 
 # Import the data structures.
-from geomorph_tools.data_structures import DrainageNetwork, EndoPoint
+from landmark.geomorph_tools.data_structures import DrainageNetwork, EndoPoint
 
 
 def calculate_slopelines(model):

@@ -11,7 +11,7 @@ into Python. It assumes that the hydrological model (model) contains the followi
 
 from tqdm import tqdm
 
-from geomorph_tools.data_structures import RidgePoint
+from landmark.geomorph_tools.data_structures import RidgePoint
 
 
 def mutual_dist(model):

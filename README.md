@@ -1,4 +1,4 @@
-# DEM Generalization with LIC
+# LANDMARK: Python Implementation of Thalweg and Ridge Network Extraction
 
 [![License: MIT](./docs/_static/License-MIT.svg)](./LICENSE.txt)
 [![Python](./docs/_static/Python-3.10.svg)](https://www.python.org/)
@@ -59,7 +59,60 @@ pip install -e .
 
 ## Python Quick Start
 
-You can use **Landmark** directly in Python. The main script is "main_landmark_geotiff.py" or "main_landmark_geotiff_batch.py" for process many DEM geotiff files.
+You can use LANDMARK directly in Python by calling the main function:
+
+```python
+from landmark.main_landmark_geotiff import landmark_processing
+
+landmark_processing(
+    mnt_path="path/to/input_dem.tif",
+    output_dir="path/to/output",
+    a_spread=100000,
+    a_out=100000,
+    hso_th=5,
+    curvature_slope=True,
+    n_pts_calc_slope=5,
+    no_data_values=[-9999, 0]
+)
+```
+
+This will create two GeoPackage files containing slopelines and ridgelines respectively.
+
+## Command Line Usage
+
+You can also run LANDMARK as a command-line interface (CLI) after installing the package.
+
+```bash
+landmark path/to/dem.tif \
+    --output_dir path/to/output \
+    --a_spread 100000 \
+    --a_out 100000 \
+    --hso_th 5 \
+    --curvature_slope \
+    --n_pts_calc_slope 5 \
+    --no_data_values -9999 0
+```
+
+### Arguments
+
+| Argument            | Description                                                                | Default         |
+|---------------------|----------------------------------------------------------------------------|-----------------|
+| `mnt_path`          | Path to the input DEM (GeoTIFF format)                                     | *(required)*    |
+| `--output_dir`      | Output directory for GeoPackage files                                      | `../../outputs` |
+| `--a_spread`        | Threshold for ridge dispersal area (m²)                                    | `1e5`           |
+| `--a_out`           | Threshold for drainage contributing area (m²)                              | `1e5`           |
+| `--hso_th`          | Horton stream order threshold                                              | `5`             |
+| `--curvature_slope` | Activate slope and curvature computation                                   | *(disabled)*    |
+| `--n_pts_calc_slope`| Number of points for slope estimation                                      | `5`             |
+| `--no_data_values`  | List of NoData values in the input DEM                                     | `[-9999, 0]`    |
+
+### Output
+
+Two GeoPackage files are created in the output directory:
+- `slopelines_se_HSO_<input_name>.gpkg` – extracted thalweg network
+- `ridgelines_se_HSO_<input_name>.gpkg` – extracted ridge network
+
+These can be directly opened in QGIS or any GIS software for further analysis.
 
 
 ## License

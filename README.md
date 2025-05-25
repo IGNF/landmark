@@ -114,6 +114,14 @@ Two GeoPackage files are created in the output directory:
 
 These can be directly opened in QGIS or any GIS software for further analysis.
 
+## Input DEM requirements
+
+The input Digital Elevation Model must:
+
+- Be a **GeoTIFF** file.
+- Use a **projected coordinate system with metric units** (e.g., UTM, Lambert 93).  
+Do **not** use a geographic CRS with degrees (such as WGS84 / EPSG:4326), as the algorithm relies on metric distances for all processing.  
+Using degrees will result in **incorrect and unusable outputs**.
 
 ## License
 

@@ -2,14 +2,14 @@
 """
 Transcript in python of the original landmark.f90
 
-! The program LENDMARK, starting from the DTM,
-! extracts drainage network by using D8-LTD method.
-! Calculates mutual distance for each ridgeline point based on downslope path
-! lenth.
-! Defines connections between endorheic basins, even nested, and esorheic basins.
-! For each endorheic basin defines the outflow path from the lowest saddle spilling
-! to an esorheic basin.
-! Constructs a hierarchically ordered ridglines network.
+The program LENDMARK, starting from the DTM,
+extracts drainage network by using D8-LTD method.
+Calculates mutual distance for each ridgeline point based on downslope path
+lenth.
+Defines connections between endorheic basins, even nested, and esorheic basins.
+For each endorheic basin defines the outflow path from the lowest saddle spilling
+to an esorheic basin.
+Constructs a hierarchically ordered ridglines network.
 """
 
 from datetime import datetime
@@ -150,21 +150,19 @@ if __name__ == "__main__":
     file_name = dtm_path.split("/")[-1]
     
     #Output Geopackage path
-    slopelines_HSO_path = f"../../outputs/slopelines_HSO_{file_name[:-4]}"
+    
     slopelines_se_HSO_path = f"../../outputs/slopelines_se_HSO_{file_name[:-4]}"
-
-    drainage_points_HSO_path = f"../../outputs/drain_points_HSO_{file_name[:-4]}"
-    
-    ridge_points_HSO_path = f"../../outputs/ridge_points_HSO{file_name[:-4]}"
-    
-    ridgelines_HSO_path = f"../../outputs/ridgelines_HSO_{file_name[:-4]}"
     ridgelines_se_HSO_path = f"../../outputs/ridgelines_se_HSO_{file_name[:-4]}"
-    
-    
-    saddle_points_HSO_path = f"../../outputs/saddle_points_HSO_filtre_{file_name[:-4]}"
-    
-    endo_points_HSO_path  = f"../../outputs/endo_points_HSO{file_name[:-4]}"
 
+    #Output Geopackage path for debug only
+    # drainage_points_HSO_path = f"../../outputs/drain_points_HSO_{file_name[:-4]}"
+    # saddle_points_HSO_path = f"../../outputs/saddle_points_HSO_filtre_{file_name[:-4]}"
+    # endo_points_HSO_path  = f"../../outputs/endo_points_HSO{file_name[:-4]}"
+    # slopelines_HSO_path = f"../../outputs/slopelines_HSO_{file_name[:-4]}"
+    # ridge_points_HSO_path = f"../../outputs/ridge_points_HSO{file_name[:-4]}"
+    # ridgelines_HSO_path = f"../../outputs/ridgelines_HSO_{file_name[:-4]}"
+    
+    
     #NoData values in the DEM
     noData = [-9999, 0]
     
@@ -201,22 +199,18 @@ if __name__ == "__main__":
     print("Calculating slopelines...")
     calculate_slopelines(model_geotiff)
     
-        
     print("Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic ")
     dpl(model_geotiff)
     
     print ("calculates the mutual distance between the two neighbor drainage points")
     mutual_dist(model_geotiff)
     
-    
     print("Delineating endorheic basins")
     endo_del(model_geotiff)
         
-    
     print("Connect basin by sadlle spill")
     saddle_spill(model_geotiff)
     
-     
     print("Define the relationship between ridge points")
     find_ridge_neighbors(model_geotiff)
 

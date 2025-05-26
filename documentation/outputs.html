@@ -1,0 +1,697 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>LANDMARK Outputs and Visualization Guide &#8212; landmark 1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/outputs';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../api_reference.html" />
+    <link rel="prev" title="LANDMARK User Manual" href="usage_manual.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">landmark 1.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ESaint-Denis/landmark" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ESaint-Denis/landmark" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface (CLI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_manual.html">LANDMARK User Manual</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">LANDMARK Outputs and Visualization Guide</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../documentation.html" class="nav-link">Documentation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">LANDMARK Outputs and Visualization Guide</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="landmark-outputs-and-visualization-guide">
+<h1>LANDMARK Outputs and Visualization Guide<a class="headerlink" href="#landmark-outputs-and-visualization-guide" title="Link to this heading">#</a></h1>
+<p>This page details the structure and content of the two main output files produced by LANDMARK, explains how to interpret their attributes, and gives best practices for their visualization in a GIS (e.g., QGIS).</p>
+<hr class="docutils" />
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
+<p>LANDMARK outputs two vector GeoPackage files (<code class="docutils literal notranslate"><span class="pre">.gpkg</span></code>):</p>
+<ul class="simple">
+<li><p><strong>Slopelines (thalweg network):</strong><br />
+<code class="docutils literal notranslate"><span class="pre">slopelines_se_HSO_&lt;input_name&gt;.gpkg</span></code></p></li>
+<li><p><strong>Ridgelines (ridge network):</strong><br />
+<code class="docutils literal notranslate"><span class="pre">ridgelines_se_HSO_&lt;input_name&gt;.gpkg</span></code></p></li>
+</ul>
+<p>Each file contains a layer of LineString features, representing individual segments of the extracted networks, with associated attributes.</p>
+</section>
+<hr class="docutils" />
+<section id="slopelines-thalweg-network">
+<h2>1. Slopelines (Thalweg Network)<a class="headerlink" href="#slopelines-thalweg-network" title="Link to this heading">#</a></h2>
+<section id="description">
+<h3>Description<a class="headerlink" href="#description" title="Link to this heading">#</a></h3>
+<p>The slopelines file contains segments representing the primary drainage lines (thalwegs) identified in the DEM. Each segment connects two consecutive drainage points along the calculated flow network. These lines correspond to pathways of surface water concentration and potential channelization.</p>
+</section>
+<section id="key-attributes">
+<h3>Key Attributes<a class="headerlink" href="#key-attributes" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>id_ch</p></td>
+<td><p>int</p></td>
+<td><p>Unique ID of the current slopeline segment.</p></td>
+</tr>
+<tr class="row-odd"><td><p>start_pnt</p></td>
+<td><p>int</p></td>
+<td><p>ID of the segment’s upstream (start) point.</p></td>
+</tr>
+<tr class="row-even"><td><p>end_pnt</p></td>
+<td><p>int</p></td>
+<td><p>ID of the segment’s downstream (end) point.</p></td>
+</tr>
+<tr class="row-odd"><td><p>id_ch_out</p></td>
+<td><p>int</p></td>
+<td><p>ID of the next downstream segment.</p></td>
+</tr>
+<tr class="row-even"><td><p>id_ch_main</p></td>
+<td><p>int</p></td>
+<td><p>ID of the main downstream segment in the hierarchy.</p></td>
+</tr>
+<tr class="row-odd"><td><p>A_out</p></td>
+<td><p>int</p></td>
+<td><p><strong>Contributing area</strong> at the start point (in map units², e.g., m²).</p></td>
+</tr>
+<tr class="row-even"><td><p>length</p></td>
+<td><p>float</p></td>
+<td><p>Segment length (in spatial units, e.g., meters).</p></td>
+</tr>
+<tr class="row-odd"><td><p>sso</p></td>
+<td><p>int</p></td>
+<td><p>Stream Segment Order (internal topological order).</p></td>
+</tr>
+<tr class="row-even"><td><p>hso</p></td>
+<td><p>int</p></td>
+<td><p><strong>Horton/Strahler stream order</strong> of the segment.</p></td>
+</tr>
+<tr class="row-odd"><td><p>slope_pct</p></td>
+<td><p>float</p></td>
+<td><p>Slope between endpoints (%). <em>(if computed)</em></p></td>
+</tr>
+<tr class="row-even"><td><p>curvature</p></td>
+<td><p>float</p></td>
+<td><p>Vertical curvature at start point. <em>(if computed)</em></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="important-filtering-tips">
+<h4>Important Filtering Tips<a class="headerlink" href="#important-filtering-tips" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p><strong>For QGIS visualization:</strong><br />
+Due to network complexity, <strong>filter the displayed lines</strong> for clarity.</p>
+<ul>
+<li><p><strong>Recommended filter:</strong></p>
+<ul>
+<li><p><strong>A_out</strong>: Only show segments with a large enough contributing area (e.g., <code class="docutils literal notranslate"><span class="pre">A_out</span> <span class="pre">&gt;</span> <span class="pre">10000</span></code>). This emphasizes main channels and removes tiny tributaries.</p></li>
+<li><p><strong>hso</strong>: Show segments with high stream order (e.g., <code class="docutils literal notranslate"><span class="pre">hso</span> <span class="pre">&gt;=</span> <span class="pre">5</span></code>) to display the main drainage skeleton.</p></li>
+</ul>
+</li>
+<li><p><strong>A_out</strong> is generally the most effective filter for thalwegs, as it directly corresponds to hydrological significance.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="geomorphological-attributes">
+<h4>Geomorphological Attributes<a class="headerlink" href="#geomorphological-attributes" title="Link to this heading">#</a></h4>
+<p>If computed, <strong>slope_pct</strong> and <strong>curvature</strong> fields provide additional information for landform and hydrological analysis (e.g., highlighting steep or concave/convex channel segments).</p>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="ridgelines-ridge-network">
+<h2>2. Ridgelines (Ridge Network)<a class="headerlink" href="#ridgelines-ridge-network" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h3>Description<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p>The ridgelines file contains segments forming the primary ridge network—divides or crests separating drainage basins. Each segment connects two consecutive ridge points and corresponds to lines of maximum elevation divergence.</p>
+</section>
+<section id="id2">
+<h3>Key Attributes<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>id_rdl</p></td>
+<td><p>int</p></td>
+<td><p>Unique ID of the ridgeline to which the segment belongs.</p></td>
+</tr>
+<tr class="row-odd"><td><p>start_pnt</p></td>
+<td><p>int</p></td>
+<td><p>ID of the segment’s start ridge point.</p></td>
+</tr>
+<tr class="row-even"><td><p>end_pnt</p></td>
+<td><p>int</p></td>
+<td><p>ID of the segment’s end ridge point.</p></td>
+</tr>
+<tr class="row-odd"><td><p>length</p></td>
+<td><p>float</p></td>
+<td><p>Segment length (in spatial units, e.g., meters).</p></td>
+</tr>
+<tr class="row-even"><td><p>jun_el</p></td>
+<td><p>int</p></td>
+<td><p>Index of the first junction (node) on the ridgeline.</p></td>
+</tr>
+<tr class="row-odd"><td><p>A_spread</p></td>
+<td><p>float</p></td>
+<td><p><strong>Spread area:</strong> approximates the lateral area controlled by the ridge (m²).</p></td>
+</tr>
+<tr class="row-even"><td><p>slope_pct</p></td>
+<td><p>float</p></td>
+<td><p>Slope between endpoints (%). <em>(if computed)</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>curvature</p></td>
+<td><p>float</p></td>
+<td><p>Vertical curvature at start point. <em>(if computed)</em></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="id3">
+<h4>Important Filtering Tips<a class="headerlink" href="#id3" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p><strong>For QGIS visualization:</strong><br />
+To avoid clutter, <strong>filter ridgelines</strong> using:</p>
+<ul>
+<li><p><strong>A_spread</strong>: Show only segments with large enough spread area (e.g., <code class="docutils literal notranslate"><span class="pre">A_spread</span> <span class="pre">&gt;</span> <span class="pre">10000</span></code>). This highlights the main ridges and omits minor, local divides.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h4>Geomorphological Attributes<a class="headerlink" href="#id4" title="Link to this heading">#</a></h4>
+<p>Fields <strong>slope_pct</strong> and <strong>curvature</strong>, if present, allow further morphometric analysis (e.g., identifying steep or curved ridges).</p>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="practical-tips-for-gis-visualization">
+<h2>Practical Tips for GIS Visualization<a class="headerlink" href="#practical-tips-for-gis-visualization" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Filtering in QGIS:</strong></p>
+<ul>
+<li><p>Open the GeoPackage layer, go to the attribute table, and use the “Select by Expression” tool to filter features (e.g., <code class="docutils literal notranslate"><span class="pre">A_out</span> <span class="pre">&gt;</span> <span class="pre">5000</span></code> or <code class="docutils literal notranslate"><span class="pre">A_spread</span> <span class="pre">&gt;</span> <span class="pre">10000</span></code>).</p></li>
+<li><p>You can symbolize lines by stream order (<code class="docutils literal notranslate"><span class="pre">hso</span></code>) or spread area (<code class="docutils literal notranslate"><span class="pre">A_spread</span></code>) for clearer maps.</p></li>
+</ul>
+</li>
+<li><p><strong>Display Recommendations:</strong></p>
+<ul>
+<li><p>For an overview, use strict thresholds to show only the main network skeleton.</p></li>
+<li><p>For detailed studies (e.g., small catchments), lower thresholds to display more features.</p></li>
+</ul>
+</li>
+<li><p><strong>Attribute Calculation Notes:</strong></p>
+<ul>
+<li><p>Slope and curvature are only included if you enabled the corresponding option during processing.</p></li>
+<li><p>Spatial units (meters, m²) depend on the CRS of your DEM.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="example-outputs-and-visualization-in-qgis">
+<h2>Example Outputs and Visualization in QGIS<a class="headerlink" href="#example-outputs-and-visualization-in-qgis" title="Link to this heading">#</a></h2>
+<p>Below are examples of QGIS visualizations illustrating different filtering options and map styles using the output GeoPackages from LANDMARK.</p>
+<p><img alt="Drainage and dispersion areas filtered at 10^6 m². The width of thalwegs (blue) and ridgelines (red) is proportional to their drainage and dispersion area, respectively." src="../_images/cretes_thalwegs_106.png" /></p>
+<p><em>LiDARHD 5 m DEM. Drainage and dispersion areas filtered at <span class="math notranslate nohighlight">\(10^6\)</span> m². The width of the blue (thalweg) and red (ridge) lines is proportional to the corresponding area.</em></p>
+<p><img alt="Drainage and dispersion areas filtered at 10^5 m²." src="../_images/cretes_thalwegs_105.png" /></p>
+<p><em>LiDARHD 5 m DEM. Drainage and dispersion areas filtered at <span class="math notranslate nohighlight">\(10^5\)</span> m².</em></p>
+<p><img alt="Thalweg network filtered by Horton order greater than 4. The width of thalwegs is proportional to the Horton order." src="../_images/thalwegs_HSO.png" /></p>
+<p><em>LiDARHD 5 m DEM. Thalweg network filtered by Horton order &gt; 4. The width of the blue lines is proportional to the Horton order of each segment.</em></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="usage_manual.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">LANDMARK User Manual</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../api_reference.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#slopelines-thalweg-network">1. Slopelines (Thalweg Network)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#description">Description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-attributes">Key Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#important-filtering-tips">Important Filtering Tips</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geomorphological-attributes">Geomorphological Attributes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ridgelines-ridge-network">2. Ridgelines (Ridge Network)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Key Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Important Filtering Tips</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Geomorphological Attributes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-tips-for-gis-visualization">Practical Tips for GIS Visualization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-outputs-and-visualization-in-qgis">Example Outputs and Visualization in QGIS</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/documentation/outputs.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Edmond SAINT DENIS.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

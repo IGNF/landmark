@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>landmark.main_landmark_geotiff &#8212; landmark 1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/landmark/main_landmark_geotiff';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">landmark 1.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ESaint-Denis/landmark" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ESaint-Denis/landmark" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">landmark.main_landmark_geotiff</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for landmark.main_landmark_geotiff</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Transcript in python of the original landmark.f90</span>
+
+<span class="sd">The program LENDMARK, starting from the DTM,</span>
+<span class="sd">extracts drainage network by using D8-LTD method.</span>
+<span class="sd">Calculates mutual distance for each ridgeline point based on downslope path</span>
+<span class="sd">lenth.</span>
+<span class="sd">Defines connections between endorheic basins, even nested, and esorheic basins.</span>
+<span class="sd">For each endorheic basin defines the outflow path from the lowest saddle spilling</span>
+<span class="sd">to an esorheic basin.</span>
+<span class="sd">Constructs a hierarchically ordered ridglines network.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span>
+
+<span class="c1">#Internal import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.load_data_geotiff</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoadData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.D8_LTD</span><span class="w"> </span><span class="kn">import</span> <span class="n">SlopelineMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.slopeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculate_slopelines</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.dpl</span><span class="w"> </span><span class="kn">import</span> <span class="n">dpl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.mutual_dist</span><span class="w"> </span><span class="kn">import</span> <span class="n">mutual_dist</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.endo_del</span><span class="w"> </span><span class="kn">import</span> <span class="n">endo_del</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.saddle_spill</span><span class="w"> </span><span class="kn">import</span> <span class="n">saddle_spill</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.ridge_point</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_ridge_neighbors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">landmark.geomorph_tools.ridge_hier</span><span class="w"> </span><span class="kn">import</span> <span class="n">ridge_hier</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">HydroModel</span><span class="p">(</span><span class="n">LoadData</span><span class="p">,</span> <span class="n">SlopelineMixin</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="landmark_processing">
+<a class="viewcode-back" href="../../generated/landmark.main_landmark_geotiff.landmark_processing.html#landmark.main_landmark_geotiff.landmark_processing">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">landmark_processing</span><span class="p">(</span>
+    <span class="n">mnt_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;../../outputs&quot;</span><span class="p">,</span>
+    <span class="n">a_spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e5</span><span class="p">,</span>
+    <span class="n">a_out</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e5</span><span class="p">,</span>
+    <span class="n">hso_th</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">curvature_slope</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_pts_calc_slope</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">no_data_values</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">9999</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Full LANDMARK processing pipeline applied to a single GeoTIFF DEM.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mnt_path : str</span>
+<span class="sd">        Path to the input DEM (GeoTIFF format).</span>
+<span class="sd">    output_dir : str, optional</span>
+<span class="sd">        Directory where output GeoPackages will be saved. Default is &quot;../../outputs&quot;.</span>
+<span class="sd">    a_spread : float, optional</span>
+<span class="sd">        Threshold for ridge dispersion area (in m^2). Default is 1e5.</span>
+<span class="sd">    a_out : float, optional</span>
+<span class="sd">        Threshold for drainage contributing area (in m^2). Default is 1e5.</span>
+<span class="sd">    hso_th : int, optional</span>
+<span class="sd">        Horton stream order threshold for exporting lines. Default is 5.</span>
+
+<span class="sd">    curvature_slope : bool, optional</span>
+<span class="sd">        Whether to compute slope and curvature. Default is False.</span>
+<span class="sd">    n_pts_calc_slope : int, optional</span>
+<span class="sd">        Number of points for slope estimation. Default is 5.</span>
+<span class="sd">    no_data_values : list, optional</span>
+<span class="sd">        List of NoData values to consider as invalid. Default is [-9999, 0].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Input validation</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">mnt_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEM file not found: </span><span class="si">{</span><span class="n">mnt_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">output_dir</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Output directory must be a non-empty string.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a_spread</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> <span class="n">a_spread</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;a_spread must be a non-negative number.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a_out</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> <span class="n">a_out</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;a_out must be a non-negative number.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hso_th</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">hso_th</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;hso_th must be a non-negative integer.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curvature_slope</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;curvature_slope must be a boolean value.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_pts_calc_slope</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n_pts_calc_slope</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_pts_calc_slope must be an integer &gt;= 3.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">no_data_values</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">no_data_values</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;no_data_values must be a list of numeric values.&quot;</span><span class="p">)</span>
+
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">mnt_path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[START] </span><span class="si">{</span><span class="n">start_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">HydroModel</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">main_channel_choice</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">type_of_landscape</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">a_spread_threshold</span> <span class="o">=</span> <span class="n">a_spread</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">a_out_threshold</span> <span class="o">=</span> <span class="n">a_out</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">hso_th</span> <span class="o">=</span> <span class="n">hso_th</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">curvature_slope</span> <span class="o">=</span> <span class="n">curvature_slope</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">n_pts_calc_slope</span> <span class="o">=</span> <span class="n">n_pts_calc_slope</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">noData</span> <span class="o">=</span> <span class="n">no_data_values</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading DEM...&quot;</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_geotiff</span><span class="p">(</span><span class="n">mnt_path</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating slopelines...&quot;</span><span class="p">)</span>
+    <span class="n">calculate_slopelines</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating downslope paths...&quot;</span><span class="p">)</span>
+    <span class="n">dpl</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing mutual distances...&quot;</span><span class="p">)</span>
+    <span class="n">mutual_dist</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Delineating endorheic basins...&quot;</span><span class="p">)</span>
+    <span class="n">endo_del</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connecting basins via saddles...&quot;</span><span class="p">)</span>
+    <span class="n">saddle_spill</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Building ridge point neighborhoods...&quot;</span><span class="p">)</span>
+    <span class="n">find_ridge_neighbors</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Constructing hierarchical ridge network...&quot;</span><span class="p">)</span>
+    <span class="n">ridge_hier</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exporting ridgeline and slopeline segments...&quot;</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">export_slopelines_single_element</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;slopelines_se_HSO_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.gpkg&quot;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">export_ridgelines_single_element</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ridgelines_se_HSO_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.gpkg&quot;</span><span class="p">))</span>
+
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[END] </span><span class="si">{</span><span class="n">end_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[INFO] Total elapsed time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[START] Processing started at </span><span class="si">{</span><span class="n">start_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    
+    <span class="c1">#Input DTM in geoTiff format</span>
+    <span class="n">dtm_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+ 
+    
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">dtm_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="c1">#Output Geopackage path</span>
+    
+    <span class="n">slopelines_se_HSO_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;../../outputs/slopelines_se_HSO_</span><span class="si">{</span><span class="n">file_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">ridgelines_se_HSO_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;../../outputs/ridgelines_se_HSO_</span><span class="si">{</span><span class="n">file_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1">#Output Geopackage path for debug only</span>
+    <span class="c1"># drainage_points_HSO_path = f&quot;../../outputs/drain_points_HSO_{file_name[:-4]}&quot;</span>
+    <span class="c1"># saddle_points_HSO_path = f&quot;../../outputs/saddle_points_HSO_filtre_{file_name[:-4]}&quot;</span>
+    <span class="c1"># endo_points_HSO_path  = f&quot;../../outputs/endo_points_HSO{file_name[:-4]}&quot;</span>
+    <span class="c1"># slopelines_HSO_path = f&quot;../../outputs/slopelines_HSO_{file_name[:-4]}&quot;</span>
+    <span class="c1"># ridge_points_HSO_path = f&quot;../../outputs/ridge_points_HSO{file_name[:-4]}&quot;</span>
+    <span class="c1"># ridgelines_HSO_path = f&quot;../../outputs/ridgelines_HSO_{file_name[:-4]}&quot;</span>
+    
+    
+    <span class="c1">#NoData values in the DEM</span>
+    <span class="n">noData</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">9999</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1">#Landmarks option (for now, only the choices indicated are coded)</span>
+    <span class="n">main_channel_choice</span> <span class="o">=</span><span class="mi">2</span> <span class="c1">#area:0, length:1, hso:2</span>
+    <span class="n">type_of_landscape</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#Natural drainage basin:0, Flood Plane:1</span>
+    
+    <span class="c1">#Export threshold value:</span>
+    <span class="n">A_spread</span> <span class="o">=</span> <span class="mf">1e5</span> <span class="c1">#Ridge dispersion area</span>
+    <span class="n">A_out</span> <span class="o">=</span> <span class="mf">1e5</span> <span class="c1">#Thalweg drainage area</span>
+    <span class="n">HSO_th</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1"># Horton stream order theshold</span>
+    
+    <span class="c1">#Calculate cuvature and slope</span>
+    <span class="n">calculate_curvature_slope</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="c1">#Calculate slope</span>
+    <span class="n">n_pts_calc_slope</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1"># Number of points to use to calculate the slope</span>
+
+
+    <span class="n">model_geotiff</span> <span class="o">=</span> <span class="n">HydroModel</span><span class="p">()</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">main_channel_choice</span> <span class="o">=</span> <span class="n">main_channel_choice</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">type_of_landscape</span> <span class="o">=</span> <span class="n">type_of_landscape</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">a_spread_threshold</span> <span class="o">=</span> <span class="n">A_spread</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">a_out_threshold</span> <span class="o">=</span> <span class="n">A_out</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">hso_th</span> <span class="o">=</span> <span class="n">HSO_th</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">curvature_slope</span> <span class="o">=</span> <span class="n">calculate_curvature_slope</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">n_pts_calc_slope</span> <span class="o">=</span> <span class="n">n_pts_calc_slope</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">noData</span> <span class="o">=</span> <span class="n">noData</span>
+    
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading data...&quot;</span><span class="p">)</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">read_geotiff</span><span class="p">(</span><span class="n">dtm_path</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating slopelines...&quot;</span><span class="p">)</span>
+    <span class="n">calculate_slopelines</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic &quot;</span><span class="p">)</span>
+    <span class="n">dpl</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
+    
+    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;calculates the mutual distance between the two neighbor drainage points&quot;</span><span class="p">)</span>
+    <span class="n">mutual_dist</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Delineating endorheic basins&quot;</span><span class="p">)</span>
+    <span class="n">endo_del</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connect basin by sadlle spill&quot;</span><span class="p">)</span>
+    <span class="n">saddle_spill</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Define the relationship between ridge points&quot;</span><span class="p">)</span>
+    <span class="n">find_ridge_neighbors</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ridge hierarchization&quot;</span><span class="p">)</span>
+    <span class="n">ridge_hier</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
+      
+    
+    <span class="c1">#---------------Geopackage exports-------------------------------------</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Export slopelines single element HSO&quot;</span><span class="p">)</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">export_slopelines_single_element</span><span class="p">(</span><span class="n">slopelines_se_HSO_path</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Export ridgelines single element HSO&quot;</span><span class="p">)</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">export_ridgelines_single_element</span><span class="p">(</span><span class="n">ridgelines_se_HSO_path</span><span class="p">)</span>
+
+    <span class="c1">#--------------Export for debug only-----------------------------------</span>
+    <span class="c1"># print(&quot;Export drainage points HSO&quot;)</span>
+    <span class="c1"># model_geotiff.export_drainage_point(drainage_points_HSO_path)</span>
+    
+    <span class="c1"># print(&quot;\nExport endo points&quot;)</span>
+    <span class="c1"># model_geotiff.export_endo_points(endo_points_HSO_path)</span>
+
+    <span class="c1"># print(&quot;Export slopelines HSO&quot;)</span>
+    <span class="c1"># model_geotiff.export_slopelines(slopelines_HSO_path)</span>
+    
+    <span class="c1"># print(&quot;Export saddle points&quot;)</span>
+    <span class="c1"># model_geotiff.export_saddle_points(saddle_points_HSO_path)</span>
+
+    <span class="c1"># print(&quot;\nExport ridges points HSO&quot;)</span>
+    <span class="c1"># model_geotiff.export_ridge_point(ridge_points_HSO_path)</span>
+    
+    <span class="c1"># print(&quot;Export ridgelines HSO&quot;)</span>
+    <span class="c1"># model_geotiff.export_ridgelines(ridgelines_HSO_path)</span>
+    
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[END] Processing finished at </span><span class="si">{</span><span class="n">end_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[INFO] Total elapsed time: </span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+    
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Edmond SAINT DENIS.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

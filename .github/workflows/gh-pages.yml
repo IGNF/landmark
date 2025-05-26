@@ -1,56 +1,33 @@
-# Workflow name
-name: "Build and deploy Github pages"
+name: build-and-deploy-docs
 
-# Event that must trigger the workflow
 on:
-  push:         # <- trigger when we call push
+  push:
     branches:
-      - main  # <- but only on main branch
+      - main    # ou master selon ta branche par défaut
+  pull_request:
 
 jobs:
-
-  build-and-deploy:
+  docs:
     runs-on: ubuntu-latest
-
-    # Task to do when launching the workflow
     steps:
+      - uses: actions/checkout@v4
 
-      # 1. First get the repository source
-
-      - name: "Checkout"
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      # 2. Sphinx part : install tool and dependencies
-
-      - name: "Set up Python"
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10.16"
+          python-version: '3.11'   # Ou la version que tu veux
 
-      - name: "Install Python dependencies"
+      - name: Install dependencies
         run: |
-          pip3 install setuptools
-          pip3 install pydata-sphinx-theme
-          pip3 install sphinx
-          pip3 install numpydoc
-          pip3 install myst-parser
+          python -m pip install --upgrade pip
+          pip install sphinx myst-parser pydata-sphinx-theme
 
-      - name: "Install dem lic library"
+      - name: Build documentation
         run: |
-          pip install -e .
+          sphinx-build -b html docs docs/_build/html
 
-      - name: "Build Sphinx Doc"
-        working-directory: .
-        run: |
-          sphinx-build -M html ./docs _build 
-
-      # 3. Déploiement sur les Github Pages
-
-      - name: "Deploy Github Pages"
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages     # <- Branche sur laquelle seront commités les fichiers
-          FOLDER: _build/html/  # <- Dossier contenant notre documentation générée
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/html

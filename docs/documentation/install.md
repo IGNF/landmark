@@ -32,7 +32,7 @@ Install **LANDMARK** by cloning the GitHub repository.
 #### HTTP Method
 
 ```bash
-git clone https://github.com/ESaint-Denis/landmark.git
+git clone https://github.com/IGNF/landmark.git
 cd landmark
 pip install -e .
 ```
@@ -40,7 +40,7 @@ pip install -e .
 #### SSH Method
 
 ```bash
-git clone git@github.com:ESaint-Denis/landmark.git
+git clone git@github.com:IGNF/landmark.git
 cd landmark
 pip install -e .
 ```

@@ -18,7 +18,7 @@ Moretti, G., & Orlandini, S. (2023). Thalweg and ridge network extraction from u
 
 Full documentation is available at:
 
-[https://esaint-denis.github.io/landmark/](https://esaint-denis.github.io/landmark/)
+[https://IGNF.github.io/landmark/](https://IGNF.github.io/landmark/)
 
 ## What does it do?
 
@@ -43,7 +43,7 @@ To install the package, clone the repository and install it in editable mode.
 ### HTTP method
 
 ```bash
-git clone https://github.com/ESaint-Denis/landmark.git
+git clone https://github.com/IGNF/landmark.git
 cd landmark
 pip install -e .
 ```
@@ -51,7 +51,7 @@ pip install -e .
 ### SSH method
 
 ```bash
-git clone git@github.com:ESaint-Denis/landmark.git
+git clone git@github.com:IGNF/landmark.git
 cd landmark
 pip install -e .
 ```

@@ -346,6 +346,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
 <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span>
@@ -470,51 +471,113 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_default_outputs_root</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a sensible default &#39;outputs&#39; directory.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Prefer a folder ``../../outputs`` relative to the script file when possible.</span>
+<span class="sd">    - Fallback to ``./outputs`` relative to the current working directory</span>
+<span class="sd">      when ``__file__`` is not defined (e.g., run from an IDE/REPL).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Absolute path to the output directory root.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Try to anchor relative to the script file</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">script_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="p">(</span><span class="n">script_dir</span> <span class="o">/</span> <span class="s2">&quot;..&quot;</span> <span class="o">/</span> <span class="s2">&quot;..&quot;</span> <span class="o">/</span> <span class="s2">&quot;outputs&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="c1"># __file__ may not exist in some IDEs; fallback to CWD</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;outputs&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">root</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_prepare_paths</span><span class="p">(</span><span class="n">dtm_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+                   <span class="n">outputs_root</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build normalized input/output paths in a cross-platform way.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dtm_path : str or Path</span>
+<span class="sd">        Path to the input DEM (GeoTIFF).</span>
+<span class="sd">    outputs_root : Path, optional</span>
+<span class="sd">        Base directory where output files will be written.</span>
+<span class="sd">        If ``None``, a default &#39;outputs&#39; folder is chosen.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple of Path</span>
+<span class="sd">        (dtm_path_norm, slopelines_se_HSO_path, ridgelines_se_HSO_path)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - **Do not** append file extensions here; leave it to the export methods.</span>
+<span class="sd">    - Output filenames are built from the input filename **stem**.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Normalize the input path (handles Windows and POSIX seamlessly)</span>
+    <span class="n">dtm_path_norm</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dtm_path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+    <span class="c1"># Convert outputs_root to Path if it&#39;s a string</span>
+    <span class="k">if</span> <span class="n">outputs_root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outputs_root</span> <span class="o">=</span> <span class="n">_default_outputs_root</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outputs_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">outputs_root</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+    <span class="c1"># Ensure output directory exists</span>
+    <span class="n">outputs_root</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Use the input filename stem (no extension)</span>
+    <span class="n">stem</span> <span class="o">=</span> <span class="n">dtm_path_norm</span><span class="o">.</span><span class="n">stem</span>
+
+    <span class="c1"># Build output base paths (without extension; exporters will add it)</span>
+    <span class="n">slopelines</span> <span class="o">=</span> <span class="n">outputs_root</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;slopelines_se_HSO_</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">ridgelines</span> <span class="o">=</span> <span class="n">outputs_root</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;ridgelines_se_HSO_</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">dtm_path_norm</span><span class="p">,</span> <span class="n">slopelines</span><span class="p">,</span> <span class="n">ridgelines</span>
+
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[START] Processing started at </span><span class="si">{</span><span class="n">start_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    
-    
-    <span class="c1">#Input DTM in geoTiff format</span>
-    <span class="n">dtm_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
- 
-    
-    <span class="n">file_name</span> <span class="o">=</span> <span class="n">dtm_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    
-    <span class="c1">#Output Geopackage path</span>
-    
-    <span class="n">slopelines_se_HSO_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;../../outputs/slopelines_se_HSO_</span><span class="si">{</span><span class="n">file_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="n">ridgelines_se_HSO_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;../../outputs/ridgelines_se_HSO_</span><span class="si">{</span><span class="n">file_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
 
-    <span class="c1">#Output Geopackage path for debug only</span>
-    <span class="c1"># drainage_points_HSO_path = f&quot;../../outputs/drain_points_HSO_{file_name[:-4]}&quot;</span>
-    <span class="c1"># saddle_points_HSO_path = f&quot;../../outputs/saddle_points_HSO_filtre_{file_name[:-4]}&quot;</span>
-    <span class="c1"># endo_points_HSO_path  = f&quot;../../outputs/endo_points_HSO{file_name[:-4]}&quot;</span>
-    <span class="c1"># slopelines_HSO_path = f&quot;../../outputs/slopelines_HSO_{file_name[:-4]}&quot;</span>
-    <span class="c1"># ridge_points_HSO_path = f&quot;../../outputs/ridge_points_HSO{file_name[:-4]}&quot;</span>
-    <span class="c1"># ridgelines_HSO_path = f&quot;../../outputs/ridgelines_HSO_{file_name[:-4]}&quot;</span>
-    
-    
-    <span class="c1">#NoData values in the DEM</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Input DTM in GeoTIFF format (Windows or Linux path both accepted)</span>
+    <span class="c1"># ------------------------------------------------------------------</span>
+    <span class="c1"># Example (Windows): r&quot;C:\Projets\cretes_talwegs\QGIS\out\Zone_O2_Ossau_2022_MNTLHD_reech5m.tif&quot;</span>
+    <span class="c1"># Example (Linux)  : &quot;/home/edmond/Projets/cretes_talwegs/QGIS/out/Zone_O2_Ossau_2022_MNTLHD_reech5m.tif&quot;</span>
+    <span class="n">dtm_path_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;C:\Projets\cretes_talwegs\zones_test\Zone_O2_Ossau\visu_dtm\Zone_O2_Ossau_2022_MNTLHD_reech25m.tif&quot;</span>
+
+    <span class="c1"># If you want to override the outputs root, set &#39;outputs_root=None&#39; here</span>
+    <span class="n">dtm_path</span><span class="p">,</span> <span class="n">slopelines_se_HSO_path</span><span class="p">,</span> <span class="n">ridgelines_se_HSO_path</span> <span class="o">=</span> <span class="n">_prepare_paths</span><span class="p">(</span>
+        <span class="n">dtm_path_str</span><span class="p">,</span>
+        <span class="n">outputs_root</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;C:\Projets\cretes_talwegs\outputs&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># ------------------ Model configuration ---------------------------</span>
+    <span class="c1"># NoData values in the DEM</span>
     <span class="n">noData</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">9999</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    
-    <span class="c1">#Landmarks option (for now, only the choices indicated are coded)</span>
-    <span class="n">main_channel_choice</span> <span class="o">=</span><span class="mi">2</span> <span class="c1">#area:0, length:1, hso:2</span>
-    <span class="n">type_of_landscape</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#Natural drainage basin:0, Flood Plane:1</span>
-    
-    <span class="c1">#Export threshold value:</span>
-    <span class="n">A_spread</span> <span class="o">=</span> <span class="mf">1e5</span> <span class="c1">#Ridge dispersion area</span>
-    <span class="n">A_out</span> <span class="o">=</span> <span class="mf">1e5</span> <span class="c1">#Thalweg drainage area</span>
-    <span class="n">HSO_th</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1"># Horton stream order theshold</span>
-    
-    <span class="c1">#Calculate cuvature and slope</span>
+
+    <span class="c1"># Landmarks option (for now, only the choices indicated are coded)</span>
+    <span class="n">main_channel_choice</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># area:0, length:1, hso:2</span>
+    <span class="n">type_of_landscape</span> <span class="o">=</span> <span class="mi">0</span>    <span class="c1"># Natural drainage basin:0, Flood Plane:1</span>
+
+    <span class="c1"># Export threshold values</span>
+    <span class="n">A_spread</span> <span class="o">=</span> <span class="mf">1e5</span>  <span class="c1"># Ridge dispersion area</span>
+    <span class="n">A_out</span> <span class="o">=</span> <span class="mf">1e5</span>     <span class="c1"># Thalweg drainage area</span>
+    <span class="n">HSO_th</span> <span class="o">=</span> <span class="mi">5</span>      <span class="c1"># Horton stream order threshold</span>
+
+    <span class="c1"># Calculate curvature and slope</span>
     <span class="n">calculate_curvature_slope</span> <span class="o">=</span> <span class="kc">False</span>
-    
-    <span class="c1">#Calculate slope</span>
-    <span class="n">n_pts_calc_slope</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1"># Number of points to use to calculate the slope</span>
 
+    <span class="c1"># Calculate slope</span>
+    <span class="n">n_pts_calc_slope</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># Number of points to use to calculate the slope</span>
 
+    <span class="c1"># ------------------ Pipeline execution ----------------------------</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading data...&quot;</span><span class="p">)</span>
     <span class="n">model_geotiff</span> <span class="o">=</span> <span class="n">HydroModel</span><span class="p">()</span>
     <span class="n">model_geotiff</span><span class="o">.</span><span class="n">main_channel_choice</span> <span class="o">=</span> <span class="n">main_channel_choice</span>
     <span class="n">model_geotiff</span><span class="o">.</span><span class="n">type_of_landscape</span> <span class="o">=</span> <span class="n">type_of_landscape</span>
@@ -524,66 +587,52 @@
     <span class="n">model_geotiff</span><span class="o">.</span><span class="n">curvature_slope</span> <span class="o">=</span> <span class="n">calculate_curvature_slope</span>
     <span class="n">model_geotiff</span><span class="o">.</span><span class="n">n_pts_calc_slope</span> <span class="o">=</span> <span class="n">n_pts_calc_slope</span>
     <span class="n">model_geotiff</span><span class="o">.</span><span class="n">noData</span> <span class="o">=</span> <span class="n">noData</span>
-    
-    
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading data...&quot;</span><span class="p">)</span>
-    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">read_geotiff</span><span class="p">(</span><span class="n">dtm_path</span><span class="p">)</span>
-    
+
+    <span class="c1"># Always pass string paths to libraries that expect str</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">read_geotiff</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dtm_path</span><span class="p">))</span>
+
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating slopelines...&quot;</span><span class="p">)</span>
     <span class="n">calculate_slopelines</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
-    
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic &quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating the length of the path between each DTM cell and the outflow point even if the basin is endorheic&quot;</span><span class="p">)</span>
     <span class="n">dpl</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
-    
-    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;calculates the mutual distance between the two neighbor drainage points&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculates the mutual distance between the two neighbor drainage points&quot;</span><span class="p">)</span>
     <span class="n">mutual_dist</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
-    
+
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Delineating endorheic basins&quot;</span><span class="p">)</span>
     <span class="n">endo_del</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
-        
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connect basin by sadlle spill&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connect basin by saddle spill&quot;</span><span class="p">)</span>
     <span class="n">saddle_spill</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
-    
+
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Define the relationship between ridge points&quot;</span><span class="p">)</span>
     <span class="n">find_ridge_neighbors</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ridge hierarchization&quot;</span><span class="p">)</span>
     <span class="n">ridge_hier</span><span class="p">(</span><span class="n">model_geotiff</span><span class="p">)</span>
-      
-    
-    <span class="c1">#---------------Geopackage exports-------------------------------------</span>
+
+    <span class="c1"># --------------- Geopackage exports -------------------------------</span>
+    <span class="c1"># Exporters often add their own extension; provide path **without** suffix.</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Export slopelines single element HSO&quot;</span><span class="p">)</span>
-    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">export_slopelines_single_element</span><span class="p">(</span><span class="n">slopelines_se_HSO_path</span><span class="p">)</span>
-    
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">export_slopelines_single_element</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">slopelines_se_HSO_path</span><span class="p">))</span>
+
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Export ridgelines single element HSO&quot;</span><span class="p">)</span>
-    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">export_ridgelines_single_element</span><span class="p">(</span><span class="n">ridgelines_se_HSO_path</span><span class="p">)</span>
+    <span class="n">model_geotiff</span><span class="o">.</span><span class="n">export_ridgelines_single_element</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ridgelines_se_HSO_path</span><span class="p">))</span>
 
-    <span class="c1">#--------------Export for debug only-----------------------------------</span>
-    <span class="c1"># print(&quot;Export drainage points HSO&quot;)</span>
-    <span class="c1"># model_geotiff.export_drainage_point(drainage_points_HSO_path)</span>
-    
-    <span class="c1"># print(&quot;\nExport endo points&quot;)</span>
-    <span class="c1"># model_geotiff.export_endo_points(endo_points_HSO_path)</span>
+    <span class="c1"># -------------- Export for debug only -----------------------------</span>
+    <span class="c1"># To enable, uncomment and they will share the same &#39;outputs&#39; root.</span>
+    <span class="c1"># drainage_points_HSO_path = (slopelines_se_HSO_path.parent / f&quot;drain_points_HSO_{dtm_path.stem}&quot;)</span>
+    <span class="c1"># saddle_points_HSO_path   = (slopelines_se_HSO_path.parent / f&quot;saddle_points_HSO_filtre_{dtm_path.stem}&quot;)</span>
+    <span class="c1"># endo_points_HSO_path     = (slopelines_se_HSO_path.parent / f&quot;endo_points_HSO_{dtm_path.stem}&quot;)</span>
+    <span class="c1"># slopelines_HSO_path      = (slopelines_se_HSO_path.parent / f&quot;slopelines_HSO_{dtm_path.stem}&quot;)</span>
+    <span class="c1"># ridge_points_HSO_path    = (slopelines_se_HSO_path.parent / f&quot;ridge_points_HSO_{dtm_path.stem}&quot;)</span>
+    <span class="c1"># ridgelines_HSO_path      = (slopelines_se_HSO_path.parent / f&quot;ridgelines_HSO_{dtm_path.stem}&quot;)</span>
 
-    <span class="c1"># print(&quot;Export slopelines HSO&quot;)</span>
-    <span class="c1"># model_geotiff.export_slopelines(slopelines_HSO_path)</span>
-    
-    <span class="c1"># print(&quot;Export saddle points&quot;)</span>
-    <span class="c1"># model_geotiff.export_saddle_points(saddle_points_HSO_path)</span>
-
-    <span class="c1"># print(&quot;\nExport ridges points HSO&quot;)</span>
-    <span class="c1"># model_geotiff.export_ridge_point(ridge_points_HSO_path)</span>
-    
-    <span class="c1"># print(&quot;Export ridgelines HSO&quot;)</span>
-    <span class="c1"># model_geotiff.export_ridgelines(ridgelines_HSO_path)</span>
-    
     <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
     <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[END] Processing finished at </span><span class="si">{</span><span class="n">end_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[INFO] Total elapsed time: </span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-
-    
 </pre></div>
 
                 </article>
